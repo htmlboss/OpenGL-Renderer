@@ -1,22 +1,11 @@
-﻿  Shader.cpp
-  main.cpp
-c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\main.cpp(50): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'const GLubyte *'
-c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\main.cpp(50): warning C4313: 'printf': '%d' in format string conflicts with argument 1 of type 'const GLubyte *'
-  Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-Shader.obj : warning LNK4049: locally defined symbol __glewAttachShader imported
-Shader.obj : warning LNK4049: locally defined symbol __glewCompileShader imported
-Shader.obj : warning LNK4049: locally defined symbol __glewCreateProgram imported
-Shader.obj : warning LNK4049: locally defined symbol __glewCreateShader imported
-Shader.obj : warning LNK4049: locally defined symbol __glewDeleteShader imported
-Shader.obj : warning LNK4049: locally defined symbol __glewGetProgramInfoLog imported
-Shader.obj : warning LNK4049: locally defined symbol __glewGetProgramiv imported
-Shader.obj : warning LNK4049: locally defined symbol __glewGetShaderInfoLog imported
-Shader.obj : warning LNK4049: locally defined symbol __glewGetShaderiv imported
-Shader.obj : warning LNK4049: locally defined symbol __glewLinkProgram imported
-Shader.obj : warning LNK4049: locally defined symbol __glewShaderSource imported
-Shader.obj : warning LNK4049: locally defined symbol __glewUseProgram imported
-glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\Nabil\Documents\Visual Studio 2015\Projects\OpenGL Shader Viewer\ShaderViewer\x64\Debug\vc120.pdb'; linking object as if no debug info
+﻿  main.cpp
+c:\program files (x86)\windows kits\10\include\10.0.10586.0\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
+  c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\3rdparty\glfw\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
+c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\3rdparty\logger\log.h(148): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10586.0\ucrt\stdio.h(1769): note: see declaration of 'sprintf'
+c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\main.cpp(18): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10586.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\main.cpp(39): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'const GLubyte *'
+c:\users\nabil\documents\visual studio 2015\projects\opengl shader viewer\shaderviewer\main.cpp(39): warning C4313: 'printf': '%d' in format string conflicts with argument 1 of type 'const GLubyte *'
   ShaderViewer.vcxproj -> C:\Users\Nabil\Documents\Visual Studio 2015\Projects\OpenGL Shader Viewer\ShaderViewer\x64\Debug\ShaderViewer.exe
   ShaderViewer.vcxproj -> C:\Users\Nabil\Documents\Visual Studio 2015\Projects\OpenGL Shader Viewer\ShaderViewer\x64\Debug\ShaderViewer.pdb (Full PDB)
