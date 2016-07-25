@@ -4,6 +4,7 @@
 
 #include <log.h>
 #include "Shader.h"
+#include "Texture.h"
 
 /***********************************************************************************/
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -51,13 +52,15 @@ int main() {
 
 	//Vertices
 	GLfloat vertices[] = {
-		// Positions         // Colors
-		0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // Bottom Right (0)
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // Bottom Left (1)
-		0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f   // Top (2)
+		// Positions          // Colors           // Texture Coords
+		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
+		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
+		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
+		-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
 	};
-	GLuint indices[] = {
-		0, 1, 2,  // First Triangle (indices of vertex array above)
+	GLuint indices[] = {  // Note that we start from 0!
+		0, 1, 3, // First Triangle
+		1, 2, 3  // Second Triangle
 	};
 
 	GLuint VBO, VAO, EBO;
@@ -75,14 +78,23 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
+	// TexCoord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
 
 
 	glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
+
+	//Textures
+	Texture t1("Tulips.jpg");
+	Texture t2("Desert.jpg");
+
+	std::cout << Texture::GetLoadedTextures();
 
 	//Rendering loop
 	while (!glfwWindowShouldClose(window)) {
@@ -92,10 +104,18 @@ int main() {
 		glClearColor(0.5f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		// Draw our first triangle
 		basicShader.Use();
+
+		glActiveTexture(GL_TEXTURE0);
+		t1.Bind2D();
+		glUniform1i(basicShader.GetUniformLoc("ourTexture1"), 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		t2.Bind2D();
+		glUniform1i(basicShader.GetUniformLoc("ourTexture2"), 1);
+
+		//Draw
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 

@@ -13,6 +13,7 @@ public:
 	~Shader();
 
 	void Use();
+	GLint GetUniformLoc(const std::string& Uniform) const;
 
 private:
 	void prepareShader(const GLchar* vertexShader, const GLchar* pixelShader);

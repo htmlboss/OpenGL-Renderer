@@ -47,6 +47,16 @@ void Shader::Use() {
 }
 
 /***********************************************************************************/
+GLint Shader::GetUniformLoc(const std::string& Uniform) const {
+	GLint loc = glGetUniformLocation(m_shaderProgram, Uniform.c_str());
+	if (loc == -1) {
+		std::cerr << "Uniform: " << Uniform << " does not exist.\n";
+		FILE_LOG(logERROR) << "Uniform: " << Uniform << " does not exist.\n";
+	}
+	return loc;
+}
+
+/***********************************************************************************/
 void Shader::prepareShader(const GLchar* vertexShader, const GLchar* pixelShader) {
 
 	// Check for compile time errors

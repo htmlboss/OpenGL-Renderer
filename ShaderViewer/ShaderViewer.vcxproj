@@ -74,7 +74,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLEW\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\Logger\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\GLEW\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\Logger\;$(SolutionDir)3rdParty\stb\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLEW\lib\Release\x64\;$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,7 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLEW\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\Logger\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\GLEW\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\Logger\;$(SolutionDir)3rdParty\stb\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLEW\lib\Release\x64\;$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -150,9 +150,16 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\pixel.glsl" />
+    <None Include="shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
