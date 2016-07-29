@@ -23,15 +23,15 @@ Texture::Texture(const std::string& TexturePath) {
 
 	//Load image
 	int x, y;
-	int n = 4; //Number of components to load (RGBA)
-	unsigned char* data = stbi_load(TexturePath.c_str(), &x, &y, &n, 0);
+	int n = 3; //Number of components to load (RGBA)
+	unsigned char* data = stbi_load(TexturePath.c_str(), &x, &y, &n, STBI_rgb);
 
 	if (data == NULL) {
 		std::cerr << stbi_failure_reason();
 		FILE_LOG(logERROR) << stbi_failure_reason();
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	//Cleanup
