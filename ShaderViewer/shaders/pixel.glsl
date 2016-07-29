@@ -1,32 +1,52 @@
 #version 440 core
-out vec4 color;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;    
+    float shininess;
+}; 
+
+struct Light {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
 
 in vec3 FragPos;  
 in vec3 Normal;  
   
-uniform vec3 lightPos; 
+out vec4 color;
+  
 uniform vec3 viewPos;
-uniform vec3 lightColor;
-uniform vec3 objectColor;
+uniform Material material;
+uniform Light light;
 
 void main() {
+
+    vec3 normal = normalize(Normal);
+    vec3 lightDir = normalize(light.position - FragPos);
+    float lambertian = max(dot(lightDir, normal), 0.0);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 specular = vec3(0.0);
+
     // Ambient
-    float ambientStrength = 0.1f;
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = light.ambient * material.ambient;
   	
     // Diffuse 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * (diff * material.diffuse);
     
     // Specular
-    float specularStrength = 0.5f;
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularStrength * spec * lightColor;  
+    if (lambertian > 0.0) {
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(halfDir, normal), 0.0), material.shininess);
+    //vec3 reflectDir = reflect(-lightDir, normal);  
+    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    specular = light.specular * (spec * material.specular);
+    }  
         
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    vec3 result = ambient + lambertian * diffuse + specular;
     color = vec4(result, 1.0f);
 } 

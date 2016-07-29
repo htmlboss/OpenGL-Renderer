@@ -1,12 +1,17 @@
-#define GLEW_STATIC
-#include <GL\glew.h>
-#include <GLFW\glfw3.h>
-#include <glm\gtc\type_ptr.hpp>
+#include <iostream>
+#include <cmath>
 
-#include <log.h>
-#include "Shader.h"
-#include "Texture.h"
-#include "Camera.h"
+// GLEW
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+// GLFW
+#include <GLFW/glfw3.h>
+
+// GLM Mathematics
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // Other includes
 #include "Shader.h"
@@ -19,10 +24,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 
+// Window dimensions
+const GLuint WIDTH = 1280, HEIGHT = 720;
+
 // Camera
 Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
-GLfloat lastX = 1280 / 2.0;
-GLfloat lastY = 720 / 2.0;
+GLfloat lastX = WIDTH / 2.0;
+GLfloat lastY = HEIGHT / 2.0;
 bool    keys[1024];
 
 // Light attributes
@@ -32,6 +40,7 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
+
 int main() {
 	// Init GLFW
 	glfwInit();
@@ -40,9 +49,10 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "LearnOpenGL", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -59,7 +69,7 @@ int main() {
 	glewInit();
 
 	// Define the viewport dimensions
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, WIDTH, HEIGHT);
 
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
@@ -158,24 +168,33 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
-		GLint objectColorLoc = lightingShader.GetUniformLoc("objectColor");
-		GLint lightColorLoc = lightingShader.GetUniformLoc("lightColor");
-		GLint lightPosLoc = lightingShader.GetUniformLoc("lightPos");
+		GLint lightPosLoc = lightingShader.GetUniformLoc("light.position");
 		GLint viewPosLoc = lightingShader.GetUniformLoc("viewPos");
-
-		glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
-		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
-
-
+		// Set lights properties
+		glm::vec3 lightColor;
+		lightColor.x = sin(glfwGetTime() * 2.0f);
+		lightColor.y = sin(glfwGetTime() * 0.7f);
+		lightColor.z = sin(glfwGetTime() * 1.3f);
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // Low influence
+		glUniform3f(lightingShader.GetUniformLoc("light.ambient"), ambientColor.x, ambientColor.y, ambientColor.z);
+		glUniform3f(lightingShader.GetUniformLoc("light.diffuse"), diffuseColor.x, diffuseColor.y, diffuseColor.z);
+		glUniform3f(lightingShader.GetUniformLoc("light.specular"), 1.0f, 1.0f, 1.0f);
+		// Set material properties
+		glUniform3f(lightingShader.GetUniformLoc("material.ambient"), 1.0f, 0.5f, 0.31f);
+		glUniform3f(lightingShader.GetUniformLoc("material.diffuse"), 1.0f, 0.5f, 0.31f);
+		glUniform3f(lightingShader.GetUniformLoc("material.specular"), 0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
+		glUniform1f(lightingShader.GetUniformLoc("material.shininess"), 32.0f);
 
 		// Create camera transformations
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)1280 / (GLfloat)720, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
 		// Get the uniform locations
 		GLint modelLoc = lightingShader.GetUniformLoc("model");
 		GLint viewLoc = lightingShader.GetUniformLoc("view");

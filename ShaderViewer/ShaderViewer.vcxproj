@@ -159,6 +159,8 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\lampps.glsl" />
+    <None Include="shaders\lampvs.glsl" />
     <None Include="shaders\pixel.glsl" />
     <None Include="shaders\vertex.glsl" />
   </ItemGroup>
