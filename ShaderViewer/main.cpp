@@ -41,8 +41,7 @@ GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
 							// The MAIN function, from here we start the application and run the game loop
-int main()
-{
+int main() {
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -125,6 +124,20 @@ int main()
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 	};
+	// Positions all containers
+	const glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, containerVAO;
 	glGenVertexArrays(1, &containerVAO);
@@ -193,6 +206,9 @@ int main()
 		glUniform3f(lightingShader.GetUniformLoc("light.ambient"), 0.2f, 0.2f, 0.2f);
 		glUniform3f(lightingShader.GetUniformLoc("light.diffuse"), 0.5f, 0.5f, 0.5f);
 		glUniform3f(lightingShader.GetUniformLoc("light.specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(lightingShader.GetUniformLoc("light.constant"), 1.0f);
+		glUniform1f(lightingShader.GetUniformLoc("light.linear"), 0.09f);
+		glUniform1f(lightingShader.GetUniformLoc("light.quadratic"), 0.032f);
 		// Set material properties
 		glUniform1f(lightingShader.GetUniformLoc("material.shininess"), 64.0f);
 
@@ -216,10 +232,17 @@ int main()
 		t2.Bind2D();
 
 		// Draw the container (using container's vertex attributes)
-		glBindVertexArray(containerVAO);
 		glm::mat4 model;
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(containerVAO);
+		for (GLuint i = 0; i < 10; ++i) {
+			model = glm::mat4();
+			model = glm::translate(model, cubePositions[i]);
+			GLfloat angle = 20.0f * i;
+			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 		// Also draw the lamp object, again binding the appropriate shader
