@@ -201,13 +201,15 @@ int main() {
 		GLint lightPosLoc = lightingShader.GetUniformLoc("light.position");
 		GLint lightSpotdirLoc = lightingShader.GetUniformLoc("light.direction");
 		GLint lightSpotCutOffLoc = lightingShader.GetUniformLoc("light.cutOff");
+		GLint lightSpotOuterCutOffLoc = lightingShader.GetUniformLoc("light.outerCutOff");
 		GLint viewPosLoc = lightingShader.GetUniformLoc("viewPos");
 		glUniform3f(lightPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniform3f(lightSpotdirLoc, camera.Front.x, camera.Front.y, camera.Front.z);
 		glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(12.5f)));
+		glUniform1f(lightSpotOuterCutOffLoc, glm::cos(glm::radians(17.5f)));
 		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
 		// Set lights properties
-		glUniform3f(lightingShader.GetUniformLoc("light.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(lightingShader.GetUniformLoc("light.ambient"), 0.1f, 0.1f, 0.1f);
 		glUniform3f(lightingShader.GetUniformLoc("light.diffuse"), 0.8f, 0.8f, 0.8f);
 		glUniform3f(lightingShader.GetUniformLoc("light.specular"), 1.0f, 1.0f, 1.0f);
 		glUniform1f(lightingShader.GetUniformLoc("light.constant"), 1.0f);
