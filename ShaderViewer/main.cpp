@@ -203,38 +203,18 @@ int main() {
 		glUniform3f(lightingShader.GetUniformLoc("dirLight.ambient"), 0.05f, 0.05f, 0.05f);
 		glUniform3f(lightingShader.GetUniformLoc("dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(lightingShader.GetUniformLoc("dirLight.specular"), 0.5f, 0.5f, 0.5f);
-		// Point light 1
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[0].constant"), 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[0].linear"), 0.09f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[0].quadratic"), 0.032f);
-		// Point light 2
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[1].constant"), 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[1].linear"), 0.09f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[1].quadratic"), 0.032f);
-		// Point light 3
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[2].constant"), 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[2].linear"), 0.09f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[2].quadratic"), 0.032f);
-		// Point light 4
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
-		glUniform3f(lightingShader.GetUniformLoc("pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[3].constant"), 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[3].linear"), 0.09f);
-		glUniform1f(lightingShader.GetUniformLoc("pointLights[3].quadratic"), 0.032f);
+		//Point lights
+		for (GLuint i = 0; i < 4; ++i) {
+			std::string number = std::to_string(i);
+
+			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].position"), pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].ambient"), 0.05f, 0.05f, 0.05f);
+			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].diffuse"), 0.8f, 0.8f, 0.8f);
+			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].specular"), 1.0f, 1.0f, 1.0f);
+			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].constant"), 1.0f);
+			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].linear"), 0.09f);
+			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].quadratic"), 0.032f);
+		}
 		// Spotlight
 		glUniform3f(lightingShader.GetUniformLoc("spotLight.position"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniform3f(lightingShader.GetUniformLoc("spotLight.direction"), camera.Front.x, camera.Front.y, camera.Front.z);

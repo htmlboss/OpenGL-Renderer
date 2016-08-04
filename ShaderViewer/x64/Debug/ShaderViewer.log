@@ -1,17 +1,1 @@
-﻿  main.cpp
-c:\program files (x86)\windows kits\10\include\10.0.10586.0\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
-  c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\3rdparty\glfw\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\3rdparty\logger\log.h(148): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10586.0\ucrt\stdio.h(1769): note: see declaration of 'sprintf'
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(184): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(245): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(246): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(324): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(325): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(329): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(330): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(332): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(333): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\main.cpp(339): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-  ShaderViewer.vcxproj -> C:\Users\Administrator\Downloads\OpenGL-Shader-Viewer\ShaderViewer\x64\Debug\ShaderViewer.exe
-  ShaderViewer.vcxproj -> C:\Users\Administrator\Downloads\OpenGL-Shader-Viewer\ShaderViewer\x64\Debug\ShaderViewer.pdb (Full PDB)
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppClean.targets(76,5): warning : The process cannot access the file 'c:\users\administrator\downloads\opengl-shader-viewer\shaderviewer\x64\debug\vc140.pdb' because it is being used by another process.
