@@ -51,5 +51,6 @@
     <None Include="shaders\lampvs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
