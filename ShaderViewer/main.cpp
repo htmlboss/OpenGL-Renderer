@@ -141,6 +141,7 @@ int main() {
 		// Transformations
 		glm::mat4 projection = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
+		glUniform3f(shader.GetUniformLoc("viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
 
