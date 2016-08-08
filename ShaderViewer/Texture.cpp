@@ -10,7 +10,7 @@
 int Texture::m_numTextures = 0; //Set initial textures to 0
 
 /***********************************************************************************/
-Texture::Texture(const std::string& TexturePath) {
+Texture::Texture(const std::string& TexturePath, const std::string& samplerName) : m_texturePath(TexturePath.c_str()), m_samplerName(samplerName) {
 	
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -27,7 +27,8 @@ Texture::Texture(const std::string& TexturePath) {
 	unsigned char* data = stbi_load(TexturePath.c_str(), &x, &y, &n, STBI_rgb);
 
 	if (data == NULL) {
-		std::cerr << stbi_failure_reason();
+		std::string error = "stb_image error (" + TexturePath + "): ";	 
+		throw std::runtime_error(error + stbi_failure_reason());
 		FILE_LOG(logERROR) << stbi_failure_reason();
 	}
 

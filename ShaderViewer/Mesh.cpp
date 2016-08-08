@@ -19,16 +19,19 @@ void Mesh::Draw(const Shader& shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 
-	for (GLuint i = 0; i < m_textures.size(); ++i) {
-		glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unit before binding
-										  // Retrieve texture number (the N in diffuse_textureN)
-		
-		std::string name = m_textures[i].type;
-		std::string number = (name == "texture_diffuse") ? std::to_string(diffuseNr++) : std::to_string(specularNr++);
+	GLuint index = 0;
+	for (auto& it : m_textures) {
+		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
+											  // Retrieve texture number (the N in diffuse_textureN)
+		std::string name = it.GetSampler();
+		std::string number = (name == "texture_diffuse") ? std::to_string(++diffuseNr) : std::to_string(++specularNr);
 
-		glUniform1i(shader.GetUniformLoc("material." + name + number), i);
-		glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
+		glUniform1i(shader.GetUniformLoc(name + number), index);
+		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
+		
+		++index;
 	}
+
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw mesh

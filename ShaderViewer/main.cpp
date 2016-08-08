@@ -16,7 +16,7 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
-#include "Texture.h"
+#include "Model.h"
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -67,11 +67,11 @@ int main() {
 	// Define the viewport dimensions
 	glViewport(0, 0, WIDTH, HEIGHT);
 
+	// For wireframe mode
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
-
-	// Build and compile our shader program
-	Shader lightingShader("shaders/vertex.glsl", "shaders/pixel.glsl");
 
 	// Set up vertex data (and buffer(s)) and attribute pointers
 	GLfloat vertices[] = {
@@ -119,64 +119,8 @@ int main() {
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 	};
 
-	const glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
-	const glm::vec3 pointLightPositions[] = {
-		glm::vec3(0.7f,  0.2f,  2.0f),
-		glm::vec3(2.3f, -3.3f, -4.0f),
-		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  0.0f, -3.0f)
-	};
-
-	// First, set the container's VAO (and VBO)
-	GLuint VBO, containerVAO;
-	glGenVertexArrays(1, &containerVAO);
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(containerVAO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	glBindVertexArray(0);
-
-	// Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
-	GLuint lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-	// We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Set the vertex attributes (only position data for the lamp))
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Note that we skip over the other data in our buffer object (we don't need the normals/textures, only positions).
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-	// Diffuse map
-	Texture t1("container2.png");
-	// Specular map
-	Texture t2("container2_specular.png");
-
-	// Set texture units
-	lightingShader.Use();
-	glUniform1i(lightingShader.GetUniformLoc("material.diffuse"), 0);
-	glUniform1i(lightingShader.GetUniformLoc("material.specular"), 1);
-
+	Model nanosuit("models/nanosuit.obj");
+	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -193,75 +137,19 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Use cooresponding shader when setting uniforms/drawing objects
-		lightingShader.Use();
-		GLint viewPosLoc = lightingShader.GetUniformLoc("viewPos");
-		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+		shader.Use();
+		// Transformations
+		glm::mat4 projection = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
 
-		// Directional light
-		glUniform3f(lightingShader.GetUniformLoc("dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(lightingShader.GetUniformLoc("dirLight.ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(lightingShader.GetUniformLoc("dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
-		glUniform3f(lightingShader.GetUniformLoc("dirLight.specular"), 0.5f, 0.5f, 0.5f);
-		//Point lights
-		for (GLuint i = 0; i < 4; ++i) {
-			std::string number = std::to_string(i);
-
-			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].position"), pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
-			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].ambient"), 0.05f, 0.05f, 0.05f);
-			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].diffuse"), 0.8f, 0.8f, 0.8f);
-			glUniform3f(lightingShader.GetUniformLoc("pointLights[" + number + "].specular"), 1.0f, 1.0f, 1.0f);
-			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].constant"), 1.0f);
-			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].linear"), 0.09f);
-			glUniform1f(lightingShader.GetUniformLoc("pointLights[" + number + "].quadratic"), 0.032f);
-		}
-		// Spotlight
-		glUniform3f(lightingShader.GetUniformLoc("spotLight.position"), camera.Position.x, camera.Position.y, camera.Position.z);
-		glUniform3f(lightingShader.GetUniformLoc("spotLight.direction"), camera.Front.x, camera.Front.y, camera.Front.z);
-		glUniform3f(lightingShader.GetUniformLoc("spotLight.ambient"), 0.0f, 0.0f, 0.0f);
-		glUniform3f(lightingShader.GetUniformLoc("spotLight.diffuse"), 1.0f, 1.0f, 1.0f);
-		glUniform3f(lightingShader.GetUniformLoc("spotLight.specular"), 1.0f, 1.0f, 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("spotLight.constant"), 1.0f);
-		glUniform1f(lightingShader.GetUniformLoc("spotLight.linear"), 0.09);
-		glUniform1f(lightingShader.GetUniformLoc("spotLight.quadratic"), 0.032);
-		glUniform1f(lightingShader.GetUniformLoc("spotLight.cutOff"), glm::cos(glm::radians(12.5f)));
-		glUniform1f(lightingShader.GetUniformLoc("spotLight.outerCutOff"), glm::cos(glm::radians(15.0f)));
-
-		// Set material properties
-		glUniform1f(lightingShader.GetUniformLoc("material.shininess"), 64.0f);
-
-		// Create camera transformations
-		glm::mat4 view;
-		view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
-		// Get the uniform locations
-		GLint modelLoc = lightingShader.GetUniformLoc("model");
-		GLint viewLoc = lightingShader.GetUniformLoc("view");
-		GLint projLoc = lightingShader.GetUniformLoc("projection");
-		// Pass the matrices to the shader
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-		// Bind diffuse map
-		glActiveTexture(GL_TEXTURE0);
-		t1.Bind2D();
-		// Bind specular map
-		glActiveTexture(GL_TEXTURE1);
-		t2.Bind2D();
-
-		// Draw 10 containers with the same VAO and VBO information; only their world space coordinates differ
+		// Draw loaded model
 		glm::mat4 model;
-		glBindVertexArray(containerVAO);
-		for (GLuint i = 0; i < 10; ++i) {
-			model = glm::mat4();
-			model = glm::translate(model, cubePositions[i]);
-			GLfloat angle = 20.0f * i;
-			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		glBindVertexArray(0);
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
+		nanosuit.Draw(shader);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
