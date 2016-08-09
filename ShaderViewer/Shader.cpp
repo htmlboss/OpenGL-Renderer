@@ -27,7 +27,7 @@ Shader::Shader(const std::string& VertexShader, const std::string& PixelShader) 
 		fragmentCode = fShaderStream.str();
 	}
 	catch (std::ifstream::failure& e) {
-		std::cout << "Shader error: " << e.what();
+		std::cerr << "Shader error: " << e.what();
 		FILE_LOG(logERROR) << "Shader error " << e.what();
 	}
 	catch (...) {
