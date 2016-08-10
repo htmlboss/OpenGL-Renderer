@@ -146,9 +146,9 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 			}
 		}
 
-		std::cout << '\n' << str.C_Str();
+		std::cout << "\nTexture path: " << str.C_Str();;
 		if (!skip) {   // If texture hasn't been loaded already, load it
-			const std::string texDirPrefix = "models/"; // Weird Assimp bug when model textures are in a subdirectory
+			const std::string texDirPrefix = m_directory + "/"; // Get directory path and append forward-slash
 			Texture texture(texDirPrefix + str.C_Str(), samplerName);
 			
 			textures.push_back(texture);

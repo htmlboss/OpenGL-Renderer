@@ -1,11 +1,25 @@
 #version 450
 
+// http://www.learnopengl.com/#!Lighting/Light-casters
 struct DirectionalLight {
     vec3 direction;
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+};
+
+struct PointLight {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    // Attenuation variables
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 in vec2 TexCoords;
@@ -41,6 +55,33 @@ vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
 }
 
 /*********************************************************************/
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+    vec3 lightDir = normalize(light.position - fragPos);
+    float lambertian = max(dot(lightDir, normal), 0.0);
+    vec3 specular = vec3(0.0);
+    // Diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    // Specular shading
+    if (lambertian > 0.0) {
+        vec3 halfDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(halfDir, normal), 0.0), 64.0);
+        specular = light.specular * (spec * vec3(texture(texture_specular1, TexCoords)));
+    }
+    // Attenuation
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    // Combine
+    vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, TexCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, TexCoords));
+
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+    return vec3(ambient + diffuse + specular);
+}
+
+/*********************************************************************/
 void main() {
     // Properties
     vec3 normal = normalize(Normal);
@@ -60,6 +101,16 @@ void main() {
     dirLight2.diffuse = vec3(0.9, 0.9, 0.9);
     dirLight2.specular = vec3(1.0, 1.0, 1.0);
     result += CalcDirLight(dirLight2, normal, viewDir);
+
+    PointLight pLight;
+    pLight.position = vec3(1.0, 2.0, 0.5);
+    pLight.ambient = vec3(0.1, 0.1, 0.1);
+    pLight.diffuse = vec3(1.0, 0.8, 0.5);
+    pLight.specular = vec3(1.0, 0.8, 0.5);
+    pLight.linear = 0.15;
+    pLight.quadratic = 0.07;
+    pLight.constant = 1.0;
+    result += CalcPointLight(pLight, normal, FragPos, viewDir);
 
     color = vec4(result, 1.0);
 }

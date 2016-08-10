@@ -12,6 +12,7 @@ public:
 	~Model();
 
 	void Draw(const Shader& shader);
+
 private:
 	void loadModel(const std::string& Path);
 	void processNode(aiNode* node, const aiScene* scene);

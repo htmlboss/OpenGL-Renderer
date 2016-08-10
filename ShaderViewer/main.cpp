@@ -29,7 +29,7 @@ void do_movement();
 const GLuint WIDTH = 1280, HEIGHT = 720;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera  camera(glm::vec3(0.0f, 2.0f, 3.0f));
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool    keys[1024];
@@ -75,10 +75,11 @@ int main() {
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
 
-	Model nanosuit("models/nanosuit.obj");
+	Model nanosuit("models/nanosuit/nanosuit.obj");
+	Model floor("models/floor/3d-model.obj");
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
-	Light light(glm::vec3(2.3f, 0.0f, -4.0f), glm::vec3(1.0f));
+	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -106,12 +107,18 @@ int main() {
 		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
 
-		// Draw loaded model
+		// Draw loaded models
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
 		nanosuit.Draw(shader);
+
+		model = glm::mat4();
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
+		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
+		floor.Draw(shader);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
