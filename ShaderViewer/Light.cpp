@@ -1,4 +1,5 @@
 #include "Light.h"
+#include "CubeData.h"
 
 /***********************************************************************************/
 Light::Light(const glm::vec3& Position, const glm::vec3& Color) :

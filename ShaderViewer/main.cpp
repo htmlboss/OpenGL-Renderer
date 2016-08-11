@@ -74,6 +74,9 @@ int main() {
 
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE); // MSAA from GLFW
+	glEnable(GL_CULL_FACE); // Culling
+	glCullFace(GL_BACK); // Back-face culling
 
 	Model nanosuit("models/nanosuit/nanosuit.obj");
 	Model floor("models/floor/3d-model.obj");
