@@ -1,23 +1,25 @@
+#ifdef _DEBUG
+#include "vld.h"
+#endif
+
 #include <iostream>
 #include <cmath>
 
-// GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
-
-// GLFW
 #include <GLFW/glfw3.h>
-
-// GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <log.h>
 
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
 #include "Light.h"
+#include "Skybox.h"
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -39,6 +41,10 @@ GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
 int main() {
+	FILELog::ReportingLevel() = logDEBUG;
+	FILE* log_fd = fopen("log.txt", "w");
+	Output2FILE::Stream() = log_fd;
+	
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -46,7 +52,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 8);
+	glfwWindowHint(GLFW_SAMPLES, 16);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
@@ -78,11 +84,14 @@ int main() {
 	glEnable(GL_CULL_FACE); // Culling
 	glCullFace(GL_BACK); // Back-face culling
 
+	Skybox skybox("skybox/");
 	Model nanosuit("models/nanosuit/nanosuit.obj");
 	Model floor("models/floor/3d-model.obj");
+	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
+	// Shaders
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
-	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
+	Shader skyboxShader("shaders/skyboxvs.glsl", "shaders/skyboxps.glsl");
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -122,6 +131,9 @@ int main() {
 		model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
 		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
 		floor.Draw(shader);
+
+		// Always draw skybox last
+		skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);

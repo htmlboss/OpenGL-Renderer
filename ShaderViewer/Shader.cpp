@@ -99,6 +99,7 @@ void Shader::prepareShader(const GLchar* vertexShader, const GLchar* pixelShader
 		FILE_LOG(logERROR) << infoLog;
 	}
 
+	std::cout << "Comiled: " << m_vertexShader << '\n';
 	//Clean up
 	glDeleteShader(m_vertexShader);
 	glDeleteShader(m_pixelShader);

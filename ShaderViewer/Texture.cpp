@@ -24,12 +24,12 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName)
 	//Load image
 	int x, y;
 	int n = 3; //Number of components to load (RGBA)
-	unsigned char* data = stbi_load(TexturePath.c_str(), &x, &y, &n, STBI_rgb);
-
-	if (data == NULL) {
-		std::string error = "stb_image error (" + TexturePath + "): ";	 
-		throw std::runtime_error(error + stbi_failure_reason());
-		FILE_LOG(logERROR) << stbi_failure_reason();
+	unsigned char* data;
+	try {
+		data = LoadSTBImage(TexturePath.c_str(), &x, &y, &n, STBI_rgb);
+	}
+	catch (const std::runtime_error& e) {
+		std::cerr << e.what() << '\n';
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -49,4 +49,17 @@ Texture::~Texture() {
 /***********************************************************************************/
 void Texture::Bind2D() {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
+}
+
+/***********************************************************************************/
+unsigned char* Texture::LoadSTBImage(const char* filename, int* x, int* y, int* comp, int req_comp) {
+	
+	unsigned char* data = stbi_load(filename, x, y, comp, req_comp);
+	
+	if (data == NULL) {
+		std::string error = "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
+		FILE_LOG(logERROR) << error;
+		throw std::runtime_error(error);
+	}
+	return data;
 }
