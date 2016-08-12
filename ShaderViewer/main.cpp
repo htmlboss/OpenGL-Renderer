@@ -109,7 +109,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Transformations
-		glm::mat4 projection = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(camera.Zoom, static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 
 		light.Draw(lightShader, view, projection);
