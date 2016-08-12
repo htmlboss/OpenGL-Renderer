@@ -19,7 +19,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	// Cleanup
 	glBindVertexArray(0);
 	
-	// Iterate through given directory and find files
+	// Iterate through given directory and find files (labeled 1-6 for proper load order)
 	int i = 0; // Index for the loop
 	for (auto& it : fs::directory_iterator(TextureDirectory)) {
 		m_faces.at(i) = it.path().generic_string(); // put texture paths into std::array for loading
