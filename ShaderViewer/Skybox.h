@@ -16,6 +16,8 @@ public:
 	Skybox(const Skybox&) = delete; // No copy c-tor
 	~Skybox();
 
+	// Bind texture if passing to other shaders
+	void BindTexture() { glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID); }
 	void Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat);
 
 private:

@@ -18,13 +18,24 @@ Mesh::~Mesh() {
 void Mesh::Draw(const Shader& shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
+	GLuint reflectanceNr = 1;
 
 	GLuint index = 0;
 	for (auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
-											  // Retrieve texture number (the N in diffuse_textureN)
+		// Retrieve texture number (the N in diffuse_textureN)
 		std::string name = it.GetSampler();
-		std::string number = (name == "texture_diffuse") ? std::to_string(++diffuseNr) : std::to_string(++specularNr);
+		std::string number;
+		// ALWAYS USE POST-INCREMENT HERE
+		if (name == "texture_diffuse") {
+			number = std::to_string(diffuseNr++);
+		}
+		if (name == "texture_specular") {
+			number = std::to_string(specularNr++);
+		}
+		if (name == "texture_reflectance") {
+			number = std::to_string(reflectanceNr++);
+		}
 
 		glUniform1i(shader.GetUniformLoc(name + number), index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());

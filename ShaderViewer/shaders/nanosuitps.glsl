@@ -1,4 +1,4 @@
-#version 450
+#version 430
 
 // http://www.learnopengl.com/#!Lighting/Light-casters
 struct DirectionalLight {
@@ -31,6 +31,8 @@ out vec4 color;
 uniform vec3 viewPos;
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
+uniform sampler2D texture_reflectance1;
+uniform samplerCube skybox;
 
 /*********************************************************************/
 vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
@@ -82,6 +84,22 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 /*********************************************************************/
+// http://www.learnopengl.com/img/advanced/cubemaps_reflection_theory.png
+vec4 CalcReflectance(vec3 Position, vec3 CameraPos, vec3 normal) {
+
+    vec3 I = normalize(Position - CameraPos);
+    vec3 R = reflect(I, normal);
+    float reflect_intensity = texture(texture_reflectance1, TexCoords).r;
+    
+    vec4 reflect_color;
+    if(reflect_intensity > 0.1) { // Only sample reflections when above a certain treshold
+        reflect_color = texture(skybox, R) * reflect_intensity;
+    }
+
+    return reflect_color;
+}
+
+/*********************************************************************/
 void main() {
     // Properties
     vec3 normal = normalize(Normal);
@@ -112,5 +130,15 @@ void main() {
     pLight.constant = 1.0;
     result += CalcPointLight(pLight, normal, FragPos, viewDir);
 
-    color = vec4(result, 1.0);
+    vec4 resultCasted = vec4(result, 1.0);
+    
+    // Need to allow passing of defines from C++ so this shader can be shared
+    // between the nanosuit and the floor (not physically correct, but whatever)
+    #define REFLECT
+    #ifdef REFLECT
+    vec4 reflectance = CalcReflectance(FragPos, viewPos, normal);
+    resultCasted += reflectance;
+    #endif
+
+    color = resultCasted;
 }

@@ -37,6 +37,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	for (auto& face : m_faces) {
 		image = Texture::LoadSTBImage(face.c_str(), &x, &y, &n, 3); // 3 = STB_rgb
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glGenerateMipmap(GL_TEXTURE_2D);
 		free(image); // Cleanup
 		++i;
 	}
@@ -46,7 +47,6 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// Cleanup
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

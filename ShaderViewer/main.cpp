@@ -118,6 +118,10 @@ int main() {
 		glUniform3f(shader.GetUniformLoc("viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
+		// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
+		glActiveTexture(GL_TEXTURE3);
+		glUniform1i(shader.GetUniformLoc("skybox"), 3);
+		skybox.BindTexture();
 
 		// Draw loaded models
 		glm::mat4 model;

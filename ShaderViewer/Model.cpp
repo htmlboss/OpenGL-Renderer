@@ -122,6 +122,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// 2. Specular maps
 		std::vector<Texture> specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		// 3. Reflectance maps
+		std::vector<Texture> reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	// Return a mesh object created from the extracted mesh data
@@ -146,7 +150,7 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 			}
 		}
 
-		std::cout << "\nTexture path: " << str.C_Str();;
+		std::cout << "\nTexture path: " << str.C_Str();
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			const std::string texDirPrefix = m_directory + "/"; // Get directory path and append forward-slash
 			Texture texture(texDirPrefix + str.C_Str(), samplerName);
