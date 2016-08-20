@@ -1,7 +1,5 @@
 #include "Skybox.h"
 
-#include <iostream>
-
 // Easier to use TS library than hard-code texture files
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
@@ -64,8 +62,8 @@ void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4
 
 	// Transformations
 	glm::mat4 view = glm::mat4(glm::mat3(CameraMatrix));	// Remove any translation component of the view matrix	
-	glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(ProjectionMat));
+	glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
+	glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(ProjectionMat));
 	
 	// Skybox Cube
 	glBindVertexArray(m_vao);

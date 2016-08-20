@@ -2,13 +2,9 @@
 #include "vld.h"
 #endif
 
-#include <iostream>
-#include <cmath>
-
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -20,6 +16,7 @@
 #include "Model.h"
 #include "Light.h"
 #include "Skybox.h"
+#include "HUDText.h"
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -52,7 +49,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 16);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
@@ -78,20 +75,24 @@ int main() {
 	// For wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	// OpenGL options
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_MULTISAMPLE); // MSAA from GLFW
+	// OpenGL options (not state-dependent)
 	glEnable(GL_CULL_FACE); // Culling
 	glCullFace(GL_BACK); // Back-face culling
-
-	Skybox skybox("skybox/");
-	Model nanosuit("models/nanosuit/nanosuit.obj");
-	Model floor("models/floor/3d-model.obj");
-	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
+	glEnable(GL_MULTISAMPLE); // MSAA from GLFW
+	glEnable(GL_BLEND); // Blending
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
+	
 	// Shaders
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
 	Shader skyboxShader("shaders/skyboxvs.glsl", "shaders/skyboxps.glsl");
+	Shader fontShader("shaders/fontvs.glsl", "shaders/fontps.glsl");
+
+	HUDText debugText(fontShader, "fonts/arial.ttf", WIDTH, HEIGHT);
+	Skybox skybox("skybox/");
+	Model nanosuit("models/nanosuit/nanosuit.obj");
+	Model floor("models/floor/3d-model.obj");
+	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -108,6 +109,8 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Enable depth testing for 3D stuff
+		glEnable(GL_DEPTH_TEST);
 		// Transformations
 		glm::mat4 projection = glm::perspective(camera.Zoom, static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -116,8 +119,8 @@ int main() {
 		
 		shader.Use();
 		glUniform3f(shader.GetUniformLoc("viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(projection));
+		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
 		// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
 		glActiveTexture(GL_TEXTURE3);
 		glUniform1i(shader.GetUniformLoc("skybox"), 3);
@@ -127,18 +130,23 @@ int main() {
 		glm::mat4 model;
 		model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
 		nanosuit.Draw(shader);
 
 		model = glm::mat4();
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
-		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
 		floor.Draw(shader);
 
-		// Always draw skybox last
+		//Always draw skybox last
 		skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
 
+		// Disable depth test for HUD
+		glDisable(GL_DEPTH_TEST);
+		// Draw Text on top of everything
+		debugText.RenderText(fontShader, "Hello World", 0.0f, 0.0f, 1.0f, glm::vec3(1.0f, 0.8f, 1.0f));
+		
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}

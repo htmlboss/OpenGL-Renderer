@@ -1,11 +1,10 @@
-#version 450
+#version 430
 
 in vec3 TexCoords;
 out vec4 color;
 
 uniform samplerCube skybox;
 
-void main() {    
+void main() {
     color = texture(skybox, TexCoords);
 }
-  
