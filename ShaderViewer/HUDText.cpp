@@ -20,7 +20,7 @@ HUDText::HUDText(Shader& shader, const std::string& FontPath, const GLint Window
 	}
 
 	// Set size to load glyphs as
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, 0, 36);
 
 	// Disable byte-alignment restriction (prevent segment faults)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -17,6 +17,7 @@
 #include "Light.h"
 #include "Skybox.h"
 #include "HUDText.h"
+#include "Timer.h"
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -42,6 +43,9 @@ int main() {
 	FILE* log_fd = fopen("log.txt", "w");
 	Output2FILE::Stream() = log_fd;
 	
+	Timer timer;
+	timer.Init();
+
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -101,6 +105,9 @@ int main() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		// Update timer
+		timer.Update();
+
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		do_movement();
@@ -145,7 +152,7 @@ int main() {
 		// Disable depth test for HUD
 		glDisable(GL_DEPTH_TEST);
 		// Draw Text on top of everything
-		debugText.RenderText(fontShader, "Hello World", 0.0f, 0.0f, 1.0f, glm::vec3(1.0f, 0.8f, 1.0f));
+		debugText.RenderText(fontShader, std::to_string(timer.GetFPS()) + " fps", 0.0f, HEIGHT - 36.0f, 1.0f, glm::vec3(0.0f));
 		
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
