@@ -50,8 +50,10 @@ void Shader::Use() {
 GLint Shader::GetUniformLoc(const std::string& Uniform) const {
 	GLint loc = glGetUniformLocation(m_shaderProgram, Uniform.c_str());
 	if (loc == -1) {
-		std::cerr << "Uniform: " << Uniform << " does not exist.\n";
-		FILE_LOG(logERROR) << "Uniform: " << Uniform << " does not exist.\n";
+		std::string error = "Uniform: " + Uniform + " does not exist.\n";
+
+		std::cerr << error;
+		FILE_LOG(logERROR) << error;
 	}
 	return loc;
 }

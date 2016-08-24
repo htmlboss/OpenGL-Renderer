@@ -5,11 +5,9 @@
 Timer::Timer() : m_FPS(0.0f), m_time1(0.0f), m_time2(0.0f), m_diffTime(0.0f), m_framesElapsed(0) {
 }
 
-
 /***********************************************************************************/
 Timer::~Timer() {
 }
-
 
 /***********************************************************************************/
 // Select an approproate timer
@@ -34,17 +32,17 @@ bool Timer::Init() {
 void Timer::Update() {
 	m_framesElapsed++;
 
-	if (m_framesElapsed % 10 == 1) {
+	if (m_framesElapsed % 5 == 1) {
 		m_time1 = GetTime() / 1000;
 	}
 
-	else if (m_framesElapsed % 10 == 0) {
+	else if (m_framesElapsed % 5 == 0) {
 		m_time1 = m_time2;
 		m_time2 = GetTime() / 1000;
 		m_diffTime = static_cast<float>(fabs(m_time2 - m_time1));
 	}
 
-	m_FPS = 10 / m_diffTime;
+	m_FPS = 5 / m_diffTime;
 }
 
 /***********************************************************************************/

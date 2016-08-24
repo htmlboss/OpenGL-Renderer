@@ -22,7 +22,6 @@
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 
 // Window dimensions
@@ -62,15 +61,11 @@ int main() {
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 
 	// GLFW Options
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
-
-	// Initialize GLEW to setup the OpenGL Function pointers
 	glewInit();
 
 	// Define the viewport dimensions
@@ -86,6 +81,23 @@ int main() {
 	glEnable(GL_BLEND); // Blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
 	
+	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
+	GLuint uboMatrices;
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW); // Allocate memory, but do not fill
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	// Define range of the buffer that links to a binding point
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+	// Projection matrix does not change at runtime (constant window size)
+	glm::mat4 projection = glm::perspective(camera.GetFOV(), static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.1f, 100.0f);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	// Insert data into allocated memory block
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
 	// Shaders
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
@@ -119,14 +131,13 @@ int main() {
 		// Enable depth testing for 3D stuff
 		glEnable(GL_DEPTH_TEST);
 		// Transformations
-		glm::mat4 projection = glm::perspective(camera.Zoom, static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		light.Draw(lightShader, view, projection);
 		
 		shader.Use();
-		glUniform3f(shader.GetUniformLoc("viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-		glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(projection));
+		glUniform3f(shader.GetUniformLoc("viewPos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
 		// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
 		glActiveTexture(GL_TEXTURE3);
@@ -204,8 +215,4 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastY = ypos;
 
 	camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	camera.ProcessMouseScroll(yoffset);
 }

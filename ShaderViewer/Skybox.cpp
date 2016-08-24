@@ -61,7 +61,7 @@ void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4
 	shader.Use();
 
 	// Transformations
-	glm::mat4 view = glm::mat4(glm::mat3(CameraMatrix));	// Remove any translation component of the view matrix	
+	glm::mat4 view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix	
 	glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(ProjectionMat));
 	

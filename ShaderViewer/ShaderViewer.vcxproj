@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="HUDText.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />

@@ -23,9 +23,10 @@ struct PointLight {
 };
 
 in vec2 TexCoords;
-in vec3 FragPos;  
+in vec3 FragPos;
 in vec3 Normal;
 
+// Final output
 out vec4 color;
 
 uniform vec3 viewPos;
@@ -39,10 +40,10 @@ vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
     float lambertian = max(dot(lightDir, normal), 0.0);
     vec3 specular = vec3(0.0);
-    
+
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
-    
+
     // Specular
    if (lambertian > 0.0) {
         vec3 halfDir = normalize(lightDir + viewDir);
@@ -52,7 +53,7 @@ vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
     // Combine
     vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, TexCoords));
-    
+
     return vec3(ambient + diffuse + specular);
 }
 
@@ -90,7 +91,7 @@ vec4 CalcReflectance(vec3 Position, vec3 CameraPos, vec3 normal) {
     vec3 I = normalize(Position - CameraPos);
     vec3 R = reflect(I, normal);
     float reflect_intensity = texture(texture_reflectance1, TexCoords).r;
-    
+
     vec4 reflect_color;
     if(reflect_intensity > 0.1) { // Only sample reflections when above a certain treshold
         reflect_color = texture(skybox, R) * reflect_intensity;
@@ -131,7 +132,7 @@ void main() {
     result += CalcPointLight(pLight, normal, FragPos, viewDir);
 
     vec4 resultCasted = vec4(result, 1.0);
-    
+
     // Need to allow passing of defines from C++ so this shader can be shared
     // between the nanosuit and the floor (not physically correct, but whatever)
     #define REFLECT
