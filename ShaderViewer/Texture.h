@@ -5,8 +5,16 @@
 
 class Texture {
 public:
+
+	// Passed to stb_image as the number of components (channels) to load
+	enum ColorMode {
+		GREY = 1,
+		RGB = 3,
+		RGB_A
+	};
+
 	Texture();
-	Texture(const std::string& TexturePath, const std::string& samplerName);
+	Texture(const std::string& TexturePath, const std::string& samplerName, const ColorMode colorMode = ColorMode::RGB);
 	~Texture();
 
 	//Bind 2D texture
