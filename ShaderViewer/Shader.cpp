@@ -1,40 +1,29 @@
 #include "Shader.h"
 
+#include <log.h>
+#include <fstream>
+#include <sstream>
+
 /***********************************************************************************/
 Shader::Shader(const std::string& VertexShader, const std::string& PixelShader) {
-	// 1. Retrieve the vertex/fragment source code from filePath
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-	std::stringstream vShaderStream, fShaderStream;
 	
-	// ensures ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::badbit);
-	try {
-		// Open files
-		vShaderFile.open(VertexShader);
-		fShaderFile.open(PixelShader);
-		// Read file's buffer contents into streams
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-		// close file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-		// Convert stream into string
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-	}
-	catch (std::ifstream::failure& e) {
-		std::cerr << "Shader error: " << e.what();
-		FILE_LOG(logERROR) << "Shader error " << e.what();
-	}
-	catch (...) {
-		std::cout << "Unhandled exception in shader class.\n";
-	}
+	// Retrieve the vertex/fragment source code from filePath
+	auto vertexCode = readShader(VertexShader);
+	auto fragmentCode = readShader(PixelShader);
 
-	prepareShader(vShaderStream.str().c_str(), fShaderStream.str().c_str());
+	// Compile and link shaders
+	prepareShader(vertexCode.c_str(), fragmentCode.c_str());
+}
+
+/***********************************************************************************/
+Shader::Shader(const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader) {
+	// Retrieve the vertex/fragment source code from filePath
+	auto vertexCode = readShader(VertexShader);
+	auto fragmentCode = readShader(PixelShader);
+	auto geometryCode = readShader(GeometryShader);
+
+	// Compile and link shaders
+	prepareShader(vertexCode.c_str(), fragmentCode.c_str(), geometryCode.c_str());
 }
 
 /***********************************************************************************/
@@ -51,7 +40,6 @@ GLint Shader::GetUniformLoc(const std::string& Uniform) const {
 	GLint loc = glGetUniformLocation(m_shaderProgram, Uniform.c_str());
 	if (loc == -1) {
 		std::string error = "Uniform: " + Uniform + " does not exist.\n";
-
 		std::cerr << error;
 		FILE_LOG(logERROR) << error;
 	}
@@ -59,34 +47,42 @@ GLint Shader::GetUniformLoc(const std::string& Uniform) const {
 }
 
 /***********************************************************************************/
+std::string Shader::readShader(const std::string& ShaderPath) {
+
+	std::string shaderCode;
+	std::ifstream file;
+	std::stringstream fileSS;
+
+	file.exceptions(std::ifstream::badbit);
+	try {
+		// Open files
+		file.open(ShaderPath);
+		// Read file's buffer contents into streams
+		fileSS << file.rdbuf();
+		// close file handlers
+		file.close();
+		// Convert stream into string
+		shaderCode = fileSS.str();
+	}
+	catch (std::ifstream::failure& e) {
+		std::cerr << "Shader error: " << e.what();
+		FILE_LOG(logERROR) << "Shader error " << e.what();
+	}
+	catch (...) {
+		std::cout << "Unhandled exception in Shader::readShader().\n";
+	}
+
+	return shaderCode;
+}
+
+/***********************************************************************************/
 void Shader::prepareShader(const GLchar* vertexShader, const GLchar* pixelShader) {
 
-	// Check for compile time errors
-	GLint success;
-	GLchar infoLog[512];
-
 	// Vertex shader
-	m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(m_vertexShader, 1, &vertexShader, NULL);
-	glCompileShader(m_vertexShader);
-	glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(m_vertexShader, 512, NULL, infoLog);
-		std::cerr << "ERROR: vertex shader compilation failed:\n" << infoLog << std::endl;
-		FILE_LOG(logERROR) << infoLog;
-	}
+	compileShader(vertexShader, ShaderType::VertexShader, m_vertexShader);
 
 	// Fragment shader
-	m_pixelShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(m_pixelShader, 1, &pixelShader, NULL);
-	glCompileShader(m_pixelShader);
-	// Check for compile time errors
-	glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(m_pixelShader, 512, NULL, infoLog);
-		std::cerr << "ERROR: fragment shader compilation failed:\n" << infoLog << std::endl;
-		FILE_LOG(logERROR) << infoLog;
-	}
+	compileShader(pixelShader, ShaderType::PixelShader, m_pixelShader);
 
 	// Link shaders
 	m_shaderProgram = glCreateProgram();
@@ -94,15 +90,61 @@ void Shader::prepareShader(const GLchar* vertexShader, const GLchar* pixelShader
 	glAttachShader(m_shaderProgram, m_pixelShader);
 	glLinkProgram(m_shaderProgram);
 	// Check for linking errors
-	glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
-		std::cerr << "ERROR: shaders failed to link:\n" << infoLog << std::endl;
-		FILE_LOG(logERROR) << infoLog;
+	glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &m_success);
+	if (!m_success) {
+		glGetProgramInfoLog(m_shaderProgram, 512, NULL, m_infoLog);
+		std::cerr << "ERROR: shaders failed to link:\n" << m_infoLog << std::endl;
+		FILE_LOG(logERROR) << m_infoLog;
 	}
 
-	std::cout << "Comiled: " << m_vertexShader << '\n';
-	//Clean up
+	std::cout << "Compiled: " << m_shaderProgram << '\n';
+	// Clean up
 	glDeleteShader(m_vertexShader);
 	glDeleteShader(m_pixelShader);
+}
+
+/***********************************************************************************/
+void Shader::prepareShader(const GLchar* vertexShader, const GLchar* pixelShader, const GLchar* geometryShader) {
+
+	// Vertex shader
+	compileShader(vertexShader, ShaderType::VertexShader, m_vertexShader);
+
+	// Fragment shader
+	compileShader(pixelShader, ShaderType::PixelShader, m_pixelShader);
+
+	// Geometry Shader
+	compileShader(geometryShader, ShaderType::GeometryShader, m_geometryShader);
+
+	// Link
+	m_shaderProgram = glCreateProgram();
+	glAttachShader(m_shaderProgram, m_vertexShader);
+	glAttachShader(m_shaderProgram, m_geometryShader);
+	glAttachShader(m_shaderProgram, m_pixelShader);
+	// Check for linking errors
+	glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &m_success);
+	if (!m_success) {
+		glGetProgramInfoLog(m_shaderProgram, 512, NULL, m_infoLog);
+		std::cerr << "ERROR: shaders failed to link:\n" << m_infoLog << std::endl;
+		FILE_LOG(logERROR) << m_infoLog;
+	}
+
+	std::cout << "Compiled: " << m_shaderProgram << '\n';
+	//Clean up
+	glDeleteShader(m_vertexShader);
+	glDeleteShader(m_geometryShader);
+	glDeleteShader(m_pixelShader);
+}
+
+/***********************************************************************************/
+void Shader::compileShader(const GLchar* shaderSource, const ShaderType shaderType, GLuint& programID) {
+
+	programID = glCreateShader(shaderType);
+	glShaderSource(programID, 1, &shaderSource, NULL);
+	glCompileShader(programID);
+	glGetShaderiv(programID, GL_COMPILE_STATUS, &m_success);
+	if (!m_success) {
+		glGetShaderInfoLog(programID, 512, NULL, m_infoLog);
+		std::cerr << "ERROR: vertex shader compilation failed:\n" << m_infoLog << std::endl;
+		FILE_LOG(logERROR) << m_infoLog;
+	}
 }
