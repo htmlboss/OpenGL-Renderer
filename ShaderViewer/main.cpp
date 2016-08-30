@@ -98,10 +98,6 @@ int main() {
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	std::vector<glm::vec3> instanceOffsets;
-	instanceOffsets.emplace_back(-14.575f, 0.0f, 0.0f);
-	instanceOffsets.emplace_back(0.0f);
-
 	// Shaders
 	Shader floorShader("shaders/floorvs.glsl", "shaders/floorps.glsl");
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
@@ -111,12 +107,10 @@ int main() {
 
 	HUDText debugText(fontShader, "fonts/arial.ttf", WIDTH, HEIGHT);
 	Skybox skybox("skybox/ocean/");
+	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 	Model nanosuit("models/nanosuit/nanosuit.obj");
-	
 	Model floor("models/floor/3d-model.obj");
 	floor.SetInstancing( { glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) } );
-	
-	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
