@@ -31,7 +31,7 @@ Shader::~Shader() {
 }
 
 /***********************************************************************************/
-void Shader::Use() {
+void Shader::Use() const {
 	glUseProgram(m_shaderProgram);
 }
 
@@ -41,7 +41,6 @@ GLint Shader::GetUniformLoc(const std::string& Uniform) const {
 	if (loc == -1) {
 		std::string error = "Uniform: " + Uniform + " does not exist.\n";
 		std::cerr << error;
-		FILE_LOG(logERROR) << error;
 	}
 	return loc;
 }
@@ -57,22 +56,29 @@ std::string Shader::readShader(const std::string& ShaderPath) {
 	try {
 		// Open files
 		file.open(ShaderPath);
-		// Read file's buffer contents into streams
-		fileSS << file.rdbuf();
-		// close file handlers
-		file.close();
-		// Convert stream into string
-		shaderCode = fileSS.str();
+		if (file) {
+			// Read file's buffer contents into streams
+			fileSS << file.rdbuf();
+			// close file handlers
+			file.close();
+			// Convert stream into string
+			shaderCode = fileSS.str();
+
+			return shaderCode;
+		} 
+		throw std::runtime_error("Failed to open: " + ShaderPath + '\n');
 	}
 	catch (std::ifstream::failure& e) {
+		std::cerr << "Shader error: " << e.what();
+		FILE_LOG(logERROR) << "Shader error " << e.what();
+	}
+	catch (std::runtime_error& e) {
 		std::cerr << "Shader error: " << e.what();
 		FILE_LOG(logERROR) << "Shader error " << e.what();
 	}
 	catch (...) {
 		std::cout << "Unhandled exception in Shader::readShader().\n";
 	}
-
-	return shaderCode;
 }
 
 /***********************************************************************************/

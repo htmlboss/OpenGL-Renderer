@@ -80,6 +80,7 @@ int main() {
 	glEnable(GL_MULTISAMPLE); // MSAA from GLFW
 	glEnable(GL_BLEND); // Blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
+	glEnable(GL_FRAMEBUFFER_SRGB); // Gamma correction
 	
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	GLuint uboMatrices;
@@ -97,18 +98,25 @@ int main() {
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+	std::vector<glm::vec3> instanceOffsets;
+	instanceOffsets.emplace_back(-14.575f, 0.0f, 0.0f);
+	instanceOffsets.emplace_back(0.0f);
 
 	// Shaders
+	Shader floorShader("shaders/floorvs.glsl", "shaders/floorps.glsl");
 	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
 	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
 	Shader skyboxShader("shaders/skyboxvs.glsl", "shaders/skyboxps.glsl");
 	Shader fontShader("shaders/fontvs.glsl", "shaders/fontps.glsl");
 
 	HUDText debugText(fontShader, "fonts/arial.ttf", WIDTH, HEIGHT);
-	Skybox skybox("skybox/");
+	Skybox skybox("skybox/ocean/");
 	Model nanosuit("models/nanosuit/nanosuit.obj");
+	
 	Model floor("models/floor/3d-model.obj");
-	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f));
+	floor.SetInstancing( { glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) } );
+	
+	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -125,7 +133,7 @@ int main() {
 		do_movement();
 
 		// Clear the colorbuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Enable depth testing for 3D stuff
@@ -134,11 +142,11 @@ int main() {
 		glm::mat4 view = camera.GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-		light.Draw(lightShader, view, projection);
+		
+		light.Draw(lightShader);
 		
 		shader.Use();
 		glUniform3f(shader.GetUniformLoc("viewPos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
-		glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
 		// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
 		glActiveTexture(GL_TEXTURE3);
 		glUniform1i(shader.GetUniformLoc("skybox"), 3);
@@ -151,11 +159,12 @@ int main() {
 		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
 		nanosuit.Draw(shader);
 
+		floorShader.Use();
 		model = glm::mat4();
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		//model = glm::translate(model, glm::vec3(0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
 		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
-		floor.Draw(shader);
+		floor.DrawInstanced(floorShader);
 
 		//Always draw skybox last
 		skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);

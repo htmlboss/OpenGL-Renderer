@@ -1,5 +1,4 @@
-#version 440 core
-
+#version 430
 
 uniform vec3 lightColor;
 out vec4 color;

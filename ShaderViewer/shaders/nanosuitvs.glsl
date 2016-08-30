@@ -6,7 +6,8 @@ layout (location = 2) in vec2 texCoords;
 
 out vec2 TexCoords;
 out vec3 FragPos;
-out vec3 Normal;;
+out vec3 Normal;
+out vec4 viewSpace;
 
 // Uniform buffer struct (shares matrix data to all shaders)
 layout (std140, binding = 0) uniform Matrices {
@@ -16,8 +17,10 @@ layout (std140, binding = 0) uniform Matrices {
 uniform mat4 model;
 
 void main() {
-    gl_Position = projection * view * model * vec4(position, 1.0f);
+    viewSpace = view * model * vec4(position, 1.0f);
+    gl_Position = projection * viewSpace;
     FragPos = vec3(model * vec4(position, 1.0f));
     Normal = mat3(transpose(inverse(model))) * normal;
     TexCoords = texCoords;
+
 }

@@ -11,7 +11,10 @@ public:
 	Model(const std::string& Path);
 	~Model();
 
+	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
+
 	void Draw(const Shader& shader);
+	void DrawInstanced(const Shader& shader);
 
 private:
 	void loadModel(const std::string& Path);
@@ -21,6 +24,7 @@ private:
 
 	std::vector<Mesh> m_meshes;
 	std::vector<Texture> m_loadedTextures;
+
 	std::string m_directory;
 };
 

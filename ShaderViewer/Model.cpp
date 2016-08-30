@@ -16,10 +16,27 @@ Model::Model(const std::string& Path) {
 Model::~Model() {
 }
 
+
+void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets) {
+	// Create initializer list from args
+	//std::initializer_list<glm::vec3> args{ std::forward<glm::vec3>(instanceOffsets) };
+	// Pass list to each mesh
+	for (auto& mesh : m_meshes) {
+		mesh.SetInstancing(instanceOffsets);
+	}
+}
+
 /***********************************************************************************/
 void Model::Draw(const Shader& shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.Draw(shader);
+	}
+}
+
+/***********************************************************************************/
+void Model::DrawInstanced(const Shader& shader) {
+	for (auto& mesh : m_meshes) {
+		mesh.DrawInstanced(shader);
 	}
 }
 

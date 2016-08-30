@@ -9,12 +9,57 @@
 
 class Light {
 public:
-	Light(const glm::vec3& Position, const glm::vec3& Color);
+	
+	enum LightType {
+		POINTLIGHT,
+		SPOTLIGHT,
+		DIRLIGHT
+	};
+
+	Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType);
 	~Light();
 
-	void Draw(Shader& shader, const glm::mat4& cameraMat, const glm::mat4& projMat);
+
+	void Draw(Shader& shader);
 
 private:
+	// Only used for inheritance
+	struct BasicLight {
+		glm::vec3 ambient;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+		glm::vec3 color;
+
+	};
+
+	// Add direction
+	struct DirLight : BasicLight {
+		glm::vec3 direction;
+	};
+
+	// Add attenuation parameters
+	struct PointLight : BasicLight {
+		glm::vec3 position;
+		
+		float constant;
+		float linear;
+		float quadratic;
+	};
+	
+	// Add cutoffs (and avoid The Diamond)
+	struct SpotLight : BasicLight {
+		glm::vec3 direction;
+		glm::vec3 position;
+
+		float constant;
+		float linear;
+		float quadratic;
+
+		// For smooth edges
+		float cutOff;
+		float outerCutOff;
+	};
+
 	glm::vec3 m_position;
 	glm::vec3 m_color;
 

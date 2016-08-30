@@ -12,7 +12,7 @@ public:
 	Shader(const Shader& other) = delete;
 	~Shader();
 
-	void Use();
+	void Use() const;
 	GLint GetUniformLoc(const std::string& Uniform) const;
 
 private:

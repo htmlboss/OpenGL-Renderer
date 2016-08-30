@@ -2,7 +2,7 @@
 #include "CubeData.h"
 
 /***********************************************************************************/
-Light::Light(const glm::vec3& Position, const glm::vec3& Color) :
+Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType) :
 			m_position(Position), 
 			m_color(Color) {
 
@@ -26,14 +26,11 @@ Light::~Light() {
 }
 
 /***********************************************************************************/
-void Light::Draw(Shader& shader, const glm::mat4& cameraMat, const glm::mat4& projMat) {
+void Light::Draw(Shader& shader) {
+	
 	shader.Use();
 
 	GLuint modelLoc = shader.GetUniformLoc("model");
-	GLuint viewLoc = shader.GetUniformLoc("view");
-	GLuint projLoc = shader.GetUniformLoc("projection");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projMat));
 
 	glUniform3f(shader.GetUniformLoc("lightColor"), m_color.x, m_color.y, m_color.z);
 

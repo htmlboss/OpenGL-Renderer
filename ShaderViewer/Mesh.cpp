@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <cstdarg>
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures) :
@@ -15,7 +16,53 @@ Mesh::~Mesh() {
 }
 
 /***********************************************************************************/
+void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
+	
+	// Iterate over positions passed in
+	for (const auto& it : args) {
+		m_instanceOffsets.push_back(it);
+	}
+
+	glBindVertexArray(m_vao);
+	glGenBuffers(1, &m_instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_instanceOffsets.size(), &m_instanceOffsets.at(0), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Vertex Instance offset
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(3, 1); // Tell OpenGL this is an instanced vertex attribute.
+
+	glBindVertexArray(0);
+}
+
+/***********************************************************************************/
 void Mesh::Draw(const Shader& shader) {
+	
+	bindTextures(shader);
+
+	// Draw mesh
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+/***********************************************************************************/
+void Mesh::DrawInstanced(const Shader& shader) {
+	
+	bindTextures(shader);
+
+	// Draw instanced mesh
+	glBindVertexArray(m_vao);
+	glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceOffsets.size());
+	glBindVertexArray(0);
+}
+
+/***********************************************************************************/
+void Mesh::bindTextures(const Shader &shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 	GLuint reflectanceNr = 1;
@@ -23,7 +70,7 @@ void Mesh::Draw(const Shader& shader) {
 	GLuint index = 0;
 	for (auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
-		// Retrieve texture number (the N in diffuse_textureN)
+											  // Retrieve texture number (the N in diffuse_textureN)
 		std::string name = it.GetSampler();
 		std::string number;
 		// ALWAYS USE POST-INCREMENT HERE
@@ -39,16 +86,11 @@ void Mesh::Draw(const Shader& shader) {
 
 		glUniform1i(shader.GetUniformLoc(name + number), index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
-		
+
 		++index;
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-
-	// Draw mesh
-	glBindVertexArray(m_vao);
-	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }
 
 /***********************************************************************************/
@@ -65,6 +107,8 @@ void Mesh::setupMesh() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), &m_indices.at(0), GL_STATIC_DRAW);
+
+	// Vertex Attributes
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
