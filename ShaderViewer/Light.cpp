@@ -16,7 +16,7 @@ Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType 
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLvoid*>(0));
 
 	glBindVertexArray(0);
 }

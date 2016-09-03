@@ -18,6 +18,8 @@
 #include "Skybox.h"
 #include "HUDText.h"
 #include "Timer.h"
+#include "FrameBuffer.h"
+#include "PostProcess.h"
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -52,10 +54,10 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 1);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -70,7 +72,7 @@ int main() {
 
 	// Define the viewport dimensions
 	glViewport(0, 0, WIDTH, HEIGHT);
-
+	
 	// For wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -81,6 +83,8 @@ int main() {
 	glEnable(GL_BLEND); // Blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
 	glEnable(GL_FRAMEBUFFER_SRGB); // Gamma correction
+
+	glDepthFunc(GL_LESS);
 	
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	GLuint uboMatrices;
@@ -97,6 +101,9 @@ int main() {
 	// Insert data into allocated memory block
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	FrameBuffer fb(WIDTH, HEIGHT, false, false);
+	PostProcess pp("shaders/screenQuadVert.glsl", "shaders/screenQuadPixel.glsl");
 
 	// Shaders
 	Shader floorShader("shaders/floorvs.glsl", "shaders/floorps.glsl");
@@ -126,45 +133,57 @@ int main() {
 		glfwPollEvents();
 		do_movement();
 
-		// Clear the colorbuffer
-		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		fb.Bind();
+		// Render to bound framebuffer
+		{
+			// Clear the colorbuffer
+			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+			// Enable depth testing for 3D stuff
+			glEnable(GL_DEPTH_TEST);
+			// Transformations
+			glm::mat4 view = camera.GetViewMatrix();
+			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+			
+			light.Draw(lightShader);
+			
+			shader.Use();
+			glUniform3f(shader.GetUniformLoc("viewPos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+			// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
+			glActiveTexture(GL_TEXTURE3);
+			glUniform1i(shader.GetUniformLoc("skybox"), 3);
+			skybox.BindTexture();
+	
+			// Draw loaded models
+			glm::mat4 model;
+			model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+			glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
+			nanosuit.Draw(shader);
+	
+			floorShader.Use();
+			model = glm::mat4();
+			//model = glm::translate(model, glm::vec3(0.0f));
+			model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
+			glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
+			floor.DrawInstanced(floorShader);
+	
+			//Always draw skybox last
+			skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
+		}
+		fb.UnBind(); 
+		// Switch back to default framebuffer
 
-		// Enable depth testing for 3D stuff
-		glEnable(GL_DEPTH_TEST);
-		// Transformations
-		glm::mat4 view = camera.GetViewMatrix();
-		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-		
-		light.Draw(lightShader);
-		
-		shader.Use();
-		glUniform3f(shader.GetUniformLoc("viewPos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
-		// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
-		glActiveTexture(GL_TEXTURE3);
-		glUniform1i(shader.GetUniformLoc("skybox"), 3);
-		skybox.BindTexture();
-
-		// Draw loaded models
-		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
-		nanosuit.Draw(shader);
-
-		floorShader.Use();
-		model = glm::mat4();
-		//model = glm::translate(model, glm::vec3(0.0f));
-		model = glm::scale(model, glm::vec3(0.3f, 0.2f, 0.3f));
-		glUniformMatrix4fv(shader.GetUniformLoc("model"), 1, GL_FALSE, value_ptr(model));
-		floor.DrawInstanced(floorShader);
-
-		//Always draw skybox last
-		skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
-
-		// Disable depth test for HUD
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		// Disable depth test for screen quad and HUD
 		glDisable(GL_DEPTH_TEST);
+
+		// Render post-processed quad
+		pp.RendertoScreen(fb);
+
 		// Draw Text on top of everything
 		debugText.RenderText(fontShader, std::to_string(timer.GetFPS()) + " fps", 0.0f, HEIGHT - 36.0f, 1.0f, glm::vec3(0.0f));
 		

@@ -13,8 +13,16 @@ public:
 		RGB_A
 	};
 
-	Texture();
-	Texture(const std::string& TexturePath, const std::string& samplerName, const ColorMode colorMode = ColorMode::RGB);
+	// Texture wrap modes passed to OpenGL
+	enum WrapMode {
+		REPEAT = GL_REPEAT,
+		MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+		EDGE_CLAMP = GL_CLAMP_TO_EDGE,
+		BORDER_CLAMP = GL_CLAMP_TO_BORDER
+	};
+
+	//Texture();
+	Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ColorMode colorMode = ColorMode::RGB);
 	~Texture();
 
 	//Bind 2D texture

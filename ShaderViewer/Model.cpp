@@ -170,7 +170,7 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 		std::cout << "\nTexture path: " << str.C_Str();
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			const std::string texDirPrefix = m_directory + "/"; // Get directory path and append forward-slash
-			Texture texture(texDirPrefix + str.C_Str(), samplerName);
+			Texture texture(texDirPrefix + str.C_Str(), samplerName, Texture::REPEAT);
 			
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

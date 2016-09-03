@@ -149,11 +149,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="HUDText.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PostProcess.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -163,10 +165,12 @@
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CubeData.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="HUDText.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PostProcess.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />

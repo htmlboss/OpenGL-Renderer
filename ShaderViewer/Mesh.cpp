@@ -32,7 +32,7 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 	// Vertex Instance offset
 	glEnableVertexAttribArray(3);
 	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), static_cast<GLvoid*>(0));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glVertexAttribDivisor(3, 1); // Tell OpenGL this is an instanced vertex attribute.
 
@@ -112,10 +112,10 @@ void Mesh::setupMesh() {
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<GLvoid*>(0));
 	// Vertex Normals
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, Normal)));
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
