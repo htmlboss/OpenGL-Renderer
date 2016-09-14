@@ -106,11 +106,11 @@ int main() {
 	PostProcess pp("shaders/screenQuadVert.glsl", "shaders/screenQuadPixel.glsl");
 
 	// Shaders
-	Shader floorShader("shaders/floorvs.glsl", "shaders/floorps.glsl");
-	Shader shader("shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
-	Shader lightShader("shaders/lampvs.glsl", "shaders/lampps.glsl");
-	Shader skyboxShader("shaders/skyboxvs.glsl", "shaders/skyboxps.glsl");
-	Shader fontShader("shaders/fontvs.glsl", "shaders/fontps.glsl");
+	Shader floorShader("shaders/common.vert", "shaders/floorvs.glsl", "shaders/floorps.glsl");
+	Shader shader("shaders/common.vert", "shaders/nanosuitvs.glsl", "shaders/nanosuitps.glsl");
+	Shader lightShader("shaders/common.vert", "shaders/lampvs.glsl", "shaders/lampps.glsl");
+	Shader skyboxShader("", "shaders/skyboxvs.glsl", "shaders/skyboxps.glsl");
+	Shader fontShader("", "shaders/fontvs.glsl", "shaders/fontps.glsl");
 
 	HUDText debugText(fontShader, "fonts/arial.ttf", WIDTH, HEIGHT);
 	Skybox skybox("skybox/ocean/");

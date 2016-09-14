@@ -24,7 +24,7 @@ FrameBuffer::FrameBuffer(const GLint WindowWidth, const GLint WindowHeight, cons
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	if (!depthTex && !stencilTex) {
-		glTexImage2D(GL_TEXTURE_2D, 0, attachment_type, m_width, m_height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_width, m_height, 0, GL_RGBA, GL_FLOAT, NULL);
 	}
 	// Using both a stencil and depth test, needs special format arguments
 	else {

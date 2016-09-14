@@ -6,8 +6,8 @@
 
 class Shader {
 public:
-	Shader(const std::string& VertexShader, const std::string& PixelShader);
-	Shader(const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader);
+	Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader);
+	Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader);
 
 	Shader(const Shader& other) = delete;
 	~Shader();
@@ -24,7 +24,7 @@ private:
 	};
 
 	// Generic function to open a shader file
-	std::string readShader(const std::string& ShaderPath);
+	std::string readFile(const std::string& ShaderPath);
 
 	void prepareShader(const GLchar* vertexShader, const GLchar* pixelShader);
 	// Overload to compile geometry shader

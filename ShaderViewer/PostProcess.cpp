@@ -3,7 +3,7 @@
 
 /***********************************************************************************/
 PostProcess::PostProcess(const std::string& screenVertShader, const std::string& screenPixelShader) : 
-	m_screenShader(screenVertShader, screenPixelShader) {
+	m_screenShader("", screenVertShader, screenPixelShader) {
 
 	glGenVertexArrays(1, &m_screenVAO);
 	glGenBuffers(1, &m_screenVBO);

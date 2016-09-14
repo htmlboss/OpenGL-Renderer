@@ -107,15 +107,15 @@ void main() {
 
     DirectionalLight dirLight;
     dirLight.direction = vec3(1.0, 0.3, 0.5);
-    dirLight.ambient = vec3(0.1, 0.1, 0.1);
-    dirLight.diffuse = vec3(0.9, 0.9, 0.9);
+    dirLight.ambient = vec3(0.0);
+    dirLight.diffuse = vec3(6.0);
     dirLight.specular = vec3(1.0, 1.0, 1.0);
     result += CalcDirLight(dirLight, normal, viewDir);
 
     PointLight pLight;
     pLight.position = vec3(1.0, 2.0, 0.5);
-    pLight.ambient = vec3(0.5, 0.5, 0.5);
-    pLight.diffuse = vec3(1.0, 0.1, 0.1);
+    pLight.ambient = vec3(0.0);
+    pLight.diffuse = vec3(5.0);
     pLight.specular = vec3(1.0, 0.1, 0.1);
     pLight.linear = 0.35;
     pLight.quadratic = 0.44;
@@ -124,8 +124,8 @@ void main() {
 
     PointLight pLight2;
     pLight2.position = vec3(-1.0, 1.0, -0.3);
-    pLight2.ambient = vec3(0.5, 0.5, 0.5);
-    pLight2.diffuse = vec3(0.1, 1.0, 0.1);
+    pLight2.ambient = vec3(0.0);
+    pLight2.diffuse = vec3(0.0, 4.0, 0.0);
     pLight2.specular = vec3(0.0, 1.0, 0.1);
     pLight2.linear = 0.35;
     pLight2.quadratic = 0.44;

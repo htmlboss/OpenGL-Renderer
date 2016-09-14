@@ -5,22 +5,31 @@
 #include <sstream>
 
 /***********************************************************************************/
-Shader::Shader(const std::string& VertexShader, const std::string& PixelShader) {
+Shader::Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader) {
 	
-	// Retrieve the vertex/fragment source code from filePath
-	auto vertexCode = readShader(VertexShader);
-	auto fragmentCode = readShader(PixelShader);
+	std::string vertexCode;
 
+	// Is the shader using common data?
+	if (!commonData.empty()) {
+		vertexCode = readFile(commonData);
+		// Retrieve the vertex/fragment source code from filePath
+		vertexCode.append(readFile(VertexShader));
+		std::cout << vertexCode << '\n';
+	} else {
+		vertexCode = readFile(VertexShader);
+	}
+
+	auto fragmentCode = readFile(PixelShader);
 	// Compile and link shaders
 	prepareShader(vertexCode.c_str(), fragmentCode.c_str());
 }
 
 /***********************************************************************************/
-Shader::Shader(const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader) {
+Shader::Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader) {
 	// Retrieve the vertex/fragment source code from filePath
-	auto vertexCode = readShader(VertexShader);
-	auto fragmentCode = readShader(PixelShader);
-	auto geometryCode = readShader(GeometryShader);
+	auto vertexCode = readFile(VertexShader);
+	auto fragmentCode = readFile(PixelShader);
+	auto geometryCode = readFile(GeometryShader);
 
 	// Compile and link shaders
 	prepareShader(vertexCode.c_str(), fragmentCode.c_str(), geometryCode.c_str());
@@ -46,7 +55,7 @@ GLint Shader::GetUniformLoc(const std::string& Uniform) const {
 }
 
 /***********************************************************************************/
-std::string Shader::readShader(const std::string& ShaderPath) {
+std::string Shader::readFile(const std::string& ShaderPath) {
 
 	std::string shaderCode;
 	std::ifstream file;

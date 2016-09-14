@@ -43,11 +43,11 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 		break;
 
 	case ColorMode::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		break;
 
 	case ColorMode::RGB_A:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		break;
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
