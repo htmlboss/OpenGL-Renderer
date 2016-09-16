@@ -18,8 +18,6 @@ Model::~Model() {
 
 /***********************************************************************************/
 void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets) {
-	// Create initializer list from args
-	//std::initializer_list<glm::vec3> args{ std::forward<glm::vec3>(instanceOffsets) };
 	// Pass list to each mesh
 	for (auto& mesh : m_meshes) {
 		mesh.SetInstancing(instanceOffsets);
@@ -44,7 +42,7 @@ void Model::DrawInstanced(const Shader& shader) {
 void Model::loadModel(const std::string& Path) {
 	std::cout << "\nLoading model: " << Path << '\n';
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(Path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	// Check if scene is not null and model is done loading
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -97,6 +95,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		vector.z = mesh->mNormals[i].z;
 		vertex.Normal = vector;
 		
+		// Tangents
+		vector.x = mesh->mTangents[i].x;
+		vector.y = mesh->mTangents[i].y;
+		vector.z = mesh->mTangents[i].z;
+		vertex.Tangent = vector;
+
 		// Texture Coordinates
 		if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
 			glm::vec2 vec;
@@ -142,7 +146,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		// 3. Reflectance maps
 		std::vector<Texture> reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
+
+		// 4. Normal maps
+		//std::vector<Texture> normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		//textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 
 	// Return a mesh object created from the extracted mesh data
