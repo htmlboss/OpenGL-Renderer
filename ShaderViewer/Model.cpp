@@ -1,8 +1,9 @@
 #include "Model.h"
 #include <log.h>
+#include <assimp/postprocess.h>
 
 /***********************************************************************************/
-Model::Model(const std::string& Path) {
+Model::Model(const std::string& Path, const std::string& Name) : m_name(Name), m_path(Path) {
 	
 	try {
 		loadModel(Path);
@@ -39,21 +40,31 @@ void Model::DrawInstanced(const Shader& shader) {
 }
 
 /***********************************************************************************/
-void Model::loadModel(const std::string& Path) {
-	std::cout << "\nLoading model: " << Path << '\n';
+bool Model::loadModel(const std::string& Path) {
+	std::cout << "\nLoading model: " << m_name << '\n';
+	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(Path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+	auto scene = importer.ReadFile(Path, aiProcess_Triangulate | 
+										 aiProcess_FlipUVs | 
+										 aiProcess_CalcTangentSpace |
+										 aiProcess_ImproveCacheLocality | 
+										 aiProcess_OptimizeGraph | 
+										 aiProcess_OptimizeMeshes | 
+										 aiProcess_SplitLargeMeshes);
+
 
 	// Check if scene is not null and model is done loading
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cerr << "Assimp Error: " << importer.GetErrorString() << std::endl;
-		FILE_LOG(logERROR) << "Assimp Error: " << importer.GetErrorString();
-		return;
+		std::cerr << "Assimp Error for " << m_name << ": " << importer.GetErrorString() << std::endl;
+		FILE_LOG(logERROR) << "Assimp Error for " << m_name << ": " << importer.GetErrorString();
+		return false;
 	}
 
-	m_directory = Path.substr(0, Path.find_last_of('/'));
+	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
-	std::cout << Path << " loaded" << '\n';
+	std::cout << "Loaded Model: " << m_name << '\n';
+	return true;
 }
 
 /***********************************************************************************/
@@ -177,7 +188,7 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 
 		std::cout << "\nTexture path: " << str.C_Str();
 		if (!skip) {   // If texture hasn't been loaded already, load it
-			const std::string texDirPrefix = m_directory + "/"; // Get directory path and append forward-slash
+			const std::string texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
 			Texture texture(texDirPrefix + str.C_Str(), samplerName, Texture::REPEAT);
 			
 			textures.push_back(texture);

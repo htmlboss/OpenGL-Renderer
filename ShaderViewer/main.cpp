@@ -1,5 +1,5 @@
 #ifdef _DEBUG
-#include "vld.h"
+	//#include "vld.h"
 #endif
 
 #define GLEW_STATIC
@@ -22,8 +22,10 @@
 #include "PostProcess.h"
 
 // Function prototypes
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+static void error_callback(int error, const char* description);
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+static void window_resize_callback(GLFWwindow* window, int w, int h);
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void do_movement();
 
 // Window dimensions
@@ -35,40 +37,48 @@ GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool    keys[1024];
 
-// Deltatime
-GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
-GLfloat lastFrame = 0.0f;  	// Time of last frame
+Time timer;
 
+/***********************************************************************************/
 int main() {
 	FILELog::ReportingLevel() = logDEBUG;
 	FILE* log_fd = fopen("log.txt", "w");
 	Output2FILE::Stream() = log_fd;
-	
-	Timer timer;
-	timer.Init();
 
 	// Init GLFW
-	glfwInit();
+	if (!glfwInit()) {
+		std::cerr << "Error: glfwInit() failed." << std::endl;
+		throw std::runtime_error("");
+	}
+
+	glfwSetErrorCallback(error_callback);
 	// Set all the required options for GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 1);
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
+	if (!window) {
+		std::cerr << "Error: glfwCreateWindow() failed." << std::endl;
+		throw std::runtime_error("");
+	}
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-
-	// GLFW Options
+	glfwSetWindowSizeCallback(window, window_resize_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetWindowPos(window, 300, 200);
 
 	glewExperimental = GL_TRUE;
-	glewInit();
+	auto err = glewInit();
+	if(err != GLEW_OK) {
+		std::cerr << "GLEW failed to initialize: " << glewGetErrorString(err) << '\n';
+		throw std::runtime_error("");
+	}
 
 	// Define the viewport dimensions
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -77,13 +87,14 @@ int main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// OpenGL options (not state-dependent)
-	glEnable(GL_CULL_FACE); // Culling
-	glCullFace(GL_BACK); // Back-face culling
-	glEnable(GL_MULTISAMPLE); // MSAA from GLFW
+	// Backface culling
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND); // Blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
 	glEnable(GL_FRAMEBUFFER_SRGB); // Gamma correction
-
 	glDepthFunc(GL_LESS);
 	
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
@@ -115,19 +126,15 @@ int main() {
 	HUDText debugText(fontShader, "fonts/arial.ttf", WIDTH, HEIGHT);
 	Skybox skybox("skybox/ocean/");
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
-	Model nanosuit("models/nanosuit/nanosuit.obj");
-	Model floor("models/floor/3d-model.obj");
+	Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
+	Model floor("models/floor/3d-model.obj", "Floor");
 	floor.SetInstancing( { glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) } );
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
-		// Calculate deltatime of current frame
-		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
 
 		// Update timer
-		timer.Update();
+		timer.Update(glfwGetTime());
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
@@ -185,7 +192,7 @@ int main() {
 		pp.RendertoScreen(fb);
 
 		// Draw Text on top of everything
-		debugText.RenderText(fontShader, std::to_string(timer.GetFPS()) + " fps", 0.0f, HEIGHT - 36.0f, 1.0f, glm::vec3(0.0f));
+		//debugText.RenderText(fontShader, std::to_string(timer.GetFPS()) + " fps", 0.0f, HEIGHT - 36.0f, 1.0f, glm::vec3(0.0f));
 		
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
@@ -196,7 +203,23 @@ int main() {
 	return 0;
 }
 
-// Is called whenever a key is pressed/released via GLFW
+/***********************************************************************************/
+// GLFW Callbacks
+void error_callback(int error, const char* description) {
+	std::cerr << "Error: " << description;
+}
+
+void window_resize_callback(GLFWwindow* window, int w, int h) {
+	int fb_w, fb_h;
+	glfwGetFramebufferSize(window, &fb_w, &fb_h);
+
+	//CameraGL::BuildProjectionMatrix(fb_w, fb_h);
+
+	glViewport(0, 0, fb_w, fb_h);
+
+	//std::cout << "Framebuffer resized to: " << fb_w << " x " << fb_h << std::endl;
+}
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -212,13 +235,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void do_movement() {
 	// Camera controls
 	if (keys[GLFW_KEY_W])
-		camera.ProcessKeyboard(FORWARD, deltaTime);
+		camera.ProcessKeyboard(FORWARD, timer.GetDelta());
 	if (keys[GLFW_KEY_S])
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
+		camera.ProcessKeyboard(BACKWARD, timer.GetDelta());
 	if (keys[GLFW_KEY_A])
-		camera.ProcessKeyboard(LEFT, deltaTime);
+		camera.ProcessKeyboard(LEFT, timer.GetDelta());
 	if (keys[GLFW_KEY_D])
-		camera.ProcessKeyboard(RIGHT, deltaTime);
+		camera.ProcessKeyboard(RIGHT, timer.GetDelta());
 }
 
 bool firstMouse = true;

@@ -1,57 +1,26 @@
 #include "Timer.h"
-#include <math.h>
+#include <iostream>
 
 /***********************************************************************************/
-Timer::Timer() : m_FPS(0.0f), m_time1(0.0f), m_time2(0.0f), m_diffTime(0.0f), m_framesElapsed(0) {
+Time::Time() : m_lastFrame(0.0f), m_lastTime(0.0f), m_nbFrames(0) {
 }
 
 /***********************************************************************************/
-Timer::~Timer() {
+Time::~Time() {
 }
 
 /***********************************************************************************/
-// Select an approproate timer
-bool Timer::Init() {
-	// check to see if we are going to be using the performance counter
-	if (QueryPerformanceFrequency((LARGE_INTEGER*)&m_frequency)) {
-		
-		m_perfTimer = true;
+void Time::Update(const double time) {
+	double currentFrame = time;
+	m_nbFrames++;
 
-		QueryPerformanceCounter((LARGE_INTEGER*)&m_perfTimerStart);
-
-		m_resolution = static_cast<float>(static_cast<double>(1.0f) / static_cast<double>(m_frequency));
-
-		m_perfTimerElapsed = m_perfTimerStart;
+	// Calculates frame time (in ms)
+	if (currentFrame - m_lastTime >= 1.0f) {
+		std::cout << 1000.0f / static_cast<double>(m_nbFrames) << " ms" << std::endl;
+		m_nbFrames = 0;
+		m_lastTime += 1.0f;
 	}
 
-	return m_perfTimer;
+	m_delta = currentFrame - m_lastFrame;
+	m_lastFrame = currentFrame;
 }
-
-/***********************************************************************************/
-// Perform calculations (update timer)
-void Timer::Update() {
-	m_framesElapsed++;
-
-	if (m_framesElapsed % 5 == 1) {
-		m_time1 = GetTime() / 1000;
-	}
-
-	else if (m_framesElapsed % 5 == 0) {
-		m_time1 = m_time2;
-		m_time2 = GetTime() / 1000;
-		m_diffTime = static_cast<float>(fabs(m_time2 - m_time1));
-	}
-
-	m_FPS = 5 / m_diffTime;
-}
-
-/***********************************************************************************/
-// Return the time since the Init() function was called
-float Timer::GetTime() {
-	
-	__int64 Time;
-	QueryPerformanceCounter((LARGE_INTEGER*)&Time);
-
-	return static_cast<float>((Time - m_perfTimerStart) * m_resolution) * 1000.0f;
-}
-

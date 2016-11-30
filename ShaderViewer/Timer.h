@@ -1,34 +1,17 @@
 #pragma once
 
-#include <windows.h>
-#include <stdio.h>
-
-class Timer {
+class Time {
 public:
-	Timer();
-	~Timer();
+	Time();
+	~Time();
 
-	bool Init();
-	void Update();
-	float GetTime();
-
-	float GetElapsedTime() const { return m_diffTime; }
-	float GetFPS() const { return m_FPS; }
+	void Update(const double time);
+	double GetDelta() const { return m_delta; }
 
 private:
-	__int64 m_perfTimerStart;
-	__int64 m_perfTimerElapsed;
-
-	// General timing stuff
-	__int64 m_frequency;
-	float m_resolution;
-	bool m_perfTimer;
-
-	// FPS
-	float m_time1;
-	float m_time2;
-	float m_diffTime;
-	float m_FPS;
-	int m_framesElapsed;
+	double m_delta;
+	double m_lastFrame;
+	double m_lastTime;
+	int m_nbFrames;
 };
 
