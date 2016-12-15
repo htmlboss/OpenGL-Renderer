@@ -1,6 +1,7 @@
 #include "Model.h"
 #include <log.h>
 #include <assimp/postprocess.h>
+#include <iostream>
 
 /***********************************************************************************/
 Model::Model(const std::string& Path, const std::string& Name) : m_name(Name), m_path(Path) {
@@ -26,14 +27,14 @@ void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffset
 }
 
 /***********************************************************************************/
-void Model::Draw(const Shader& shader) {
+void Model::Draw(Shader& shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.Draw(shader);
 	}
 }
 
 /***********************************************************************************/
-void Model::DrawInstanced(const Shader& shader) {
+void Model::DrawInstanced(Shader& shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.DrawInstanced(shader);
 	}
@@ -63,14 +64,12 @@ bool Model::loadModel(const std::string& Path) {
 
 	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
-	std::cout << "Loaded Model: " << m_name << '\n';
+	std::cout << "\nLoaded Model: " << m_name << '\n';
 	return true;
 }
 
 /***********************************************************************************/
 void Model::processNode(aiNode* node, const aiScene* scene) {
-
-	// Nodes don't have iterators >.>
 
 	// Process all node meshes
 	for (GLuint i = 0; i < node->mNumMeshes; ++i) {

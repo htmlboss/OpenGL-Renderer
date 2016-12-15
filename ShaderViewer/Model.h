@@ -12,8 +12,8 @@ public:
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
 
-	void Draw(const Shader& shader);
-	void DrawInstanced(const Shader& shader);
+	void Draw(Shader& shader);
+	void DrawInstanced(Shader& shader);
 
 private:
 	bool loadModel(const std::string& Path);

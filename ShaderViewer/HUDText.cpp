@@ -1,11 +1,13 @@
 #include "HUDText.h"
+#include <iostream>
 
 
 /***********************************************************************************/
 HUDText::HUDText(Shader& shader, const std::string& FontPath, const GLint WindowWidth, const GLint WindowHeight) {
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(WindowWidth), 0.0f, static_cast<GLfloat>(WindowHeight));
-	shader.Use();
-	glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(projection));
+	const auto projection = glm::ortho(0.0f, static_cast<GLfloat>(WindowWidth), 0.0f, static_cast<GLfloat>(WindowHeight));
+	shader.Bind();
+	//glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(projection));
+	shader.SetUniform("projection", projection);
 
 	FT_Library ft;
 	// All functions return a value different than 0 whenever an error occurred
@@ -89,14 +91,15 @@ HUDText::~HUDText() {
 /***********************************************************************************/
 void HUDText::RenderText(Shader& shader, const std::string& Text, GLfloat x, const GLfloat y, const GLfloat scale, const glm::vec3& color) {
 	// Activate corresponding render state	
-	shader.Use();
-	glUniform3f(shader.GetUniformLoc("textColor"), color.x, color.y, color.z);
+	shader.Bind();
+	//glUniform3f(shader.GetUniformLoc("textColor"), color.x, color.y, color.z);
+	shader.SetUniform("textColor", color);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(m_vao);
 
 	// Iterate through all characters
 	std::string::const_iterator c;
-	for (c = Text.begin(); c != Text.end(); c++) {
+	for (c = Text.begin(); c != Text.end(); ++c) {
 		Character ch = m_characters[*c];
 
 		GLfloat xpos = x + ch.Bearing.x * scale;

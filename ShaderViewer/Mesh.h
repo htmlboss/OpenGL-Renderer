@@ -1,10 +1,8 @@
 #pragma once
 
-#include <string>
 #include <vector>
 
-#include <GL\glew.h>
-#include <glm\glm.hpp>
+#include <GL/glew.h>
 
 #include "Texture.h"
 #include "Shader.h"
@@ -22,12 +20,14 @@ public:
 	~Mesh();
 	
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
-	void Draw(const Shader& shader);
-	void DrawInstanced(const Shader& shader);
+	void Draw(Shader& shader);
+	void DrawInstanced(Shader& shader);
 
 private:
-	void bindTextures(const Shader &shader);
+	void bindTextures(Shader &shader);
 	void setupMesh();
+
+	bool m_uniformsAdded;
 
 	GLuint m_vao, m_vbo, m_ebo, m_instanceVBO;
 	std::vector<Vertex> m_vertices;

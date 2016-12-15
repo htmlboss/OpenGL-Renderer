@@ -1,21 +1,22 @@
 #pragma once
-#include <GL\glew.h>
+#include <GL/glew.h>
+#include <GLM/detail/type_vec3.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
-#include <iostream>
-#include <string>
+#include <map>
+#include <array>
+
+// Allow std::array to use operator<<
+template <class T, std::size_t N>
+	std::ostream& operator<<(std::ostream& o, const std::array<T, N>& arr) {
+		copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(o, " "));		
+		return o;
+}
 
 class Shader {
 public:
-	Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader);
-	Shader(const std::string& commonData, const std::string& VertexShader, const std::string& PixelShader, const std::string& GeometryShader);
-
-	Shader(const Shader& other) = delete;
+	Shader(const char* shaderName);
 	~Shader();
-
-	void Use() const;
-	GLint GetUniformLoc(const std::string& Uniform) const;
-
-private:
 
 	enum ShaderType {
 		PixelShader = GL_FRAGMENT_SHADER,
@@ -23,18 +24,27 @@ private:
 		GeometryShader = GL_GEOMETRY_SHADER
 	};
 
-	// Generic function to open a shader file
-	std::string readFile(const std::string& ShaderPath);
+	void AddShader(const std::string& shaderSource, const ShaderType shaderType);
+	void AddUniform(const std::string& uniform);
+	void Link();
+	void Bind() const;
 
-	void prepareShader(const GLchar* vertexShader, const GLchar* pixelShader);
-	// Overload to compile geometry shader
-	void prepareShader(const GLchar* vertexShader, const GLchar* pixelShader, const GLchar* geometryShader);
-	// Generic function to compile any shader file
-	void compileShader(const GLchar* shaderSource, const ShaderType shaderType, GLuint& programID);
+	void SetUniformi(const std::string& uniformName, const GLint value) { glUniform1i(m_uniformMap.at(uniformName), value); }
+	void SetUniformf(const std::string& uniformName, const GLfloat value) { glUniform1f(m_uniformMap.at(uniformName), value); }
+	void SetUniform(const std::string& uniformName, const glm::vec3& value) { glUniform3f(m_uniformMap.at(uniformName), value.x, value.y, value.z); }
+	void SetUniform(const std::string& uniformName, const glm::mat4x4& value) { glUniformMatrix4fv(m_uniformMap.at(uniformName), 1, GL_FALSE, value_ptr(value)); }
 
-	GLuint m_vertexShader, m_pixelShader, m_geometryShader, m_shaderProgram;
+private:
+	GLuint compileShader(const GLchar* shaderSource, const ShaderType shaderType);
+
+	GLuint m_program;
+	bool m_linked;
+	const char* m_shaderName;
+
+	std::map<std::string, GLint> m_uniformMap;
+
 	//  To check for compile-time errors
 	GLint m_success;
-	GLchar m_infoLog[512];
+	std::array<GLchar, 1024> m_infoLog;
 };
 

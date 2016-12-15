@@ -5,10 +5,12 @@
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures) :
 	m_vertices(vertices), 
 	m_indices(indices), 
-	m_textures(textures) {
+	m_textures(textures),
+	m_uniformsAdded(false) {
 
 	//Construct mesh
 	setupMesh();
+
 }
 
 /***********************************************************************************/
@@ -18,10 +20,7 @@ Mesh::~Mesh() {
 /***********************************************************************************/
 void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 	
-	// Iterate over positions passed in
-	for (const auto& it : args) {
-		m_instanceOffsets.push_back(it);
-	}
+	m_instanceOffsets = args;
 
 	glBindVertexArray(m_vao);
 	glGenBuffers(1, &m_instanceVBO);
@@ -40,7 +39,7 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 }
 
 /***********************************************************************************/
-void Mesh::Draw(const Shader& shader) {
+void Mesh::Draw(Shader& shader) {
 	
 	bindTextures(shader);
 
@@ -51,7 +50,7 @@ void Mesh::Draw(const Shader& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::DrawInstanced(const Shader& shader) {
+void Mesh::DrawInstanced(Shader& shader) {
 	
 	bindTextures(shader);
 
@@ -62,7 +61,7 @@ void Mesh::DrawInstanced(const Shader& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::bindTextures(const Shader &shader) {
+void Mesh::bindTextures(Shader &shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 	GLuint reflectanceNr = 1;
@@ -71,9 +70,8 @@ void Mesh::bindTextures(const Shader &shader) {
 	for (auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
 											  // Retrieve texture number (the N in diffuse_textureN)
-		std::string name = it.GetSampler();
+		const auto name = it.GetSampler();
 		std::string number;
-		// ALWAYS USE POST-INCREMENT HERE
 		if (name == "texture_diffuse") {
 			number = std::to_string(diffuseNr++);
 		}
@@ -84,7 +82,8 @@ void Mesh::bindTextures(const Shader &shader) {
 			number = std::to_string(reflectanceNr++);
 		}
 
-		glUniform1i(shader.GetUniformLoc(name + number), index);
+		//glUniform1i(shader.GetUniformLoc(name + number), index);
+		shader.SetUniformi(name + number, index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
 
 		++index;
@@ -115,10 +114,10 @@ void Mesh::setupMesh() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<GLvoid*>(0));
 	// Vertex Normals
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, Normal)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Normal)));
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
 
 	glBindVertexArray(0);
 }

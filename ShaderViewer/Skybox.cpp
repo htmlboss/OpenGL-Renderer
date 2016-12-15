@@ -34,6 +34,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	i = 0; // Index for the loop
 	for (auto& face : m_faces) {
 		image = Texture::LoadSTBImage(face.c_str(), &x, &y, &n, 3); // 3 = STB_rgb
+		
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		free(image); // Cleanup
@@ -45,6 +46,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	
 	// Anisotropic filtering
 	GLfloat aniso = 0.0f;
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
@@ -62,17 +64,20 @@ Skybox::~Skybox() {
 /***********************************************************************************/
 void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) {
 	glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
-	shader.Use();
+	shader.Bind();
 
 	// Transformations
 	glm::mat4 view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix	
-	glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
-	glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(ProjectionMat));
+	//glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
+	//glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(ProjectionMat));
+	shader.SetUniform("view", view);
+	shader.SetUniform("projection", ProjectionMat);
 	
 	// Skybox Cube
 	glBindVertexArray(m_vao);
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(shader.GetUniformLoc("skybox"), 0);
+	shader.SetUniformi("skybox", 0);
+	//glUniform1i(shader.GetUniformLoc("skybox"), 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include <string>
 
 class Texture {
-public:
 
+public:
 	// Passed to stb_image as the number of components (channels) to load
 	enum ColorMode {
 		GREY = 1,
