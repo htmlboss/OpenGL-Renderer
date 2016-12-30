@@ -1,57 +1,48 @@
 #pragma once
 
-// GL Includes
-#include <GL/glew.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement {
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT
-};
-
-// Default camera values
-const GLfloat YAW = -90.0f;
-const GLfloat PITCH = 0.0f;
-const GLfloat SPEED = 3.0f;
-const GLfloat SENSITIVTY = 0.25f;
 
 class Camera {
 
 public:
+	enum Camera_Movement {
+		FORWARD,
+		BACKWARD,
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN
+	};
+
 	// Constructor with vectors
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH, GLfloat FOV = 45.0f);
+	Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f, float FOV = 45.0f);
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-	void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime);
+	void ProcessKeyboard(const Camera_Movement direction, const double deltaTime);
 
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-	void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true);
+	void ProcessMouseMovement(float xoffset, float yoffset, const bool constrainPitch = true);
 
-	glm::mat4 GetViewMatrix() const { return glm::lookAt(Position, Position + Front, Up); }
-	glm::vec3 GetPosition() const { return Position; }
-	GLfloat GetFOV() const { return m_FOV; }
+	glm::mat4x4 GetViewMatrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
+	glm::mat4x4 GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 0.1f, 100.0f); }
+	glm::vec3 GetPosition() const { return m_position; }
 
 private:
 	// Calculates the front vector from the Camera's (updated) Eular Angles
-	void updateCameraVectors();
+	void updateVectors();
 
 	// Camera Attributes
-	glm::vec3 Position;
-	glm::vec3 Front;
-	glm::vec3 Up;
-	glm::vec3 Right;
-	glm::vec3 WorldUp;
+	glm::vec3 m_position;
+	glm::vec3 m_front;
+	glm::vec3 m_up;
+	glm::vec3 m_right;
+	const glm::vec3 m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// Eular Angles
-	GLfloat Yaw;
-	GLfloat Pitch;
-	// Camera options
-	GLfloat MovementSpeed;
-	GLfloat MouseSensitivity;
-	const GLfloat m_FOV;
+	float m_yaw;
+	float m_pitch;
+
+	float m_speed = 3.0f;
+	const float m_sensitivity = 0.25f;
+	const float m_FOV;
 };

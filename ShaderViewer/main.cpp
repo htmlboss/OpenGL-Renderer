@@ -5,7 +5,6 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <log.h>
@@ -35,7 +34,7 @@ void do_movement();
 const GLuint WIDTH = 1280, HEIGHT = 720;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 2.0f, 3.0f));
+Camera  camera({0.0f, 2.0f, 0.0f});
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool    keys[1024];
@@ -91,7 +90,7 @@ int main() {
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
 
 	// Projection matrix does not change at runtime (constant window size)
-	const auto projection = glm::perspective(camera.GetFOV(), static_cast<GLfloat>(WIDTH) / static_cast<GLfloat>(HEIGHT), 0.1f, 100.0f);
+	const auto projection = camera.GetProjMatrix(WIDTH, HEIGHT);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	// Insert data into allocated memory block
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
@@ -227,14 +226,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void do_movement() {
 	// Camera controls
-	if (keys[GLFW_KEY_W])
-		camera.ProcessKeyboard(FORWARD, timer.GetDelta());
-	if (keys[GLFW_KEY_S])
-		camera.ProcessKeyboard(BACKWARD, timer.GetDelta());
-	if (keys[GLFW_KEY_A])
-		camera.ProcessKeyboard(LEFT, timer.GetDelta());
-	if (keys[GLFW_KEY_D])
-		camera.ProcessKeyboard(RIGHT, timer.GetDelta());
+	if (keys[GLFW_KEY_W]) {
+		camera.ProcessKeyboard(Camera::FORWARD, timer.GetDelta());
+	}
+	if (keys[GLFW_KEY_S]) {
+		camera.ProcessKeyboard(Camera::BACKWARD, timer.GetDelta());
+	}
+	if (keys[GLFW_KEY_A]) {
+		camera.ProcessKeyboard(Camera::LEFT, timer.GetDelta());
+	}
+	if (keys[GLFW_KEY_D]) {
+		camera.ProcessKeyboard(Camera::RIGHT, timer.GetDelta());
+	}
+	if (keys[GLFW_KEY_SPACE]) {
+		camera.ProcessKeyboard(Camera::UP, timer.GetDelta());
+	}
+	if (keys[GLFW_KEY_LEFT_CONTROL]) {
+		camera.ProcessKeyboard(Camera::DOWN, timer.GetDelta());
+	}
 }
 
 bool firstMouse = true;
