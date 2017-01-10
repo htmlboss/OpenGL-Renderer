@@ -1,4 +1,5 @@
 #include "Skybox.h"
+#include "Texture.h"
 
 // Easier to use TS library than hard-code texture files
 #include <experimental/filesystem>
@@ -13,7 +14,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(m_skyboxVertices), &m_skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), static_cast<GLvoid*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
 	// Cleanup
 	glBindVertexArray(0);
 	
@@ -67,9 +68,7 @@ void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4
 	shader.Bind();
 
 	// Transformations
-	glm::mat4 view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix	
-	//glUniformMatrix4fv(shader.GetUniformLoc("view"), 1, GL_FALSE, value_ptr(view));
-	//glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(ProjectionMat));
+	const auto view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix
 	shader.SetUniform("view", view);
 	shader.SetUniform("projection", ProjectionMat);
 	
@@ -77,7 +76,6 @@ void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4
 	glBindVertexArray(m_vao);
 	glActiveTexture(GL_TEXTURE0);
 	shader.SetUniformi("skybox", 0);
-	//glUniform1i(shader.GetUniformLoc("skybox"), 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	

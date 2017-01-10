@@ -22,7 +22,8 @@
     <ProjectGuid>{79953202-FB57-485E-89E1-3E6E37692583}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShaderViewer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <ProjectName>MP-APS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -160,13 +161,13 @@
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SkySphere.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="CubeData.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="HUDText.h" />
     <ClInclude Include="Light.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SkySphere.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>

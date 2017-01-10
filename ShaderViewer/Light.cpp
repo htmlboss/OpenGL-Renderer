@@ -30,15 +30,11 @@ void Light::Draw(Shader& shader) {
 	
 	shader.Bind();
 
-	//GLuint modelLoc = shader.GetUniformLoc("model");
-
-	//glUniform3f(shader.GetUniformLoc("lightColor"), m_color.x, m_color.y, m_color.z);
 	shader.SetUniform("lightColor", m_color);
 	glm::mat4 model;
 	model = glm::translate(model, m_position);
 	model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 	shader.SetUniform("model", model);
-	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	
 	glBindVertexArray(m_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 36);

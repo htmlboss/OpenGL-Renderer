@@ -9,7 +9,7 @@
     is correct.
 */
 
-GLfloat vertices[] = {
+const float vertices[] = {
     // Back face
     -0.5f, -0.5f, -0.5f,  // Bottom-left
      0.5f,  0.5f, -0.5f,  // top-right

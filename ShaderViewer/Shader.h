@@ -1,13 +1,12 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLM/detail/type_vec3.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 
 #include <map>
 #include <array>
 
 // Allow std::array to use operator<<
-template <class T, std::size_t N>
+template <typename T, std::size_t N>
 	std::ostream& operator<<(std::ostream& o, const std::array<T, N>& arr) {
 		copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(o, " "));		
 		return o;
@@ -26,6 +25,7 @@ public:
 
 	void AddShader(const std::string& shaderSource, const ShaderType shaderType);
 	void AddUniform(const std::string& uniform);
+	void AddUniforms(const std::initializer_list<std::string> uniforms);
 	void Link();
 	void Bind() const;
 

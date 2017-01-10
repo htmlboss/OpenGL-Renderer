@@ -20,6 +20,7 @@
 #include "FrameBuffer.h"
 #include "PostProcess.h"
 #include "RenderUtils.h"
+#include "SkySphere.h"
 
 #include <iostream>
 
@@ -104,32 +105,31 @@ int main() {
 	shader.AddShader("shaders/nanosuitvs.glsl", Shader::VertexShader);
 	shader.AddShader("shaders/nanosuitps.glsl", Shader::PixelShader);
 	shader.Link();
-	shader.AddUniform("model");
-	shader.AddUniform("viewPos");
-	shader.AddUniform("skybox");
-	shader.AddUniform("texture_diffuse1");
-	shader.AddUniform("texture_specular1");
-	shader.AddUniform("texture_reflectance1");
+	shader.AddUniforms({ "model", "viewPos", "skybox", "texture_diffuse1", "texture_specular1", "texture_reflectance1"});
 
 	Shader lightShader("Lamp Shader");
 	lightShader.AddShader("shaders/lampvs.glsl", Shader::VertexShader);
 	lightShader.AddShader("shaders/lampps.glsl", Shader::PixelShader);
 	lightShader.Link();
-	lightShader.AddUniform("model");
-	lightShader.AddUniform("lightColor");
+	lightShader.AddUniforms({ "model", "lightColor" });
+
+	Shader sphereShader("Sphere Shader");
+	sphereShader.AddShader("shaders/spherevs.glsl", Shader::VertexShader);
+	sphereShader.AddShader("shaders/sphereps.glsl", Shader::PixelShader);
+	sphereShader.Link();
+	sphereShader.AddUniforms({ "projection", "view", "model"});
 	
 	Shader skyboxShader("Skybox Shader");
 	skyboxShader.AddShader("shaders/skyboxvs.glsl", Shader::VertexShader);
 	skyboxShader.AddShader("shaders/skyboxps.glsl", Shader::PixelShader);
 	skyboxShader.Link();
-	skyboxShader.AddUniform("projection");
-	skyboxShader.AddUniform("view");
-	skyboxShader.AddUniform("skybox");
+	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
 
 	// Models
 	Skybox skybox("skybox/ocean/");
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 	Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
+	SkySphere sphere;
 	nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
 
 	// Game loop
@@ -147,14 +147,19 @@ int main() {
 	
 			// Enable depth testing for 3D stuff
 			glEnable(GL_DEPTH_TEST);
+			glm::mat4 model;
+
 			// Transformations
 			auto view = camera.GetViewMatrix();
 			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-			
+
+			/// TODO: fix light shader model matrix not applying
+			model = glm::translate(model, { 5.0f, -5.0f, -10.0f });
+			lightShader.SetUniform("model", model);
 			lightShader.SetUniform("lightColor", glm::vec3(1.0f));
 			light.Draw(lightShader);
-			
+
 			shader.Bind();
 			shader.SetUniform("viewPos", camera.GetPosition());
 			// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
@@ -163,14 +168,22 @@ int main() {
 			skybox.BindTexture();
 	
 			// Draw loaded models
-			glm::mat4 model;
+			model = glm::mat4x4();
 			model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
 			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 			shader.SetUniform("model", model);
 			nanosuit.DrawInstanced(shader);
-	
+
+			//skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
+
+			sphereShader.Bind();
+			model = glm::mat4x4();
+			model = glm::translate(model, {0.0f, 10.75f, 0.0f});
+			sphereShader.SetUniform("model", model);
+			sphere.Draw(sphereShader, camera.GetViewMatrix(), projection, camera.GetPosition());
+
 			//Always draw skybox last
-			skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
+			
 		}
 		fb.UnBind(); 
 		// Switch back to default framebuffer
@@ -203,7 +216,7 @@ void window_resize_callback(GLFWwindow* window, int w, int h) {
 	int fb_w, fb_h;
 	glfwGetFramebufferSize(window, &fb_w, &fb_h);
 
-	//CameraGL::BuildProjectionMatrix(fb_w, fb_h);
+	/// TODO: Rebuild projection matrix
 
 	glViewport(0, 0, fb_w, fb_h);
 

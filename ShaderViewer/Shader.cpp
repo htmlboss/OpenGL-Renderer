@@ -15,8 +15,10 @@ Shader::~Shader() {
 /***********************************************************************************/
 void Shader::AddShader(const std::string& shaderSource, const ShaderType shaderType) {
 
+#ifdef _DEBUG
 	//std::cout << shaderSource << std::endl;
-	
+#endif
+
 	glAttachShader(m_program, compileShader(ResourceLoader::LoadTextFile(shaderSource).c_str(), shaderType));
 }
 
@@ -29,6 +31,13 @@ void Shader::AddUniform(const std::string& uniform) {
 		return;
 	}
 	m_uniformMap.try_emplace(uniform, uniformLocation);
+}
+
+/***********************************************************************************/
+void Shader::AddUniforms(const std::initializer_list<std::string> uniforms) {
+	for (const auto& it : uniforms) {
+		AddUniform(it);
+	}
 }
 
 /***********************************************************************************/

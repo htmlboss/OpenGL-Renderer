@@ -7,7 +7,7 @@
 
 class Model {
 public:
-	Model(const std::string& Path, const std::string& Name);
+	Model(const std::string& Path, const std::string& Name, const bool flipWindingOrder = false);
 	~Model();
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
@@ -16,7 +16,7 @@ public:
 	void DrawInstanced(Shader& shader);
 
 private:
-	bool loadModel(const std::string& Path);
+	bool loadModel(const std::string& Path, const bool flipWindingOrder);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<Texture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string& samplerName);

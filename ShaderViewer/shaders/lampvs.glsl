@@ -13,7 +13,6 @@ layout (std140, binding = 0) uniform Matrices {
 // All objects have a model matrix
 uniform mat4 model;
 
-
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0f);
 }

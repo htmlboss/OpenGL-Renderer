@@ -31,7 +31,7 @@ public:
 	// Load image
 	static unsigned char* LoadSTBImage(char const *filename, int *x, int *y, int *comp, int req_comp);
 
-	//Returns the global number of UNIQUE textures loaded
+	// Returns the global number of UNIQUE textures loaded
 	static int GetLoadedTextures() { return m_numTextures; }
 	GLuint GetTexture() const { return m_texture; }
 	std::string GetPath() const { return m_texturePath; }

@@ -29,10 +29,10 @@ void Camera::ProcessKeyboard(const Camera_Movement direction, const double delta
 		m_position += m_right * velocity;
 		break;
 	case UP:
-		m_position += m_up * velocity;
+		m_position += m_worldUp * velocity;
 		break;
 	case DOWN:
-		m_position -= m_up * velocity;
+		m_position -= m_worldUp * velocity;
 		break;
 	}
 }

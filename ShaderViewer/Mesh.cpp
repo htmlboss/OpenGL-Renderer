@@ -45,7 +45,7 @@ void Mesh::Draw(Shader& shader) {
 
 	// Draw mesh
 	glBindVertexArray(m_vao);
-	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 }
 
@@ -56,7 +56,7 @@ void Mesh::DrawInstanced(Shader& shader) {
 
 	// Draw instanced mesh
 	glBindVertexArray(m_vao);
-	glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceOffsets.size());
+	glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr, m_instanceOffsets.size());
 	glBindVertexArray(0);
 }
 

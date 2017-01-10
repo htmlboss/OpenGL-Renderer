@@ -4,10 +4,10 @@
 #include <iostream>
 
 /***********************************************************************************/
-Model::Model(const std::string& Path, const std::string& Name) : m_name(Name), m_path(Path) {
+Model::Model(const std::string& Path, const std::string& Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
 	
 	try {
-		loadModel(Path);
+		loadModel(Path, flipWindingOrder);
 	}
 	catch (const std::runtime_error& e) {
 		std::cerr << "Runtime exception: " << e.what();
@@ -41,18 +41,37 @@ void Model::DrawInstanced(Shader& shader) {
 }
 
 /***********************************************************************************/
-bool Model::loadModel(const std::string& Path) {
+bool Model::loadModel(const std::string& Path, const bool flipWindingOrder) {
 	std::cout << "\nLoading model: " << m_name << '\n';
 	
 	Assimp::Importer importer;
+	const aiScene* scene = nullptr;
 
-	auto scene = importer.ReadFile(Path, aiProcess_Triangulate | 
-										 aiProcess_FlipUVs | 
-										 aiProcess_CalcTangentSpace |
-										 aiProcess_ImproveCacheLocality | 
-										 aiProcess_OptimizeGraph | 
-										 aiProcess_OptimizeMeshes | 
-										 aiProcess_SplitLargeMeshes);
+	if (flipWindingOrder) {
+		scene = importer.ReadFile(Path, aiProcess_Triangulate |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_GenUVCoords |
+			aiProcess_SortByPType |
+			aiProcess_RemoveRedundantMaterials |
+			aiProcess_FindInvalidData |
+			aiProcess_FlipUVs |
+			aiProcess_FlipWindingOrder | // Reverse back-face culling
+			aiProcess_CalcTangentSpace |
+			aiProcess_OptimizeMeshes |
+			aiProcess_SplitLargeMeshes);
+	} 
+	else {
+		scene = importer.ReadFile(Path, aiProcess_Triangulate |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_GenUVCoords |
+			aiProcess_SortByPType |
+			aiProcess_RemoveRedundantMaterials |
+			aiProcess_FindInvalidData |
+			aiProcess_FlipUVs |
+			aiProcess_CalcTangentSpace |
+			aiProcess_OptimizeMeshes |
+			aiProcess_SplitLargeMeshes);
+	}
 
 
 	// Check if scene is not null and model is done loading
@@ -94,22 +113,28 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 		
 		// Positions
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
+		if (mesh->HasPositions()) {
+			vector.x = mesh->mVertices[i].x;
+			vector.y = mesh->mVertices[i].y;
+			vector.z = mesh->mVertices[i].z;
+			vertex.Position = vector;
+		}
 		
 		// Normals
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
+		if (mesh->HasNormals()) {
+			vector.x = mesh->mNormals[i].x;
+			vector.y = mesh->mNormals[i].y;
+			vector.z = mesh->mNormals[i].z;
+			vertex.Normal = vector;
+		}
 		
 		// Tangents
-		vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
-		vertex.Tangent = vector;
+		if (mesh->HasTangentsAndBitangents()) {
+			vector.x = mesh->mTangents[i].x;
+			vector.y = mesh->mTangents[i].y;
+			vector.z = mesh->mTangents[i].z;
+			vertex.Tangent = vector;
+		}
 
 		// Texture Coordinates
 		if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
