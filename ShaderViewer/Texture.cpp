@@ -29,7 +29,7 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 	// Load image
 	int x, y;
 	int n = colorMode; // Number of components to load (RGBA)
-	unsigned char* data;
+	unsigned char* data = nullptr;
 	try {
 		data = LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
 	}
@@ -71,9 +71,9 @@ void Texture::Bind2D() {
 /***********************************************************************************/
 unsigned char* Texture::LoadSTBImage(const char* filename, int* x, int* y, int* comp, int req_comp) {
 	
-	unsigned char* data = stbi_load(filename, x, y, comp, req_comp);
+	auto data = stbi_load(filename, x, y, comp, req_comp);
 	
-	if (data == NULL) {
+	if (data == nullptr) {
 		std::string error = "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
 		FILE_LOG(logERROR) << error;
 		throw std::runtime_error(error);

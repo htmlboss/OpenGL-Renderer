@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="HUDText.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="HUDText.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
@@ -176,6 +178,7 @@
     <ClInclude Include="PostProcess.h" />
     <ClInclude Include="RenderUtils.h" />
     <ClInclude Include="ResourceLoader.h" />
+    <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SkySphere.h" />
