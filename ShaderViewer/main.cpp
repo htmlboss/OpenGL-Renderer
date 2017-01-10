@@ -21,6 +21,7 @@
 #include "PostProcess.h"
 #include "RenderUtils.h"
 #include "SkySphere.h"
+#include "GBuffer.h"
 
 #include <iostream>
 
@@ -96,6 +97,8 @@ int main() {
 	// Insert data into allocated memory block
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	GBuffer gBuffer(WIDTH, HEIGHT);
 
 	FrameBuffer fb(WIDTH, HEIGHT, false, false);
 	PostProcess pp("shaders/screenQuadVert.glsl", "shaders/screenQuadPixel.glsl");
