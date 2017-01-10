@@ -6,7 +6,7 @@ public:
 	GBuffer(const size_t width, const size_t height);
 	~GBuffer();
 
-	void BindGBuffer() const { glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer); }
+	void BindGBuffer() const;
 	void UnBindGBuffer() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 	void BindTextures() const;

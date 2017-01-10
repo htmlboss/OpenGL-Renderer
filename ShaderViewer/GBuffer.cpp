@@ -57,6 +57,12 @@ GBuffer::~GBuffer() {
 }
 
 /***********************************************************************************/
+void GBuffer::BindGBuffer() const {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/***********************************************************************************/
 void GBuffer::BindTextures() const {
 
 	glActiveTexture(GL_TEXTURE0);
