@@ -178,7 +178,6 @@
     <ClInclude Include="PostProcess.h" />
     <ClInclude Include="RenderUtils.h" />
     <ClInclude Include="ResourceLoader.h" />
-    <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SkySphere.h" />

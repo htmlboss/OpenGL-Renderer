@@ -180,8 +180,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
 		// 3. Reflectance maps
-		std::vector<Texture> reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
-		textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
+		//std::vector<Texture> reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
+		//textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
 
 		// 4. Normal maps
 		//std::vector<Texture> normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");

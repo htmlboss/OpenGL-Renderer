@@ -4,6 +4,7 @@
 
 #include <map>
 #include <array>
+#include <iostream>
 
 // Allow std::array to use operator<<
 template <typename T, std::size_t N>
@@ -33,6 +34,15 @@ public:
 	void SetUniformf(const std::string& uniformName, const GLfloat value) { glUniform1f(m_uniformMap.at(uniformName), value); }
 	void SetUniform(const std::string& uniformName, const glm::vec3& value) { glUniform3f(m_uniformMap.at(uniformName), value.x, value.y, value.z); }
 	void SetUniform(const std::string& uniformName, const glm::mat4x4& value) { glUniformMatrix4fv(m_uniformMap.at(uniformName), 1, GL_FALSE, value_ptr(value)); }
+
+	GLint GetUniformLoc(const std::string& Uniform) const {
+		GLint loc = glGetUniformLocation(m_program, Uniform.c_str());
+		if (loc == -1) {
+			std::cerr << "Uniform: does not exist.\n";
+			
+		}
+		return loc;
+	}
 
 private:
 	GLuint compileShader(const GLchar* shaderSource, const ShaderType shaderType);

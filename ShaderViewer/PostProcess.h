@@ -2,7 +2,6 @@
 
 #include <gl/glew.h>
 
-#include "ScreenQuad.h"
 #include "Shader.h"
 #include "FrameBuffer.h"
 
@@ -18,6 +17,12 @@ private:
 	Shader m_screenShader;
 	GLuint m_screenVAO, m_screenVBO;
 
-	const ScreenQuad m_screenQuad;
+	const GLfloat m_quadVertices[20] = {
+		// Positions        // Texture Coords
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	};
 };
 

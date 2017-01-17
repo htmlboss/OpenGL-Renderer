@@ -15,7 +15,6 @@
 #include "Model.h"
 #include "Light.h"
 #include "Skybox.h"
-#include "HUDText.h"
 #include "Timer.h"
 #include "FrameBuffer.h"
 #include "PostProcess.h"
@@ -31,6 +30,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 static void window_resize_callback(GLFWwindow* window, int w, int h);
 static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void do_movement();
+void RenderQuad();
 
 // Window dimensions
 const GLuint WIDTH = 1280, HEIGHT = 720;
@@ -42,7 +42,6 @@ GLfloat lastY = HEIGHT / 2.0;
 bool    keys[1024];
 
 Time timer;
-
 /***********************************************************************************/
 int main() {
 	// Setup the logger
@@ -104,12 +103,6 @@ int main() {
 	PostProcess pp("shaders/screenQuadVert.glsl", "shaders/screenQuadPixel.glsl");
 
 	// Shaders
-	Shader shader("Nanosuit");
-	shader.AddShader("shaders/nanosuitvs.glsl", Shader::VertexShader);
-	shader.AddShader("shaders/nanosuitps.glsl", Shader::PixelShader);
-	shader.Link();
-	shader.AddUniforms({ "model", "viewPos", "skybox", "texture_diffuse1", "texture_specular1", "texture_reflectance1"});
-
 	Shader lightShader("Lamp Shader");
 	lightShader.AddShader("shaders/lampvs.glsl", Shader::VertexShader);
 	lightShader.AddShader("shaders/lampps.glsl", Shader::PixelShader);
@@ -128,6 +121,42 @@ int main() {
 	skyboxShader.Link();
 	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
 
+	Shader geometryPassShader("Deferred Geometry Pass Shader");
+	geometryPassShader.AddShader("shaders/geometrypassvs.glsl", Shader::VertexShader);
+	geometryPassShader.AddShader("shaders/geometrypassps.glsl", Shader::PixelShader);
+	geometryPassShader.Link();
+	geometryPassShader.AddUniforms({ "model", "texture_diffuse1", "texture_specular1"});
+
+	Shader lightingPassShader("Deferred Lighting Pass Shader");
+	lightingPassShader.AddShader("shaders/lightingpassvs.glsl", Shader::VertexShader);
+	lightingPassShader.AddShader("shaders/lightingpassps.glsl", Shader::PixelShader);
+	lightingPassShader.Link();
+	lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
+	
+	// Set samplers
+	lightingPassShader.Bind();
+	lightingPassShader.SetUniformi("gPosition", 0);
+	lightingPassShader.SetUniformi("gNormal", 1);
+	lightingPassShader.SetUniformi("gAlbedoSpec", 2);
+
+	// - Colors
+	const GLuint NR_LIGHTS = 32;
+	std::vector<glm::vec3> lightPositions;
+	std::vector<glm::vec3> lightColors;
+	srand(13);
+	for (GLuint i = 0; i < NR_LIGHTS; ++i) {
+		// Calculate slightly random offsets
+		GLfloat xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+		GLfloat yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
+		GLfloat zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+		lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
+		// Also calculate random color
+		GLfloat rColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+		GLfloat gColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+		GLfloat bColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+		lightColors.push_back(glm::vec3(rColor, gColor, bColor));
+	}
+
 	// Models
 	Skybox skybox("skybox/ocean/");
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
@@ -142,63 +171,57 @@ int main() {
 		glfwPollEvents();
 		do_movement();
 
-		fb.Bind();
-		// Render to bound framebuffer
-		{
-			// Clear the colorbuffer
-			renderUtils.Clear();
-	
-			// Enable depth testing for 3D stuff
-			glEnable(GL_DEPTH_TEST);
-			glm::mat4 model;
+		// Geometry pass
+		gBuffer.BindGBuffer();
 
-			// Transformations
-			auto view = camera.GetViewMatrix();
-			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		const auto view = camera.GetViewMatrix();
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
-			/// TODO: fix light shader model matrix not applying
-			model = glm::translate(model, { 5.0f, -5.0f, -10.0f });
-			lightShader.SetUniform("model", model);
-			lightShader.SetUniform("lightColor", glm::vec3(1.0f));
-			light.Draw(lightShader);
-
-			shader.Bind();
-			shader.SetUniform("viewPos", camera.GetPosition());
-			// We already have 3 texture units active (in this shader) so set the skybox as the 4th texture unit (texture units are 0 based so index number 3)
-			glActiveTexture(GL_TEXTURE3);
-			shader.SetUniformi("skybox", 3);
-			skybox.BindTexture();
-	
-			// Draw loaded models
-			model = glm::mat4x4();
-			model = glm::translate(model, glm::vec3(0.0f, 0.175f, 0.0f));
-			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-			shader.SetUniform("model", model);
-			nanosuit.DrawInstanced(shader);
-
-			//skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
-
-			sphereShader.Bind();
-			model = glm::mat4x4();
-			model = glm::translate(model, {0.0f, 10.75f, 0.0f});
-			sphereShader.SetUniform("model", model);
-			sphere.Draw(sphereShader, camera.GetViewMatrix(), projection, camera.GetPosition());
-
-			//Always draw skybox last
-			
-		}
-		fb.UnBind(); 
-		// Switch back to default framebuffer
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		// Disable depth test for screen quad and HUD
-		glDisable(GL_DEPTH_TEST);
-
-		// Render post-processed quad
-		pp.RendertoScreen(fb);
+		geometryPassShader.Bind();
 		
+		glm::mat4 model;
+		model = glm::scale(model, glm::vec3(0.25f));
+		geometryPassShader.SetUniform("model", model);
+		nanosuit.DrawInstanced(geometryPassShader);
+		
+		gBuffer.UnBindGBuffer();
+
+		// Lighting Pass
+
+		//glUniform1i(lightingPassShader.GetUniformLoc("skybox"), 3);
+		//skybox.BindTexture();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		lightingPassShader.Bind();
+		gBuffer.BindTextures();
+
+		// Also send light relevant uniforms
+		for (GLuint i = 0; i < lightPositions.size(); ++i)
+		{
+			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Position"), 1, &lightPositions[i][0]);
+			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Color"), 1, &lightColors[i][0]);
+			// Update attenuation parameters and calculate radius
+			// Assume constant = 1.0
+			static const GLfloat linear = 0.7f;
+			static const GLfloat quadratic = 1.8f;
+			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Linear"), linear);
+			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Quadratic"), quadratic);
+		}
+		lightingPassShader.SetUniform("viewPos", camera.GetPosition());
+
+		//skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
+
+		/*
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		sphereShader.Bind();
+		model = glm::mat4x4();
+		model = glm::translate(model, { 0.0f, 10.75f, 0.0f });
+		sphereShader.SetUniform("model", model);
+		sphere.Draw(sphereShader, camera.GetViewMatrix(), projection, camera.GetPosition());
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		*/
+
+		RenderQuad();
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
@@ -206,7 +229,7 @@ int main() {
 	// Clean up
 	glfwDestroyWindow(window);
 	glfwTerminate();
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /***********************************************************************************/
@@ -278,4 +301,35 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastY = ypos;
 
 	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// RenderQuad() Renders a 1x1 quad in NDC, best used for framebuffer color targets
+// and post-processing effects.
+GLuint quadVAO = 0;
+GLuint quadVBO;
+void RenderQuad()
+{
+	if (quadVAO == 0)
+	{
+		GLfloat quadVertices[] = {
+			// Positions        // Texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// Setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }

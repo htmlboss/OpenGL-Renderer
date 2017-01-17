@@ -2,10 +2,9 @@
 #include <array>
 #include <iostream>
 
-
 /***********************************************************************************/
 GBuffer::GBuffer(const size_t width, const size_t height) {
-	
+
 	glGenFramebuffers(1, &m_gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
 
