@@ -16,11 +16,9 @@
 #include "Light.h"
 #include "Skybox.h"
 #include "Timer.h"
-#include "FrameBuffer.h"
-#include "PostProcess.h"
 #include "RenderUtils.h"
 #include "SkySphere.h"
-#include "GBuffer.h"
+#include "Renderer.h"
 
 #include <iostream>
 
@@ -74,9 +72,7 @@ int main() {
 	glfwSetWindowPos(window, 300, 200);
 
 	// Start up OpenGL
-	RenderUtils renderUtils;
-
-	glViewport(0, 0, WIDTH, HEIGHT);
+	Renderer renderer(WIDTH, HEIGHT);
 	
 	// For wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -96,11 +92,6 @@ int main() {
 	// Insert data into allocated memory block
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	GBuffer gBuffer(WIDTH, HEIGHT);
-
-	FrameBuffer fb(WIDTH, HEIGHT, false, false);
-	PostProcess pp("shaders/screenQuadVert.glsl", "shaders/screenQuadPixel.glsl");
 
 	// Shaders
 	Shader lightShader("Lamp Shader");
@@ -164,6 +155,7 @@ int main() {
 	SkySphere sphere;
 	nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
 
+	renderer.ClearColor();
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 
@@ -172,7 +164,7 @@ int main() {
 		do_movement();
 
 		// Geometry pass
-		gBuffer.BindGBuffer();
+		renderer.m_gBuffer->BindGBuffer();
 
 		const auto view = camera.GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -185,7 +177,7 @@ int main() {
 		geometryPassShader.SetUniform("model", model);
 		nanosuit.DrawInstanced(geometryPassShader);
 		
-		gBuffer.UnBindGBuffer();
+		renderer.m_gBuffer->UnBindGBuffer();
 
 		// Lighting Pass
 
@@ -193,7 +185,7 @@ int main() {
 		//skybox.BindTexture();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		lightingPassShader.Bind();
-		gBuffer.BindTextures();
+		renderer.m_gBuffer->BindTextures();
 
 		// Also send light relevant uniforms
 		for (GLuint i = 0; i < lightPositions.size(); ++i)
