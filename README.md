@@ -1,5 +1,7 @@
 # OpenGL 3D Renderer
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd7023ebf2e941eeb7d4f67cf9c6ea1f)](https://www.codacy.com/app/htmlboss/OpenGL-Renderer?utm_source=github.com&utm_medium=referral&utm_content=htmlboss/OpenGL-Renderer&utm_campaign=badger)
+
 ## Intro
 I've been extremely interested in computer graphics for a number of years now, but I've only possessed the C++ skill and math knowledge for just over a year to fully understand the theory behind DirectX/OpenGL. So this is my first implementation of a 3D Renderer in OpenGL using various websites as references to help me along ([Learn OpenGL](http://www.learnopengl.com/), [open.gl](http://open.gl), and naturally YouTube).
 Obviously, performance is atrocious since my main goal here was to get visual results on-screen and learn to debug graphical run-time errors (and yes, those were painful), but I learned a ton of things about graphics and some finer nuances of C++ (and even contributed a [bugfix](https://github.com/matus-chochlik/oglplus/issues/135) for Windows to OGLPlus).
