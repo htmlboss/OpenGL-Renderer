@@ -2,15 +2,15 @@
 #include <iostream>
 
 /***********************************************************************************/
-Time::Time() : m_lastFrame(0.0f), m_lastTime(0.0f), m_nbFrames(0) {
+Timer::Timer() : m_lastFrame(0.0f), m_lastTime(0.0f), m_nbFrames(0) {
 }
 
 /***********************************************************************************/
-Time::~Time() {
+Timer::~Timer() {
 }
 
 /***********************************************************************************/
-void Time::Update(const double time) {
+void Timer::Update(const double time) {
 	double currentFrame = time;
 	m_nbFrames++;
 

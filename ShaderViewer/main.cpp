@@ -5,46 +5,32 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <log.h>
 
 // Other includes
 #include "Shader.h"
-#include "Camera.h"
 #include "Model.h"
 #include "Light.h"
 #include "Skybox.h"
-#include "Timer.h"
-#include "RenderUtils.h"
 #include "SkySphere.h"
-#include "Renderer.h"
-
-#include <iostream>
+#include "GLRenderer.h"
 
 // Function prototypes
 static void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 static void window_resize_callback(GLFWwindow* window, int w, int h);
 static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void do_movement();
 void RenderQuad();
 
-// Window dimensions
-const GLuint WIDTH = 1280, HEIGHT = 720;
-
-// Camera
-Camera  camera({0.0f, 2.0f, 0.0f});
-GLfloat lastX = WIDTH / 2.0;
-GLfloat lastY = HEIGHT / 2.0;
-bool    keys[1024];
-
-Time timer;
 /***********************************************************************************/
 int main() {
+	// Window dimensions
+	const GLuint WIDTH = 1280, HEIGHT = 720;
+
 	// Setup the logger
 	FILELog::ReportingLevel() = logDEBUG;
-	FILE* log_fd = fopen("log.txt", "w");
+	const auto log_fd = fopen("log.txt", "w");
 	Output2FILE::Stream() = log_fd;
 
 	// Init GLFW
@@ -59,7 +45,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
+	const auto window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
 	if (!window) {
 		std::cerr << "Error: glfwCreateWindow() failed." << std::endl;
 		throw std::runtime_error("");
@@ -72,26 +58,10 @@ int main() {
 	glfwSetWindowPos(window, 300, 200);
 
 	// Start up OpenGL
-	Renderer renderer(WIDTH, HEIGHT);
+	GLRenderer renderer(WIDTH, HEIGHT);
 	
 	// For wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
-	GLuint uboMatrices;
-	glGenBuffers(1, &uboMatrices);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW); // Allocate memory, but do not fill
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	// Define range of the buffer that links to a binding point
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
-
-	// Projection matrix does not change at runtime (constant window size)
-	const auto projection = camera.GetProjMatrix(WIDTH, HEIGHT);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-	// Insert data into allocated memory block
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	// Shaders
 	Shader lightShader("Lamp Shader");
@@ -159,16 +129,11 @@ int main() {
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 
-		timer.Update(glfwGetTime());
 		glfwPollEvents();
-		do_movement();
+		renderer.Update(glfwGetTime());
 
 		// Geometry pass
-		renderer.m_gBuffer->BindGBuffer();
-
-		const auto view = camera.GetViewMatrix();
-		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		renderer.BeginGeometryPass();
 
 		geometryPassShader.Bind();
 		
@@ -177,12 +142,12 @@ int main() {
 		geometryPassShader.SetUniform("model", model);
 		nanosuit.DrawInstanced(geometryPassShader);
 		
-		renderer.m_gBuffer->UnBindGBuffer();
-
+		renderer.EndGeometryPass();
 		// Lighting Pass
 
 		//glUniform1i(lightingPassShader.GetUniformLoc("skybox"), 3);
 		//skybox.BindTexture();
+		renderer.BeginLightingPass();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		lightingPassShader.Bind();
 		renderer.m_gBuffer->BindTextures();
@@ -199,10 +164,12 @@ int main() {
 			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Linear"), linear);
 			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Quadratic"), quadratic);
 		}
-		lightingPassShader.SetUniform("viewPos", camera.GetPosition());
+		lightingPassShader.SetUniform("viewPos", renderer.GetCameraPos());
 
+		// Blit depthbuffer so skydome renders behind everything
+		//renderer.GetDepthBuffer();
 		//skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
-
+		
 		/*
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		sphereShader.Bind();
@@ -227,7 +194,7 @@ int main() {
 /***********************************************************************************/
 // GLFW Callbacks
 void error_callback(int error, const char* description) {
-	std::cerr << "Error: " << description;
+	std::cerr << "Error: " << description << std::endl;
 }
 
 void window_resize_callback(GLFWwindow* window, int w, int h) {
@@ -238,7 +205,9 @@ void window_resize_callback(GLFWwindow* window, int w, int h) {
 
 	glViewport(0, 0, fb_w, fb_h);
 
+#ifdef _DEBUG
 	//std::cout << "Framebuffer resized to: " << fb_w << " x " << fb_h << std::endl;
+#endif
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -247,52 +216,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (key >= 0 && key < 1024) {
 		if (action == GLFW_PRESS) {
-			keys[key] = true;
+			KEY_PRESSED(key);
 		}
 		else if (action == GLFW_RELEASE) {
-			keys[key] = false;
+			KEY_RELEASED(key);
 		}
 	}
 }
 
-void do_movement() {
-	// Camera controls
-	if (keys[GLFW_KEY_W]) {
-		camera.ProcessKeyboard(Camera::FORWARD, timer.GetDelta());
-	}
-	if (keys[GLFW_KEY_S]) {
-		camera.ProcessKeyboard(Camera::BACKWARD, timer.GetDelta());
-	}
-	if (keys[GLFW_KEY_A]) {
-		camera.ProcessKeyboard(Camera::LEFT, timer.GetDelta());
-	}
-	if (keys[GLFW_KEY_D]) {
-		camera.ProcessKeyboard(Camera::RIGHT, timer.GetDelta());
-	}
-	if (keys[GLFW_KEY_SPACE]) {
-		camera.ProcessKeyboard(Camera::UP, timer.GetDelta());
-	}
-	if (keys[GLFW_KEY_LEFT_CONTROL]) {
-		camera.ProcessKeyboard(Camera::DOWN, timer.GetDelta());
-	}
-}
-
-bool firstMouse = true;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
 
-	GLfloat xoffset = xpos - lastX;
-	GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
-
-	lastX = xpos;
-	lastY = ypos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	GLRenderer::UpdateMouse(xpos, ypos);
 }
 
 // RenderQuad() Renders a 1x1 quad in NDC, best used for framebuffer color targets

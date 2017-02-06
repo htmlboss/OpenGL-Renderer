@@ -3,7 +3,6 @@
 
 class GBuffer {
 public:
-	GBuffer() { };
 	GBuffer(const size_t width, const size_t height);
 	~GBuffer();
 
@@ -13,8 +12,9 @@ public:
 	void BindTextures() const;
 
 	// Write depth buffer to default framebuffer
-	void BlitDepthBuffer(const size_t width, const size_t height) const;
+	void BlitDepthBuffer() const;
 private:
 	GLuint m_gBuffer, m_gPosition, m_gNormal, m_gDiffuseSpec, m_rboDepth;
+	const size_t m_width, m_height;
 };
 

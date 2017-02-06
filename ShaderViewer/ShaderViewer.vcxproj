@@ -150,7 +150,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="HUDText.cpp" />
     <ClCompile Include="IRenderer.cpp" />
@@ -158,33 +157,30 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="PostProcess.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="RenderUtils.cpp" />
+    <ClCompile Include="GLRenderer.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SkySphere.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="HUDText.h" />
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="PostProcess.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RenderUtils.h" />
+    <ClInclude Include="GLRenderer.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SkySphere.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>

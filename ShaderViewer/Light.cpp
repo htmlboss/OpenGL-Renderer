@@ -1,10 +1,10 @@
 #include "Light.h"
 #include "CubeData.h"
 
+#include <glm//gtc/matrix_transform.hpp>
+
 /***********************************************************************************/
-Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType) :
-			m_position(Position), 
-			m_color(Color) {
+Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType) : m_position(Position), m_color(Color) {
 
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);

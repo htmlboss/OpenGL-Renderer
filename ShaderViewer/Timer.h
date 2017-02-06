@@ -1,9 +1,9 @@
 #pragma once
 
-class Time {
+class Timer {
 public:
-	Time();
-	~Time();
+	Timer();
+	~Timer();
 
 	void Update(const double time);
 	double GetDelta() const { return m_delta; }

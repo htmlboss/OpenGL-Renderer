@@ -31,10 +31,10 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	
 	unsigned char* image;
 	int x, y;
-	int n = 3; //Number of components to load (RGBA)
+	int n = 0;
 	i = 0; // Index for the loop
 	for (auto& face : m_faces) {
-		image = Texture::LoadSTBImage(face.c_str(), &x, &y, &n, 3); // 3 = STB_rgb
+		image = ResourceLoader::LoadSTBImage(face.c_str(), &x, &y, &n, ResourceLoader::RGB); // 3 = STB_rgb
 		
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);

@@ -3,7 +3,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-GBuffer::GBuffer(const size_t width, const size_t height) {
+GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_height(height) {
 
 	glGenFramebuffers(1, &m_gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
@@ -73,10 +73,10 @@ void GBuffer::BindTextures() const {
 }
 
 /***********************************************************************************/
-void GBuffer::BlitDepthBuffer(const size_t width, const size_t height) const {
+void GBuffer::BlitDepthBuffer() const {
 	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

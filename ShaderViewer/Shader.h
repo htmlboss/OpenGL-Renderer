@@ -6,13 +6,6 @@
 #include <array>
 #include <iostream>
 
-// Allow std::array to use operator<<
-template <typename T, std::size_t N>
-	std::ostream& operator<<(std::ostream& o, const std::array<T, N>& arr) {
-		copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(o, " "));		
-		return o;
-}
-
 class Shader {
 public:
 	Shader(const char* shaderName);
@@ -46,6 +39,9 @@ public:
 
 private:
 	GLuint compileShader(const GLchar* shaderSource, const ShaderType shaderType);
+	// This needs to be implemented asap:
+	// https://stackoverflow.com/questions/9113154/proper-way-to-delete-glsl-shader
+	void deleteShaders();
 
 	GLuint m_program;
 	bool m_linked;

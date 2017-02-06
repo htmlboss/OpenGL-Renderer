@@ -3,13 +3,9 @@
 #include <iostream>
 #include <log.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
-#include <stb_image.h>
-
 int Texture::m_numTextures = 0; //Set initial textures to 0
 /***********************************************************************************/
-Texture::Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ColorMode colorMode) : 
+Texture::Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode) : 
 	m_texturePath(TexturePath.c_str()), 
 	m_samplerName(samplerName) {
 	
@@ -28,25 +24,25 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 
 	// Load image
 	int x, y;
-	int n = colorMode; // Number of components to load (RGBA)
+	int n = 0;
 	unsigned char* data = nullptr;
 	try {
-		data = LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
+		data = ResourceLoader::LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
 	}
 	catch (const std::runtime_error& e) {
 		std::cerr << e.what() << '\n';
 	}
 
 	switch (colorMode) {
-	case ColorMode::GREY:
+	case ResourceLoader::GREY:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		break;
 
-	case ColorMode::RGB:
+	case ResourceLoader::ColorMode::RGB:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		break;
 
-	case ColorMode::RGB_A:
+	case ResourceLoader::ColorMode::RGB_A:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		break;
 	}
@@ -54,7 +50,6 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 
 	// Cleanup
 	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(data);
 
 	++m_numTextures;
 }
@@ -66,17 +61,4 @@ Texture::~Texture() {
 /***********************************************************************************/
 void Texture::Bind2D() {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
-}
-
-/***********************************************************************************/
-unsigned char* Texture::LoadSTBImage(const char* filename, int* x, int* y, int* comp, int req_comp) {
-	
-	auto data = stbi_load(filename, x, y, comp, req_comp);
-	
-	if (data == nullptr) {
-		std::string error = "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
-		FILE_LOG(logERROR) << error;
-		throw std::runtime_error(error);
-	}
-	return data;
 }

@@ -2,16 +2,11 @@
 
 #include <GL/glew.h>
 #include <string>
+#include "ResourceLoader.h"
 
 class Texture {
 
 public:
-	// Passed to stb_image as the number of components (channels) to load
-	enum ColorMode {
-		GREY = 1,
-		RGB = 3,
-		RGB_A
-	};
 
 	// Texture wrap modes passed to OpenGL
 	enum WrapMode {
@@ -22,14 +17,11 @@ public:
 	};
 
 	//Texture();
-	Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ColorMode colorMode = ColorMode::RGB);
+	Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
 	~Texture();
 
 	//Bind 2D texture
 	void Bind2D();
-
-	// Load image
-	static unsigned char* LoadSTBImage(char const *filename, int *x, int *y, int *comp, int req_comp);
 
 	// Returns the global number of UNIQUE textures loaded
 	static int GetLoadedTextures() { return m_numTextures; }

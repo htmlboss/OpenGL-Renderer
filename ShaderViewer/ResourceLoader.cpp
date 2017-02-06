@@ -2,14 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <log.h>
 
-/***********************************************************************************/
-ResourceLoader::ResourceLoader() {
-}
-
-/***********************************************************************************/
-ResourceLoader::~ResourceLoader() {
-}
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_FAILURE_USERMSG
+#include <stb_image.h>
 
 /***********************************************************************************/
 std::string ResourceLoader::LoadTextFile(const std::string & path) {
@@ -43,4 +40,18 @@ std::string ResourceLoader::LoadTextFile(const std::string & path) {
 	catch (...) {
 		std::cout << "Unhandled exception in Shader::readShader().\n";
 	}
+}
+
+/***********************************************************************************/
+unsigned char* ResourceLoader::LoadSTBImage(char const* filename, int* x, int* y, int* comp, const ColorMode mode) {
+
+	auto data = stbi_load(filename, x, y, comp, mode);
+
+	if (data == nullptr) {
+		const auto error = "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
+		FILE_LOG(logERROR) << error;
+		throw std::runtime_error(error);
+	}
+
+	return data;
 }

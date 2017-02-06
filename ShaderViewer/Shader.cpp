@@ -87,3 +87,7 @@ GLuint Shader::compileShader(const GLchar* shaderSource, const ShaderType shader
 	}
 	return programID;
 }
+
+/***********************************************************************************/
+void Shader::deleteShaders() {
+}
