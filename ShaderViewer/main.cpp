@@ -21,7 +21,6 @@ static void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 static void window_resize_callback(GLFWwindow* window, int w, int h);
 static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void RenderQuad();
 
 /***********************************************************************************/
 int main() {
@@ -180,7 +179,7 @@ int main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		*/
 
-		RenderQuad();
+		renderer.RenderScreenQuad();
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
@@ -227,35 +226,4 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 	GLRenderer::UpdateMouse(xpos, ypos);
-}
-
-// RenderQuad() Renders a 1x1 quad in NDC, best used for framebuffer color targets
-// and post-processing effects.
-GLuint quadVAO = 0;
-GLuint quadVBO;
-void RenderQuad()
-{
-	if (quadVAO == 0)
-	{
-		GLfloat quadVertices[] = {
-			// Positions        // Texture Coords
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		};
-		// Setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	}
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
 }

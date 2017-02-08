@@ -5,7 +5,6 @@
 
 #include <memory>
 
-
 class GLRenderer : public IRenderer {
 public:
 	GLRenderer(const size_t width, const size_t height);
@@ -32,6 +31,9 @@ public:
 private:
 	static Camera m_camera;
 	GLuint m_uboMatrices;
+
+	// Screen-quad
+	GLuint m_quadVAO, m_quadVBO;
 	
 	// Mouse stuff
 	static bool m_firstMouse;

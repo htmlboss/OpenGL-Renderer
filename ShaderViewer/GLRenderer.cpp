@@ -58,6 +58,21 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(widt
 	// Insert data into allocated memory block
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// Setup Screenquad
+	glGenVertexArrays(1, &m_quadVAO);
+	glGenBuffers(1, &m_quadVBO);
+
+	glBindVertexArray(m_quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), &m_screenQuadVertices, GL_STATIC_DRAW);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 }
 
 /***********************************************************************************/
@@ -89,6 +104,9 @@ void GLRenderer::EnableBlending() const {
 
 /***********************************************************************************/
 void GLRenderer::RenderScreenQuad() const {
+	glBindVertexArray(m_quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }
 
 /***********************************************************************************/

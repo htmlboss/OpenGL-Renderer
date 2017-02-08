@@ -32,5 +32,13 @@ protected:
 	size_t m_width, m_height;
 
 	Timer m_timer;
+
+	const std::array<float, 20> m_screenQuadVertices = {
+		// Positions			// Texture Coords
+		-1.0f, 1.0f, 0.0f,		0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f,		1.0f, 0.0f
+	};
 };
 

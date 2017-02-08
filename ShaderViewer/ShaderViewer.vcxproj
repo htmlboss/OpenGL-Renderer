@@ -77,6 +77,9 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)3rdParty\GLEW\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\Logger\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\FreeType\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLEW\lib\Release\x64\;$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\lib\x64\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -106,6 +109,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>false</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -187,10 +192,6 @@
   <ItemGroup>
     <None Include="..\README.md" />
     <None Include="packages.config" />
-    <None Include="shaders\lampps.glsl" />
-    <None Include="shaders\lampvs.glsl" />
-    <None Include="shaders\pixel.glsl" />
-    <None Include="shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

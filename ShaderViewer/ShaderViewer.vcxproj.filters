@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{521aff23-8aac-448d-9b9e-98c989394dce}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -114,18 +111,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\pixel.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\vertex.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\lampps.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\lampvs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="..\README.md" />
   </ItemGroup>

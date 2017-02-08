@@ -1,5 +1,7 @@
 # OpenGL 3D Renderer
 
+
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd7023ebf2e941eeb7d4f67cf9c6ea1f)](https://www.codacy.com/app/htmlboss/OpenGL-Renderer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=htmlboss/OpenGL-Renderer&amp;utm_campaign=Badge_Grade)
 
 ## Intro
