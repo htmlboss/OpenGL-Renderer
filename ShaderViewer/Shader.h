@@ -1,56 +1,37 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLM/gtc/type_ptr.hpp>
 
-#include <map>
 #include <array>
-#include <iostream>
+#include <optional>
+
+class GLShaderProgram;
 
 class Shader {
+	friend class GLShaderProgram;
 public:
-	Shader(const char* shaderName);
-	~Shader();
 
-	enum ShaderType {
+	enum GLShaderType {
 		PixelShader = GL_FRAGMENT_SHADER,
 		VertexShader = GL_VERTEX_SHADER,
 		GeometryShader = GL_GEOMETRY_SHADER
 	};
 
-	void AddShader(const std::string& shaderSource, const ShaderType shaderType);
-	void AddUniform(const std::string& uniform);
-	void AddUniforms(const std::initializer_list<std::string> uniforms);
-	void Link();
-	void Bind() const;
+	enum D3DShaderType {
+		
+	};
 
-	void SetUniformi(const std::string& uniformName, const GLint value) { glUniform1i(m_uniformMap.at(uniformName), value); }
-	void SetUniformf(const std::string& uniformName, const GLfloat value) { glUniform1f(m_uniformMap.at(uniformName), value); }
-	void SetUniform(const std::string& uniformName, const glm::vec3& value) { glUniform3f(m_uniformMap.at(uniformName), value.x, value.y, value.z); }
-	void SetUniform(const std::string& uniformName, const glm::mat4x4& value) { glUniformMatrix4fv(m_uniformMap.at(uniformName), 1, GL_FALSE, value_ptr(value)); }
-
-	GLint GetUniformLoc(const std::string& Uniform) const {
-		GLint loc = glGetUniformLocation(m_program, Uniform.c_str());
-		if (loc == -1) {
-			std::cerr << "Uniform: does not exist.\n";
-			
-		}
-		return loc;
-	}
+	Shader(const std::string_view shaderPath, const GLShaderType type);
+	~Shader();
 
 private:
-	GLuint compileShader(const GLchar* shaderSource, const ShaderType shaderType);
-	// This needs to be implemented asap:
-	// https://stackoverflow.com/questions/9113154/proper-way-to-delete-glsl-shader
-	void deleteShaders();
+	// OpenGL shader stuff
+	void compileShader(const GLchar* shaderSource, const GLShaderType shaderType);
 
-	GLuint m_program;
-	bool m_linked;
-	const char* m_shaderName;
-
-	std::map<std::string, GLint> m_uniformMap;
-
-	//  To check for compile-time errors
+	GLuint m_shaderID;
 	GLint m_success;
 	std::array<GLchar, 1024> m_infoLog;
+	//std::optional<GLuint> m_shaderID;
+	//std::optional<GLint> m_success; //  To check for compile-time errors
+	//std::optional< std::array<GLchar, 1024> > m_infoLog;
 };
 

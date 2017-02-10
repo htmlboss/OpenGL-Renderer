@@ -5,16 +5,18 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 #include <log.h>
 
 // Other includes
-#include "Shader.h"
+#include "GLShaderProgram.h"
 #include "Model.h"
 #include "Light.h"
 #include "Skybox.h"
 #include "SkySphere.h"
 #include "GLRenderer.h"
+
 
 // Function prototypes
 static void error_callback(int error, const char* description);
@@ -63,34 +65,19 @@ int main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Shaders
-	Shader lightShader("Lamp Shader");
-	lightShader.AddShader("shaders/lampvs.glsl", Shader::VertexShader);
-	lightShader.AddShader("shaders/lampps.glsl", Shader::PixelShader);
-	lightShader.Link();
+	GLShaderProgram lightShader("Lamp Shader", { Shader("shaders/lampvs.glsl", Shader::VertexShader), Shader("shaders/lampps.glsl", Shader::PixelShader) });
 	lightShader.AddUniforms({ "model", "lightColor" });
 
-	Shader sphereShader("Sphere Shader");
-	sphereShader.AddShader("shaders/spherevs.glsl", Shader::VertexShader);
-	sphereShader.AddShader("shaders/sphereps.glsl", Shader::PixelShader);
-	sphereShader.Link();
+	GLShaderProgram sphereShader("Sphere Shader", { Shader("shaders/spherevs.glsl", Shader::VertexShader), Shader("shaders/sphereps.glsl", Shader::PixelShader) });
 	sphereShader.AddUniforms({ "projection", "view", "model"});
 	
-	Shader skyboxShader("Skybox Shader");
-	skyboxShader.AddShader("shaders/skyboxvs.glsl", Shader::VertexShader);
-	skyboxShader.AddShader("shaders/skyboxps.glsl", Shader::PixelShader);
-	skyboxShader.Link();
+	GLShaderProgram skyboxShader("Skybox Shader", { Shader("shaders/skyboxvs.glsl", Shader::VertexShader), Shader("shaders/skyboxps.glsl", Shader::PixelShader) });
 	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
 
-	Shader geometryPassShader("Deferred Geometry Pass Shader");
-	geometryPassShader.AddShader("shaders/geometrypassvs.glsl", Shader::VertexShader);
-	geometryPassShader.AddShader("shaders/geometrypassps.glsl", Shader::PixelShader);
-	geometryPassShader.Link();
+	GLShaderProgram geometryPassShader("Deferred Geometry Pass Shader", { Shader("shaders/geometrypassvs.glsl", Shader::VertexShader), Shader("shaders/geometrypassps.glsl", Shader::PixelShader) });
 	geometryPassShader.AddUniforms({ "model", "texture_diffuse1", "texture_specular1"});
 
-	Shader lightingPassShader("Deferred Lighting Pass Shader");
-	lightingPassShader.AddShader("shaders/lightingpassvs.glsl", Shader::VertexShader);
-	lightingPassShader.AddShader("shaders/lightingpassps.glsl", Shader::PixelShader);
-	lightingPassShader.Link();
+	GLShaderProgram lightingPassShader("Deferred Lighting Pass Shader", { Shader("shaders/lightingpassvs.glsl", Shader::VertexShader), Shader("shaders/lightingpassps.glsl", Shader::PixelShader) });
 	lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
 	
 	// Set samplers

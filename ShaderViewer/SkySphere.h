@@ -2,7 +2,7 @@
 
 #include "Model.h"
 
-class Shader;
+class GLShaderProgram;
 
 class SkySphere {
 
@@ -10,7 +10,7 @@ public:
 	SkySphere();
 	~SkySphere();
 
-	void Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos);
+	void Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos);
 
 private:
 	Model m_model;

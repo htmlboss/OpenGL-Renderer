@@ -8,7 +8,6 @@ public:
 	~Terrain();
 
 private:
-
 	void calculateNormals();
 
 	int m_width, m_length;

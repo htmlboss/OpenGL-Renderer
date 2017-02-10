@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <array>
 
-#include "Shader.h"
+#include "GLShaderProgram.h"
 
 class Skybox {
 public:
@@ -12,7 +12,7 @@ public:
 
 	// Bind texture if passing to other shaders
 	void BindTexture() { glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID); }
-	void Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat);
+	void Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) const;
 
 private:
 	std::array<std::string, 6> m_faces; // A skybox only ever has 6 faces, so an array is fine (and safer perhaps)

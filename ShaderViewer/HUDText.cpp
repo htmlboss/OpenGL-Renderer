@@ -1,9 +1,10 @@
 #include "HUDText.h"
 #include <iostream>
-
+#include <glm/gtc/matrix_transform.hpp>
 
 /***********************************************************************************/
-HUDText::HUDText(Shader& shader, const std::string& FontPath, const GLint WindowWidth, const GLint WindowHeight) {
+HUDText::HUDText(GLShaderProgram& shader, const std::string& FontPath, const GLint WindowWidth, const GLint WindowHeight) {
+	
 	const auto projection = glm::ortho(0.0f, static_cast<GLfloat>(WindowWidth), 0.0f, static_cast<GLfloat>(WindowHeight));
 	shader.Bind();
 	//glUniformMatrix4fv(shader.GetUniformLoc("projection"), 1, GL_FALSE, value_ptr(projection));
@@ -18,7 +19,7 @@ HUDText::HUDText(Shader& shader, const std::string& FontPath, const GLint Window
 	// Load font as face
 	FT_Face face;
 	if (FT_New_Face(ft, FontPath.c_str(), 0, &face)) {
-		std::cerr << "Freetype failed to load font: " << FontPath << '\n';
+		std::cerr << "Freetype failed to load font: " << FontPath.c_str() << '\n';
 	}
 
 	// Set size to load glyphs as
@@ -89,7 +90,7 @@ HUDText::~HUDText() {
 }
 
 /***********************************************************************************/
-void HUDText::RenderText(Shader& shader, const std::string& Text, GLfloat x, const GLfloat y, const GLfloat scale, const glm::vec3& color) {
+void HUDText::RenderText(GLShaderProgram& shader, const std::string& Text, GLfloat x, const GLfloat y, const GLfloat scale, const glm::vec3& color) {
 	// Activate corresponding render state	
 	shader.Bind();
 	//glUniform3f(shader.GetUniformLoc("textColor"), color.x, color.y, color.z);

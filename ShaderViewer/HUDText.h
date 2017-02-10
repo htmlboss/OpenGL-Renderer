@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <map>
 
 #include <ft2build.h>
@@ -8,19 +7,17 @@
 
 #include <GL/glew.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.h"
+#include "GLShaderProgram.h"
 
 class HUDText {
 public:
-	HUDText(Shader& shader, const std::string& FontPath, const GLint WindowWidth, const GLint WindowHeight);
+	HUDText(GLShaderProgram& shader, const std::string& FontPath, const GLint WindowWidth, const GLint WindowHeight);
 	~HUDText();
 
 	// Render Text to screen
-	void RenderText(Shader& shader, const std::string& Text, GLfloat x, const GLfloat y, const GLfloat scale, const glm::vec3& color);
+	void RenderText(GLShaderProgram& shader, const std::string& Text, GLfloat x, const GLfloat y, const GLfloat scale, const glm::vec3& color);
 
 private:
 	struct Character {

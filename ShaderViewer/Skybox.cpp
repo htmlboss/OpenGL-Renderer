@@ -63,7 +63,7 @@ Skybox::~Skybox() {
 }
 
 /***********************************************************************************/
-void Skybox::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) {
+void Skybox::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) const {
 	glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
 	shader.Bind();
 

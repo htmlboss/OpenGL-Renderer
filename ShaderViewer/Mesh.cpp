@@ -10,7 +10,6 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 
 	//Construct mesh
 	setupMesh();
-
 }
 
 /***********************************************************************************/
@@ -39,7 +38,7 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 }
 
 /***********************************************************************************/
-void Mesh::Draw(Shader& shader) {
+void Mesh::Draw(GLShaderProgram& shader) {
 	
 	bindTextures(shader);
 
@@ -50,7 +49,7 @@ void Mesh::Draw(Shader& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::DrawInstanced(Shader& shader) {
+void Mesh::DrawInstanced(GLShaderProgram& shader) {
 	
 	bindTextures(shader);
 
@@ -61,7 +60,7 @@ void Mesh::DrawInstanced(Shader& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::bindTextures(Shader &shader) {
+void Mesh::bindTextures(GLShaderProgram& shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 	GLuint reflectanceNr = 1;

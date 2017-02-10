@@ -1,6 +1,8 @@
 #include "Light.h"
 #include "CubeData.h"
 
+#include "GLShaderProgram.h"
+
 #include <glm//gtc/matrix_transform.hpp>
 
 /***********************************************************************************/
@@ -26,7 +28,7 @@ Light::~Light() {
 }
 
 /***********************************************************************************/
-void Light::Draw(Shader& shader) {
+void Light::Draw(GLShaderProgram& shader) {
 	
 	shader.Bind();
 

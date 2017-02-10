@@ -1,5 +1,5 @@
 #include "SkySphere.h"
-#include "Shader.h"
+#include "GLShaderProgram.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,7 +12,7 @@ SkySphere::~SkySphere() {
 }
 
 /***********************************************************************************/
-void SkySphere::Draw(Shader& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos) {
+void SkySphere::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos) {
 	glDepthFunc(GL_LEQUAL);
 	shader.Bind();
 	glActiveTexture(GL_TEXTURE0);

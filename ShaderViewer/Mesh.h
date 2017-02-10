@@ -2,9 +2,10 @@
 
 #include <vector>
 #include <GL/glew.h>
+#include <glm/detail/type_vec3.hpp>
 
 #include "Texture.h"
-#include "Shader.h"
+#include "GLShaderProgram.h"
 
 struct Vertex {
 	glm::vec3 Position;
@@ -19,11 +20,11 @@ public:
 	~Mesh();
 	
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
-	void Draw(Shader& shader);
-	void DrawInstanced(Shader& shader);
+	void Draw(GLShaderProgram& shader);
+	void DrawInstanced(GLShaderProgram& shader);
 
 private:
-	void bindTextures(Shader &shader);
+	void bindTextures(GLShaderProgram& shader);
 	void setupMesh();
 
 	bool m_uniformsAdded;

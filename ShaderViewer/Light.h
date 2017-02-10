@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.h"
+class GLShaderProgram;
 
 class Light {
 public:
@@ -17,7 +17,7 @@ public:
 	Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType);
 	~Light();
 
-	void Draw(Shader& shader);
+	void Draw(GLShaderProgram& shader);
 
 private:
 	glm::vec3 m_position;

@@ -6,11 +6,8 @@
 /***********************************************************************************/
 Model::Model(const std::string& Path, const std::string& Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
 	
-	try {
-		loadModel(Path, flipWindingOrder);
-	}
-	catch (const std::runtime_error& e) {
-		std::cerr << "Runtime exception: " << e.what();
+	if(!loadModel(Path, flipWindingOrder)) {
+		std::cerr << "Failed to load: " << Name << '\n';
 	}
 }
 
@@ -27,14 +24,14 @@ void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffset
 }
 
 /***********************************************************************************/
-void Model::Draw(Shader& shader) {
+void Model::Draw(GLShaderProgram& shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.Draw(shader);
 	}
 }
 
 /***********************************************************************************/
-void Model::DrawInstanced(Shader& shader) {
+void Model::DrawInstanced(GLShaderProgram& shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.DrawInstanced(shader);
 	}
