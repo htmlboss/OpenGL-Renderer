@@ -1,9 +1,16 @@
 #ifdef _DEBUG
-	//#include "vld.h"
-
+	// CRT Memory Leak detection
 	#define _CRTDBG_MAP_ALLOC  
 	#include <stdlib.h>  
-	#include <crtdbg.h>  
+	#include <crtdbg.h>
+
+	// Nvidia PerfKit
+	#define NVPM_INITGUID
+	#include "3rdParty/nvidia/perfkit/NvPmApi.Manager.h"
+	// Simple singleton implementation for grabbing the NvPmApi
+	static NvPmApiManager S_NVPMManager;
+	extern NvPmApiManager *GetNvPmApiManager() { return &S_NVPMManager; }
+	const NvPmApi *GetNvPmApi() { return S_NVPMManager.Api(); }
 #endif
 
 #define GLEW_STATIC
@@ -148,7 +155,7 @@ int main() {
 			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Position"), 1, &lightPositions[i][0]);
 			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Color"), 1, &lightColors[i][0]);
 			// Update attenuation parameters and calculate radius
-			// Assume constant = 1.0
+			static const GLfloat constant = 1.0f;
 			static const GLfloat linear = 0.7f;
 			static const GLfloat quadratic = 1.8f;
 			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Linear"), linear);
