@@ -29,7 +29,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	
-	unsigned char* image;
+	unsigned char* image = nullptr;
 	int x, y;
 	int n = 0;
 	i = 0; // Index for the loop
@@ -38,7 +38,11 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 		
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
-		free(image); // Cleanup
+		
+		// Cleanup
+		delete[] image;
+		image = nullptr;
+		
 		++i;
 	}
 

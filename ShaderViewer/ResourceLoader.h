@@ -11,7 +11,7 @@ public:
 		RGB_A // RGB w/ alpha
 	};
 
-	static std::string LoadTextFile(const std::string_view& path);
+	static std::string LoadTextFile(const std::string_view path);
 	static unsigned char* LoadSTBImage(const char* filename, int* x, int* y, int* comp, const ColorMode mode);
 
 private:

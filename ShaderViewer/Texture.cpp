@@ -25,12 +25,10 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 	// Load image
 	int x, y;
 	int n = 0;
-	unsigned char* data = nullptr;
-	try {
-		data = ResourceLoader::LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
-	}
-	catch (const std::runtime_error& e) {
-		std::cerr << e.what() << '\n';
+	const auto data = ResourceLoader::LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
+	
+	if (!data) {
+		throw std::runtime_error("");
 	}
 
 	switch (colorMode) {
@@ -50,6 +48,7 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 
 	// Cleanup
 	glBindTexture(GL_TEXTURE_2D, 0);
+	delete[] data;
 
 	++m_numTextures;
 }

@@ -9,14 +9,14 @@
 #include <stb_image.h>
 
 /***********************************************************************************/
-std::string ResourceLoader::LoadTextFile(const std::string_view& path) {
-	std::string fileContents, strPath(path);
+std::string ResourceLoader::LoadTextFile(const std::string_view path) {
+	std::string fileContents;
 	std::ifstream file;
 	std::stringstream fileSS;
 
 	file.exceptions(std::ifstream::badbit);
 	try {
-		file.open(strPath);
+		file.open(path.data());
 		
 		if (file) {
 			// Read file's buffer contents into stream
@@ -29,7 +29,7 @@ std::string ResourceLoader::LoadTextFile(const std::string_view& path) {
 			return fileContents;
 		}
 		// Bad file
-		throw std::runtime_error("Failed to open: " + strPath + '\n');
+		throw std::runtime_error("Failed to open: " + std::string(path) + '\n');
 	}
 	catch (std::ifstream::failure& e) {
 		std::cerr << "Shader error: " << e.what();

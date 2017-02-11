@@ -1,8 +1,8 @@
 #include "GLRenderer.h"
 
-#include <iostream>
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include "Skybox.h"
+#include "SkySphere.h"
+#include "GLShaderProgram.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -43,6 +43,8 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(widt
 
 	// Start up GBuffer
 	m_gBuffer = std::make_unique<GBuffer>(GBuffer(width, height));
+	m_skybox = std::make_unique<Skybox>(Skybox("skybox/ocean/"));
+	//m_skySphere = std::make_unique<SkySphere>();
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
@@ -103,10 +105,17 @@ void GLRenderer::EnableBlending() const {
 }
 
 /***********************************************************************************/
-void GLRenderer::RenderScreenQuad() const {
+void GLRenderer::Render() const {
+
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+void GLRenderer::RenderSkybox(GLShaderProgram& shader) {
+	
+	GetDepthBuffer();
+	m_skybox->Draw(shader, m_camera.GetViewMatrix(), m_camera.GetProjMatrix(m_width, m_height));
 }
 
 /***********************************************************************************/

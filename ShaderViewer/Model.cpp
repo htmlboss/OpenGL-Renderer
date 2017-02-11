@@ -1,4 +1,5 @@
 #include "Model.h"
+
 #include <log.h>
 #include <assimp/postprocess.h>
 #include <iostream>
@@ -160,7 +161,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 	// Process materials
 	if (mesh->mMaterialIndex >= 0) {
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		auto* material = scene->mMaterials[mesh->mMaterialIndex];
 		// We assume a convention for sampler names in the shaders. Each diffuse texture should be named
 		// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 		// Same applies to other texture as the following list summarizes:
@@ -169,20 +170,22 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// Normal: texture_normalN
 
 		// 1. Diffuse maps
-		std::vector<Texture> diffuseMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		const auto diffuseMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		
 		// 2. Specular maps
-		std::vector<Texture> specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
+		/*
 		// 3. Reflectance maps
-		//std::vector<Texture> reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
-		//textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
+		const auto reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
+		textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
 
 		// 4. Normal maps
-		//std::vector<Texture> normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		//textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		*/
 	}
 
 	// Return a mesh object created from the extracted mesh data

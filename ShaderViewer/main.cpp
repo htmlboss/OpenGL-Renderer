@@ -1,5 +1,9 @@
 #ifdef _DEBUG
 	//#include "vld.h"
+
+	#define _CRTDBG_MAP_ALLOC  
+	#include <stdlib.h>  
+	#include <crtdbg.h>  
 #endif
 
 #define GLEW_STATIC
@@ -13,10 +17,7 @@
 #include "GLShaderProgram.h"
 #include "Model.h"
 #include "Light.h"
-#include "Skybox.h"
-#include "SkySphere.h"
 #include "GLRenderer.h"
-
 
 // Function prototypes
 static void error_callback(int error, const char* description);
@@ -26,6 +27,11 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 /***********************************************************************************/
 int main() {
+
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// Window dimensions
 	const GLuint WIDTH = 1280, HEIGHT = 720;
 
@@ -46,7 +52,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-	const auto window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
+	const auto window = glfwCreateWindow(WIDTH, HEIGHT, "MP-APS", nullptr, nullptr);
 	if (!window) {
 		std::cerr << "Error: glfwCreateWindow() failed." << std::endl;
 		throw std::runtime_error("");
@@ -105,10 +111,9 @@ int main() {
 	}
 
 	// Models
-	Skybox skybox("skybox/ocean/");
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 	Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
-	SkySphere sphere;
+	//SkySphere sphere;
 	nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
 
 	renderer.ClearColor();
@@ -152,10 +157,6 @@ int main() {
 		}
 		lightingPassShader.SetUniform("viewPos", renderer.GetCameraPos());
 
-		// Blit depthbuffer so skydome renders behind everything
-		//renderer.GetDepthBuffer();
-		//skybox.Draw(skyboxShader, camera.GetViewMatrix(), projection);
-		
 		/*
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		sphereShader.Bind();
@@ -166,7 +167,9 @@ int main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		*/
 
-		renderer.RenderScreenQuad();
+		renderer.Render();
+		renderer.RenderSkybox(skyboxShader);
+
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}

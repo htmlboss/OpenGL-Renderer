@@ -1,4 +1,6 @@
 #include "Mesh.h"
+#include "Utils.h"
+
 #include <cstdarg>
 
 /***********************************************************************************/
@@ -18,19 +20,19 @@ Mesh::~Mesh() {
 
 /***********************************************************************************/
 void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
-	
+
 	m_instanceOffsets = args;
 
 	glBindVertexArray(m_vao);
 	glGenBuffers(1, &m_instanceVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_instanceOffsets.size(), &m_instanceOffsets.at(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * args.size(), args.begin(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// Vertex Instance offset
 	glEnableVertexAttribArray(3);
 	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), static_cast<GLvoid*>(0));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glVertexAttribDivisor(3, 1); // Tell OpenGL this is an instanced vertex attribute.
 
@@ -63,25 +65,26 @@ void Mesh::DrawInstanced(GLShaderProgram& shader) {
 void Mesh::bindTextures(GLShaderProgram& shader) {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
-	GLuint reflectanceNr = 1;
 
 	GLuint index = 0;
 	for (auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
 											  // Retrieve texture number (the N in diffuse_textureN)
+		
 		const auto name = it.GetSampler();
+		const auto textureNameHashed = str2int(name.c_str());
 		std::string number;
-		if (name == "texture_diffuse") {
+
+		switch (textureNameHashed) {
+		case str2int("texture_diffuse"):
 			number = std::to_string(diffuseNr++);
-		}
-		if (name == "texture_specular") {
+			break;
+
+		case str2int("texture_specular"):
 			number = std::to_string(specularNr++);
-		}
-		if (name == "texture_reflectance") {
-			number = std::to_string(reflectanceNr++);
+			break;
 		}
 
-		//glUniform1i(shader.GetUniformLoc(name + number), index);
 		shader.SetUniformi(name + number, index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
 
@@ -110,7 +113,7 @@ void Mesh::setupMesh() {
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<GLvoid*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 	// Vertex Normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Normal)));
