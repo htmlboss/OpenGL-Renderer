@@ -1,12 +1,11 @@
 #include "Texture.h"
 
-#include <iostream>
 #include <log.h>
 
 int Texture::m_numTextures = 0; //Set initial textures to 0
 /***********************************************************************************/
-Texture::Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode) : 
-	m_texturePath(TexturePath.c_str()), 
+Texture::Texture(const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode /*= ResourceLoader::ColorMode::RGB*/) : 
+	m_texturePath(TexturePath.data()), 
 	m_samplerName(samplerName) {
 	
 	glGenTextures(1, &m_texture);
@@ -25,7 +24,7 @@ Texture::Texture(const std::string& TexturePath, const std::string& samplerName,
 	// Load image
 	int x, y;
 	int n = 0;
-	const auto data = ResourceLoader::LoadSTBImage(TexturePath.c_str(), &x, &y, &n, colorMode);
+	const auto data = ResourceLoader::LoadSTBImage(TexturePath.data(), &x, &y, &n, colorMode);
 	
 	if (!data) {
 		throw std::runtime_error("");

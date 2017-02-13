@@ -120,9 +120,9 @@ int main() {
 	// Models
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
-	//Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
 	//SkySphere sphere;
-	//nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
+
+	std::cout << "# of generated textures: " << Texture::GetLoadedTextures() << '\n';
 
 	renderer.ClearColor();
 	// Game loop

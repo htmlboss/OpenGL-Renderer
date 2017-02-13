@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <string>
+#include <string_view>
 #include "ResourceLoader.h"
 
 class Texture {
@@ -17,7 +17,7 @@ public:
 	};
 
 	//Texture();
-	Texture(const std::string& TexturePath, const std::string& samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
+	Texture(const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
 	~Texture();
 
 	//Bind 2D texture

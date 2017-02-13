@@ -2,6 +2,7 @@
 #include "Utils.h"
 
 #include <cstdarg>
+#include <string>
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures) :
