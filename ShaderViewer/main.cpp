@@ -35,6 +35,7 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 int main() {
 
 #ifdef _DEBUG
+	// Detects memory leaks upon program exit
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
@@ -118,9 +119,10 @@ int main() {
 
 	// Models
 	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
-	Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
+	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
+	//Model nanosuit("models/nanosuit/nanosuit.obj", "Nanosuit");
 	//SkySphere sphere;
-	nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
+	//nanosuit.SetInstancing({ glm::vec3(0.0f), glm::vec3(-14.575f, 0.0f, 0.0f), glm::vec3(14.575f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 14.575f) });
 
 	renderer.ClearColor();
 	// Game loop
@@ -135,9 +137,10 @@ int main() {
 		geometryPassShader.Bind();
 		
 		glm::mat4 model;
-		model = glm::scale(model, glm::vec3(0.25f));
+		model = glm::scale(model, glm::vec3(0.1f));
 		geometryPassShader.SetUniform("model", model);
-		nanosuit.DrawInstanced(geometryPassShader);
+		sponza.Draw(geometryPassShader);
+		//nanosuit.DrawInstanced(geometryPassShader);
 		
 		renderer.EndGeometryPass();
 		// Lighting Pass

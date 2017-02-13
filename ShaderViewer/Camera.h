@@ -24,7 +24,7 @@ public:
 	void ProcessMouseMovement(float xoffset, float yoffset, const bool constrainPitch = true);
 
 	glm::mat4x4 GetViewMatrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
-	glm::mat4x4 GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 0.1f, 100.0f); }
+	glm::mat4x4 GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 0.1f, 1000.0f); }
 	glm::vec3 GetPosition() const { return m_position; }
 
 private:
@@ -42,7 +42,7 @@ private:
 	float m_yaw;
 	float m_pitch;
 
-	float m_speed = 4.0f;
+	float m_speed = 15.0f;
 	const float m_sensitivity = 0.25f;
 	const float m_FOV;
 };

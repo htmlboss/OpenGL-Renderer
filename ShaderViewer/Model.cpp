@@ -5,7 +5,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-Model::Model(const std::string& Path, const std::string& Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
+Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder /*= false*/) : m_name(Name), m_path(Path) {
 	
 	if(!loadModel(Path, flipWindingOrder)) {
 		std::cerr << "Failed to load: " << Name << '\n';
@@ -39,14 +39,14 @@ void Model::DrawInstanced(GLShaderProgram& shader) {
 }
 
 /***********************************************************************************/
-bool Model::loadModel(const std::string& Path, const bool flipWindingOrder) {
+bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) {
 	std::cout << "\nLoading model: " << m_name << '\n';
 	
 	Assimp::Importer importer;
 	const aiScene* scene = nullptr;
 
 	if (flipWindingOrder) {
-		scene = importer.ReadFile(Path, aiProcess_Triangulate |
+		scene = importer.ReadFile(Path.data(), aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_GenUVCoords |
 			aiProcess_SortByPType |
@@ -59,16 +59,7 @@ bool Model::loadModel(const std::string& Path, const bool flipWindingOrder) {
 			aiProcess_SplitLargeMeshes);
 	} 
 	else {
-		scene = importer.ReadFile(Path, aiProcess_Triangulate |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_GenUVCoords |
-			aiProcess_SortByPType |
-			aiProcess_RemoveRedundantMaterials |
-			aiProcess_FindInvalidData |
-			aiProcess_FlipUVs |
-			aiProcess_CalcTangentSpace |
-			aiProcess_OptimizeMeshes |
-			aiProcess_SplitLargeMeshes);
+		scene = importer.ReadFile(Path.data(), aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
 	}
 
 
