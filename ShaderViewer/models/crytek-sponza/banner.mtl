@@ -12,5 +12,5 @@ newmtl banner
 	Kd 0.5880 0.5880 0.5880
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka textures\gi_flag.tga
-	map_Kd textures\gi_flag.tga
+	map_Ka textures/gi_flag.tga
+	map_Kd textures/gi_flag.tga

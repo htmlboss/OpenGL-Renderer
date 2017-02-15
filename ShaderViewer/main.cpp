@@ -122,7 +122,6 @@ int main() {
 	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
 	//SkySphere sphere;
 
-	std::cout << "# of generated textures: " << Texture::GetLoadedTextures() << '\n';
 
 	renderer.ClearColor();
 	// Game loop
@@ -140,7 +139,6 @@ int main() {
 		model = glm::scale(model, glm::vec3(0.1f));
 		geometryPassShader.SetUniform("model", model);
 		sponza.Draw(geometryPassShader);
-		//nanosuit.DrawInstanced(geometryPassShader);
 		
 		renderer.EndGeometryPass();
 		// Lighting Pass

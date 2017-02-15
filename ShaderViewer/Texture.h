@@ -16,8 +16,15 @@ public:
 		BORDER_CLAMP = GL_CLAMP_TO_BORDER
 	};
 
+	enum TextureType {
+		DIFFUSE = 0,
+		HEIGHT,
+		SPECULAR,
+		AMBIENT // aka reflection map
+	};
+
 	//Texture();
-	Texture(const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
+	Texture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
 	~Texture();
 
 	//Bind 2D texture
@@ -25,14 +32,16 @@ public:
 
 	// Returns the global number of UNIQUE textures loaded
 	static int GetLoadedTextures() { return m_numTextures; }
+
 	GLuint GetTexture() const { return m_texture; }
-	std::string GetPath() const { return m_texturePath; }
+	std::string GetFullPath() const { return m_fullPath; }
+	std::string GetRelativePath() const { return m_texturePath; }
 	std::string GetSampler() const { return m_samplerName; }
 
 private:
 	static int m_numTextures;
 	GLuint m_texture;
 	std::string m_samplerName;
-	const char* m_texturePath;
+	std::string m_texturePath, m_fullPath;
 };
 

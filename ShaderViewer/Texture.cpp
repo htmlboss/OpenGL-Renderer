@@ -4,10 +4,13 @@
 
 int Texture::m_numTextures = 0; //Set initial textures to 0
 /***********************************************************************************/
-Texture::Texture(const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode /*= ResourceLoader::ColorMode::RGB*/) : 
-	m_texturePath(TexturePath.data()), 
+Texture::Texture(const std::string_view ModelPath, const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode /*= ResourceLoader::ColorMode::RGB*/) :
+	m_texturePath(TexturePath), 
 	m_samplerName(samplerName) {
 	
+	m_fullPath = ModelPath;
+	m_fullPath += std::string(TexturePath);
+
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 	// Set texture parameters
@@ -24,7 +27,7 @@ Texture::Texture(const std::string_view TexturePath, const std::string_view samp
 	// Load image
 	int x, y;
 	int n = 0;
-	const auto data = ResourceLoader::LoadSTBImage(TexturePath.data(), &x, &y, &n, colorMode);
+	const auto data = ResourceLoader::LoadSTBImage(m_fullPath.c_str(), &x, &y, &n, colorMode);
 	
 	if (!data) {
 		throw std::runtime_error("");

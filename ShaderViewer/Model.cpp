@@ -59,9 +59,17 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 			aiProcess_SplitLargeMeshes);
 	} 
 	else {
-		scene = importer.ReadFile(Path.data(), aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
+		scene = importer.ReadFile(Path.data(), aiProcess_Triangulate |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_GenUVCoords |
+			aiProcess_SortByPType |
+			aiProcess_RemoveRedundantMaterials |
+			aiProcess_FindInvalidData |
+			aiProcess_FlipUVs |
+			aiProcess_CalcTangentSpace |
+			aiProcess_OptimizeMeshes |
+			aiProcess_SplitLargeMeshes);
 	}
-
 
 	// Check if scene is not null and model is done loading
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -72,6 +80,8 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 
 	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
+
+	std::cout << "---Loaded textures:" << m_loadedTextures.size() << '\n';
 	std::cout << "\nLoaded Model: " << m_name << '\n';
 	return true;
 }
@@ -162,6 +172,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		// 1. Diffuse maps
 		const auto diffuseMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		
 		// 2. Specular maps
@@ -184,31 +195,41 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 /***********************************************************************************/
-std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string& samplerName) {
+std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
 	
 	std::vector<Texture> textures;
-	for (GLuint i = 0; i < mat->GetTextureCount(type); ++i) {
+	for (GLuint c = 0; c < mat->GetTextureCount(type); ++c) {
 		aiString str;
-		mat->GetTexture(type, i, &str);
+		mat->GetTexture(type, c, &str);
 		
 		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 		GLboolean skip = false;
 		for (auto& loadedTex : m_loadedTextures) {
-			if (loadedTex.GetPath().c_str() == str.C_Str()) { // Compare c-strings since both are different types
+			std::cout << "Comparing: " << loadedTex.GetRelativePath() << " " << str.C_Str();
+
+			if (std::strcmp(loadedTex.GetRelativePath().c_str(), str.C_Str()) == 0) {
+				std::cout << " Equal!\n";
+				std::cout << "---------------\n";
 				textures.push_back(loadedTex);
 				skip = true;
 				break;
 			}
+			std::cout << " Not equal!\n";
 		}
 
-		std::cout << "\nTexture path: " << str.C_Str();
+		//std::cout << "\nTexture path: " << str.C_Str();
 		if (!skip) {   // If texture hasn't been loaded already, load it
-			const std::string texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
-			Texture texture(texDirPrefix + str.C_Str(), samplerName, Texture::REPEAT);
 			
+			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
+			Texture texture(texDirPrefix, str.C_Str(), samplerName, Texture::WrapMode::REPEAT);
+			
+			std::cout << "Texture not found! Adding: " << texDirPrefix + str.C_Str() << '\n';
+			std::cout << "---------------\n";
+
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 		}
 	}
+
 	return textures;
 }

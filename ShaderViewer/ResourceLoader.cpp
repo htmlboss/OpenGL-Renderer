@@ -48,9 +48,10 @@ unsigned char* ResourceLoader::LoadSTBImage(char const* filename, int* x, int* y
 	auto data = stbi_load(filename, x, y, comp, mode);
 
 	if (data == nullptr) {
-		const auto error = "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
+		const auto error = "\nstb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
 		FILE_LOG(logERROR) << error;
-		throw std::runtime_error(error);
+		std::cerr << error;
+		throw std::runtime_error("");
 	}
 
 	return data;

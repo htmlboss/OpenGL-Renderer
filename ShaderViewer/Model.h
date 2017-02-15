@@ -19,7 +19,7 @@ private:
 	bool loadModel(const std::string_view Path, const bool flipWindingOrder);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string& samplerName);
+	std::vector<Texture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName);
 
 	std::vector<Mesh> m_meshes;
 	std::vector<Texture> m_loadedTextures;
