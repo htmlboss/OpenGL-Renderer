@@ -21,6 +21,5 @@ private:
 	ResourceLoader(ResourceLoader& other) = delete;
 	ResourceLoader(ResourceLoader&& other) = delete;
 	ResourceLoader& operator=(ResourceLoader rhs) = delete;
-	ResourceLoader& operator=(const ResourceLoader& rhs) = delete;
 };
 

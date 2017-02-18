@@ -9,8 +9,8 @@
 class IRenderer {
 
 public:
-	IRenderer(const size_t width, const size_t height);
-	virtual ~IRenderer();
+	IRenderer(const size_t width, const size_t height) : m_width(width), m_height(height) {}
+	virtual ~IRenderer() {}
 
 	virtual void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const = 0;
 	virtual void Resize(const size_t width, const size_t height) = 0;

@@ -1,7 +1,5 @@
 #include "Texture.h"
 
-#include <log.h>
-
 int Texture::m_numTextures = 0; //Set initial textures to 0
 /***********************************************************************************/
 Texture::Texture(const std::string_view ModelPath, const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode /*= ResourceLoader::ColorMode::RGB*/) :

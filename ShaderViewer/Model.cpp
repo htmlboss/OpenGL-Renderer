@@ -1,6 +1,5 @@
 #include "Model.h"
 
-#include <log.h>
 #include <assimp/postprocess.h>
 #include <iostream>
 
@@ -74,14 +73,12 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 	// Check if scene is not null and model is done loading
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cerr << "Assimp Error for " << m_name << ": " << importer.GetErrorString() << std::endl;
-		FILE_LOG(logERROR) << "Assimp Error for " << m_name << ": " << importer.GetErrorString();
 		return false;
 	}
 
 	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 
-	std::cout << "---Loaded textures:" << m_loadedTextures.size() << '\n';
 	std::cout << "\nLoaded Model: " << m_name << '\n';
 	return true;
 }
@@ -205,26 +202,20 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 		GLboolean skip = false;
 		for (auto& loadedTex : m_loadedTextures) {
-			std::cout << "Comparing: " << loadedTex.GetRelativePath() << " " << str.C_Str();
 
 			if (std::strcmp(loadedTex.GetRelativePath().c_str(), str.C_Str()) == 0) {
-				std::cout << " Equal!\n";
-				std::cout << "---------------\n";
 				textures.push_back(loadedTex);
 				skip = true;
 				break;
 			}
-			std::cout << " Not equal!\n";
 		}
 
-		//std::cout << "\nTexture path: " << str.C_Str();
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			
 			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
 			Texture texture(texDirPrefix, str.C_Str(), samplerName, Texture::WrapMode::REPEAT);
 			
 			std::cout << "Texture not found! Adding: " << texDirPrefix + str.C_Str() << '\n';
-			std::cout << "---------------\n";
 
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

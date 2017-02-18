@@ -3,21 +3,11 @@
 	#define _CRTDBG_MAP_ALLOC  
 	#include <stdlib.h>  
 	#include <crtdbg.h>
-
-	// Nvidia PerfKit
-	#define NVPM_INITGUID
-	#include "3rdParty/nvidia/perfkit/NvPmApi.Manager.h"
-	// Simple singleton implementation for grabbing the NvPmApi
-	static NvPmApiManager S_NVPMManager;
-	extern NvPmApiManager *GetNvPmApiManager() { return &S_NVPMManager; }
-	const NvPmApi *GetNvPmApi() { return S_NVPMManager.Api(); }
 #endif
 
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <log.h>
 
 // Other includes
 #include "GLShaderProgram.h"
@@ -41,11 +31,6 @@ int main() {
 
 	// Window dimensions
 	const GLuint WIDTH = 1280, HEIGHT = 720;
-
-	// Setup the logger
-	FILELog::ReportingLevel() = logDEBUG;
-	const auto log_fd = fopen("log.txt", "w");
-	Output2FILE::Stream() = log_fd;
 
 	// Init GLFW
 	if (!glfwInit()) {

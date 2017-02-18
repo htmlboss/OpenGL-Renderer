@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <log.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
@@ -45,12 +44,10 @@ std::string ResourceLoader::LoadTextFile(const std::string_view path) {
 /***********************************************************************************/
 unsigned char* ResourceLoader::LoadSTBImage(char const* filename, int* x, int* y, int* comp, const ColorMode mode) {
 
-	auto data = stbi_load(filename, x, y, comp, mode);
+	const auto data = stbi_load(filename, x, y, comp, mode);
 
 	if (data == nullptr) {
-		const auto error = "\nstb_image error (" + std::string(filename) + "): " + stbi_failure_reason();
-		FILE_LOG(logERROR) << error;
-		std::cerr << error;
+		std::cerr << "stb_image error (" + std::string(filename) + "): " + stbi_failure_reason() << '\n';
 		throw std::runtime_error("");
 	}
 
