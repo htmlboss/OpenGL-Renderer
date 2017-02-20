@@ -4,7 +4,6 @@
 #include <assimp/scene.h>
 
 #include "Mesh.h"
-#include <unordered_map>
 
 class Model {
 public:
@@ -24,7 +23,6 @@ private:
 
 	std::vector<Mesh> m_meshes;
 	std::vector<Texture> m_loadedTextures;
-	//std::unordered_map<const char*, Texture> m_loadedTextures;
 
 	const std::string m_name;
 	std::string m_path;

@@ -84,26 +84,7 @@ int main() {
 	lightingPassShader.SetUniformi("gNormal", 1);
 	lightingPassShader.SetUniformi("gAlbedoSpec", 2);
 
-	// - Colors
-	const GLuint NR_LIGHTS = 32;
-	std::vector<glm::vec3> lightPositions;
-	std::vector<glm::vec3> lightColors;
-	srand(13);
-	for (GLuint i = 0; i < NR_LIGHTS; ++i) {
-		// Calculate slightly random offsets
-		GLfloat xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-		GLfloat yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-		GLfloat zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-		lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
-		// Also calculate random color
-		GLfloat rColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-		GLfloat gColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-		GLfloat bColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-		lightColors.push_back(glm::vec3(rColor, gColor, bColor));
-	}
-
 	// Models
-	Light light(glm::vec3(2.3f, 2.0f, -3.0f), glm::vec3(1.0f), Light::POINTLIGHT);
 	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
 	//SkySphere sphere;
 
@@ -135,18 +116,6 @@ int main() {
 		lightingPassShader.Bind();
 		renderer.m_gBuffer->BindTextures();
 
-		// Also send light relevant uniforms
-		for (GLuint i = 0; i < lightPositions.size(); ++i)
-		{
-			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Position"), 1, &lightPositions[i][0]);
-			glUniform3fv(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Color"), 1, &lightColors[i][0]);
-			// Update attenuation parameters and calculate radius
-			static const GLfloat constant = 1.0f;
-			static const GLfloat linear = 0.7f;
-			static const GLfloat quadratic = 1.8f;
-			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Linear"), linear);
-			glUniform1f(lightingPassShader.GetUniformLoc("lights[" + std::to_string(i) + "].Quadratic"), quadratic);
-		}
 		lightingPassShader.SetUniform("viewPos", renderer.GetCameraPos());
 
 		/*

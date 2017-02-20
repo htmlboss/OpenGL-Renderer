@@ -195,15 +195,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
 	
 	std::vector<Texture> textures;
+
+	// Get all textures
 	for (GLuint c = 0; c < mat->GetTextureCount(type); ++c) {
-		aiString str;
-		mat->GetTexture(type, c, &str);
-		
+		aiString texturePath;
+		mat->GetTexture(type, c, &texturePath);
+
 		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 		GLboolean skip = false;
 		for (auto& loadedTex : m_loadedTextures) {
 
-			if (std::strcmp(loadedTex.GetRelativePath().c_str(), str.C_Str()) == 0) {
+			if (std::strcmp(loadedTex.GetRelativePath().c_str(), texturePath.C_Str()) == 0) {
 				textures.push_back(loadedTex);
 				skip = true;
 				break;
@@ -213,9 +215,9 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			
 			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
-			Texture texture(texDirPrefix, str.C_Str(), samplerName, Texture::WrapMode::REPEAT);
+			Texture texture(texDirPrefix, texturePath.C_Str(), samplerName, Texture::WrapMode::REPEAT);
 			
-			std::cout << "Texture not found! Adding: " << texDirPrefix + str.C_Str() << '\n';
+			std::cout << "Texture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
 
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

@@ -27,6 +27,8 @@ public:
 	Texture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
 	~Texture();
 
+	bool operator==(const Texture& rhs) const { return m_fullPath == rhs.GetFullPath(); }
+
 	//Bind 2D texture
 	void Bind2D();
 
