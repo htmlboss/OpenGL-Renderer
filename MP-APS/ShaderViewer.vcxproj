@@ -191,8 +191,6 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="Utils\Queue.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
