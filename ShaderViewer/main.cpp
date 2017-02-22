@@ -58,9 +58,6 @@ int main() {
 
 	// Start up OpenGL
 	GLRenderer renderer(WIDTH, HEIGHT);
-	
-	// For wireframe mode
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Shaders
 	GLShaderProgram lightShader("Lamp Shader", { Shader("shaders/lampvs.glsl", Shader::VertexShader), Shader("shaders/lampps.glsl", Shader::PixelShader) });
@@ -88,24 +85,24 @@ int main() {
 	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
 	//SkySphere sphere;
 
-
 	renderer.ClearColor();
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
+
 		renderer.Update(glfwGetTime());
 
 		// Geometry pass
 		renderer.BeginGeometryPass();
 
 		geometryPassShader.Bind();
-		
+
 		glm::mat4 model;
 		model = glm::scale(model, glm::vec3(0.1f));
 		geometryPassShader.SetUniform("model", model);
 		sponza.Draw(geometryPassShader);
-		
+
 		renderer.EndGeometryPass();
 		// Lighting Pass
 
@@ -165,11 +162,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 	if (key >= 0 && key < 1024) {
-		if (action == GLFW_PRESS) {
+		switch (action) {
+		case GLFW_PRESS:
 			KEY_PRESSED(key);
-		}
-		else if (action == GLFW_RELEASE) {
+			break;
+		case GLFW_RELEASE:
 			KEY_RELEASED(key);
+			break;
 		}
 	}
 }

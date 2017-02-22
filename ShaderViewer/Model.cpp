@@ -106,43 +106,33 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 	for (GLuint i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
-		glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
-		
-		// Positions
+
 		if (mesh->HasPositions()) {
-			vector.x = mesh->mVertices[i].x;
-			vector.y = mesh->mVertices[i].y;
-			vector.z = mesh->mVertices[i].z;
-			vertex.Position = vector;
+			vertex.Position.x = mesh->mVertices[i].x;
+			vertex.Position.y = mesh->mVertices[i].y;
+			vertex.Position.z = mesh->mVertices[i].z;
 		}
 		
-		// Normals
 		if (mesh->HasNormals()) {
-			vector.x = mesh->mNormals[i].x;
-			vector.y = mesh->mNormals[i].y;
-			vector.z = mesh->mNormals[i].z;
-			vertex.Normal = vector;
+			vertex.Normal.x = mesh->mNormals[i].x;
+			vertex.Normal.y = mesh->mNormals[i].y;
+			vertex.Normal.z = mesh->mNormals[i].z;
 		}
 		
-		// Tangents
 		if (mesh->HasTangentsAndBitangents()) {
-			vector.x = mesh->mTangents[i].x;
-			vector.y = mesh->mTangents[i].y;
-			vector.z = mesh->mTangents[i].z;
-			vertex.Tangent = vector;
+			vertex.Tangent.x = mesh->mTangents[i].x;
+			vertex.Tangent.y = mesh->mTangents[i].y;
+			vertex.Tangent.z = mesh->mTangents[i].z;
 		}
 
-		// Texture Coordinates
-		if (mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
-			glm::vec2 vec;
+		if (mesh->HasTextureCoords(0)) {
 			// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
+			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
 		}
 		else {
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+			vertex.TexCoords = glm::vec2(0.0f);
 		}
 		vertices.push_back(vertex);
 	}
@@ -169,7 +159,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		// 1. Diffuse maps
 		const auto diffuseMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		
 		// 2. Specular maps

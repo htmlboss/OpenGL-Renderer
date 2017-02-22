@@ -15,8 +15,6 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(m_skyboxVertices), &m_skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-	// Cleanup
-	glBindVertexArray(0);
 	
 	// Iterate through given directory and find files (labeled 1-6 for proper load order)
 	int i = 0; // Index for the loop
@@ -34,7 +32,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	int n = 0;
 	i = 0; // Index for the loop
 	for (auto& face : m_faces) {
-		image = ResourceLoader::LoadSTBImage(face.c_str(), &x, &y, &n, ResourceLoader::RGB); // 3 = STB_rgb
+		image = ResourceLoader::LoadSTBImage(face.c_str(), &x, &y, &n, ResourceLoader::RGB);
 		
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -83,7 +81,5 @@ void Skybox::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-	// Cleanup
-	glBindVertexArray(0);
 	glDepthFunc(GL_LESS); // Set depth function back to default
 }

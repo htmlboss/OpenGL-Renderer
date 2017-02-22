@@ -164,8 +164,6 @@ void GLRenderer::Update(const double glfwTimer) {
 		m_camera.ProcessKeyboard(Camera::DOWN, deltaTime);
 	}
 
-	// Update Mouse
-
 
 	// Update view matrix inside UBO
 	const auto view = m_camera.GetViewMatrix();

@@ -8,6 +8,16 @@
 #include "GLShaderProgram.h"
 
 /***********************************************************************************/
+struct Material {
+	Material(const std::string_view Name) : name(Name) {};
+
+	const std::string name;
+
+
+	bool wireframe = false;
+};
+
+/***********************************************************************************/
 struct Vertex {
 	glm::vec3 Position;
 	glm::vec3 Normal;

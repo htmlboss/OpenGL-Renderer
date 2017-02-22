@@ -6,7 +6,7 @@
 #include <glm//gtc/matrix_transform.hpp>
 
 /***********************************************************************************/
-Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType lightType) : m_position(Position), m_color(Color) {
+Light::Light(const Vec3 Position, const Vec3 Color, const LightType lightType) : m_position(Position), m_color(Color) {
 
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
@@ -18,16 +18,14 @@ Light::Light(const glm::vec3& Position, const glm::vec3& Color, const LightType 
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLvoid*>(0));
-
-	glBindVertexArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 /***********************************************************************************/
 Light::~Light() {
 }
 
-/***********************************************************************************/
+/***********************************************************************************
 void Light::Draw(GLShaderProgram& shader) {
 	
 	shader.Bind();
@@ -42,3 +40,4 @@ void Light::Draw(GLShaderProgram& shader) {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
+*/
