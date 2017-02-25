@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include "Utils.h"
+#include "Utils/Utils.h"
 
 #include <cstdarg>
 #include <string>
@@ -60,11 +60,13 @@ void Mesh::DrawInstanced(GLShaderProgram& shader) {
 
 /***********************************************************************************/
 void Mesh::bindTextures(GLShaderProgram& shader) {
+	using namespace Utils;
+
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 
 	GLuint index = 0;
-	for (auto& it : m_textures) {
+	for (const auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
 											  // Retrieve texture number (the N in diffuse_textureN)
 		
