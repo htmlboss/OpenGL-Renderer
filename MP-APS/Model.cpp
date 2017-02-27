@@ -65,7 +65,7 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_FindInvalidData |
 			aiProcess_FlipUVs |
-			aiProcess_CalcTangentSpace |
+			aiProcess_CalcTangentSpace | // Tangents and bitangents
 			aiProcess_OptimizeMeshes |
 			aiProcess_SplitLargeMeshes);
 	}
@@ -123,6 +123,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.Tangent.x = mesh->mTangents[i].x;
 			vertex.Tangent.y = mesh->mTangents[i].y;
 			vertex.Tangent.z = mesh->mTangents[i].z;
+
+			vertex.Bitangent.x = mesh->mBitangents[i].x;
+			vertex.Bitangent.y = mesh->mBitangents[i].y;
+			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 
 		if (mesh->HasTextureCoords(0)) {
@@ -130,8 +134,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
 			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
-		}
-		else {
+		} else {
 			vertex.TexCoords = glm::vec2(0.0f);
 		}
 		vertices.push_back(vertex);

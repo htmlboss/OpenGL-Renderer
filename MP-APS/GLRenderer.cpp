@@ -113,7 +113,7 @@ void GLRenderer::Render() const {
 	glBindVertexArray(0);
 }
 
-void GLRenderer::RenderSkybox(GLShaderProgram& shader) {
+void GLRenderer::RenderSkybox(GLShaderProgram& shader) const {
 	
 	GetDepthBuffer();
 	m_skybox->Draw(shader, m_camera.GetViewMatrix(), m_camera.GetProjMatrix(m_width, m_height));

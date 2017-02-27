@@ -9,20 +9,16 @@
 
 /***********************************************************************************/
 struct Material {
-	Material(const std::string_view Name) : name(Name) {};
-
-	const std::string name;
-
-
-	bool wireframe = false;
+	Material(const std::string_view Name);
 };
 
 /***********************************************************************************/
 struct Vertex {
 	glm::vec3 Position;
 	glm::vec3 Normal;
-	glm::vec3 Tangent;
 	glm::vec2 TexCoords;
+	glm::vec3 Tangent;
+	glm::vec3 Bitangent;
 };
 
 /***********************************************************************************/

@@ -20,7 +20,7 @@ public:
 	void EnableBlending() const override;
 	
 	void Render() const override;
-	void RenderSkybox(GLShaderProgram& shader);
+	void RenderSkybox(GLShaderProgram& shader) const;
 	static void UpdateMouse(const double xPos, const double yPos);
 
 	glm::vec3 GetCameraPos() const { return m_camera.GetPosition(); }
