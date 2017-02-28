@@ -30,7 +30,7 @@ int main() {
 #endif
 
 	// Window dimensions
-	const GLuint WIDTH = 1280, HEIGHT = 720;
+	const std::size_t WIDTH = 1280, HEIGHT = 720;
 
 	// Init GLFW
 	if (!glfwInit()) {

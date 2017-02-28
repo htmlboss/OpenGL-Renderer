@@ -9,6 +9,7 @@
 
 // Probably a better way of doing this
 std::array<bool, 1024> IRenderer::m_keys;
+std::vector<Light> IRenderer::m_lights;
 bool GLRenderer::m_firstMouse = true;
 double GLRenderer::m_prevX = 1280.0 / 2.0;
 double GLRenderer::m_prevY = 720.0 / 2.0;

@@ -3,11 +3,8 @@
 #include <GL/glew.h>
 #include <array>
 
-class GLShaderProgram;
-
-class Light {
-	typedef std::array<float, 3> Vec3;
-public:
+struct Light {
+	using Vec3 = std::array<float, 3>;
 	
 	enum LightType {
 		POINTLIGHT,
@@ -15,14 +12,10 @@ public:
 		DIRLIGHT
 	};
 
-	Light(const Vec3 Position, const Vec3 Color, const LightType lightType);
-	~Light();
+	Light(const Vec3 Position, const Vec3 Color, const LightType lightType) : m_position(Position), m_color(Color), m_lightType(lightType) {}
 
-	//void Draw(GLShaderProgram& shader);
+	Vec3 m_position, m_color;
+	const LightType m_lightType;
 
-private:
-	Vec3 m_position;
-	Vec3 m_color;
-
-	GLuint m_vao, m_vbo;
+	static GLuint m_vao, m_vbo;
 };

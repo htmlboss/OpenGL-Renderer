@@ -10,6 +10,7 @@ class SkySphere;
 class Skybox;
 
 class GLRenderer : public IRenderer {
+
 public:
 	GLRenderer(const size_t width, const size_t height);
 	~GLRenderer();
@@ -23,7 +24,7 @@ public:
 	void RenderSkybox(GLShaderProgram& shader) const;
 	static void UpdateMouse(const double xPos, const double yPos);
 
-	glm::vec3 GetCameraPos() const { return m_camera.GetPosition(); }
+	static glm::vec3 GetCameraPos() { return m_camera.GetPosition(); }
 	void Update(const double glfwTimer) override;
 
 	// Deferred
@@ -47,4 +48,7 @@ private:
 	// Mouse stuff
 	static bool m_firstMouse;
 	static double m_prevX, m_prevY;
+
+	// Lights
+	GLuint m_lightVAO, m_lightVBO;
 };
