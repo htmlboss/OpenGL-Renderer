@@ -24,7 +24,6 @@ public:
 	~Shader();
 
 private:
-	// OpenGL shader stuff
 	void compileShader(const GLchar* shaderSource, const GLShaderType shaderType);
 
 	GLuint m_shaderID;

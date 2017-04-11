@@ -56,14 +56,13 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 
 	glBindVertexArray(m_quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_screenQuadVertices.size(), m_screenQuadVertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_screenQuadVertices.size(), m_screenQuadVertices.data(), GL_STATIC_DRAW);
 	
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 	
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
 }
 
 /***********************************************************************************/

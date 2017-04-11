@@ -14,7 +14,7 @@ class Skybox;
 class GLRenderer : public IRenderer {
 
 public:
-	GLRenderer(const size_t width, const size_t height);
+	GLRenderer(const std::size_t width, const std::size_t height);
 	~GLRenderer();
 
 	void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const override;
@@ -27,7 +27,7 @@ public:
 	static glm::vec3 GetCameraPos() { return m_camera->GetPosition(); }
 	void Update(const double deltaTime) override;
 
-	static void Resize(const size_t width, const size_t height);
+	static void Resize(const std::size_t width, const std::size_t height);
 
 	// Update view from mouse movement
 	static void UpdateCameraView(double xPos, double yPos);

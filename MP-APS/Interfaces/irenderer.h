@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Vertex.h"
+
 #include <array>
 
 #define KEY_PRESSED(KEY) (IRenderer::m_keys.at(KEY) = true, (void)0 )
@@ -27,12 +29,12 @@ public:
 
 protected:
 
-	const std::array<float, 20> m_screenQuadVertices {
-		// Positions			// GLTexture Coords
-		-1.0f, 1.0f, 0.0f,		0.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,		1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f,		1.0f, 0.0f
+	const std::array<Vertex, 4> m_screenQuadVertices {
+				// Positions			// GLTexture Coords
+		Vertex({-1.0f, 1.0f, 0.0f},		{0.0f, 1.0f}),
+		Vertex({-1.0f, -1.0f, 0.0f},	{0.0f, 0.0f}),
+		Vertex({1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}),
+		Vertex({1.0f, -1.0f, 0.0f},		{1.0f, 0.0f})
 	};
 
 	const std::array<float, 108> m_cubeVertices {

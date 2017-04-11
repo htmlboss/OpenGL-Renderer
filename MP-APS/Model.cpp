@@ -35,7 +35,7 @@ void Model::DrawInstanced(GLShaderProgram& shader) {
 
 /***********************************************************************************/
 bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) {
-	std::cout << "\nLoading model: " << m_name << '\n';
+	std::cout << "---Loading model: " << m_name << '\n';
 	
 	Assimp::Importer importer;
 	const aiScene* scene = nullptr;
@@ -61,7 +61,9 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_FindInvalidData |
 			aiProcess_FlipUVs |
-			aiProcess_CalcTangentSpace | // Tangents and bitangents
+			aiProcess_CalcTangentSpace |
+			aiProcess_GenSmoothNormals |
+			aiProcess_ImproveCacheLocality |
 			aiProcess_OptimizeMeshes |
 			aiProcess_SplitLargeMeshes);
 	}
@@ -75,7 +77,7 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 
-	std::cout << "\nLoaded Model: " << m_name << '\n';
+	std::cout << "---Loaded Model: " << m_name << '\n';
 	return true;
 }
 
@@ -100,36 +102,36 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<GLuint> indices;
 	std::vector<GLTexture> textures;
 
-	for (GLuint i = 0; i < mesh->mNumVertices; ++i) {
+	for (std::size_t i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
 
 		if (mesh->HasPositions()) {
-			vertex.Position.x = mesh->mVertices[i].x;
-			vertex.Position.y = mesh->mVertices[i].y;
-			vertex.Position.z = mesh->mVertices[i].z;
+			vertex.Position->x = mesh->mVertices[i].x;
+			vertex.Position->y = mesh->mVertices[i].y;
+			vertex.Position->z = mesh->mVertices[i].z;
 		}
 		
 		if (mesh->HasNormals()) {
-			vertex.Normal.x = mesh->mNormals[i].x;
-			vertex.Normal.y = mesh->mNormals[i].y;
-			vertex.Normal.z = mesh->mNormals[i].z;
+			vertex.Normal->x = mesh->mNormals[i].x;
+			vertex.Normal->y = mesh->mNormals[i].y;
+			vertex.Normal->z = mesh->mNormals[i].z;
 		}
 		
 		if (mesh->HasTangentsAndBitangents()) {
-			vertex.Tangent.x = mesh->mTangents[i].x;
-			vertex.Tangent.y = mesh->mTangents[i].y;
-			vertex.Tangent.z = mesh->mTangents[i].z;
+			vertex.Tangent->x = mesh->mTangents[i].x;
+			vertex.Tangent->y = mesh->mTangents[i].y;
+			vertex.Tangent->z = mesh->mTangents[i].z;
 
-			vertex.Bitangent.x = mesh->mBitangents[i].x;
-			vertex.Bitangent.y = mesh->mBitangents[i].y;
-			vertex.Bitangent.z = mesh->mBitangents[i].z;
+			vertex.Bitangent->x = mesh->mBitangents[i].x;
+			vertex.Bitangent->y = mesh->mBitangents[i].y;
+			vertex.Bitangent->z = mesh->mBitangents[i].z;
 		}
 
 		if (mesh->HasTextureCoords(0)) {
 			// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+			vertex.TexCoords->x = mesh->mTextureCoords[0][i].x;
+			vertex.TexCoords->y = mesh->mTextureCoords[0][i].y;
 		} else {
 			vertex.TexCoords = glm::vec2(0.0f);
 		}
@@ -137,10 +139,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	// Get indices from each face
-	for (GLuint i = 0; i < mesh->mNumFaces; ++i) {
-		aiFace face = mesh->mFaces[i];
+	for (std::size_t i = 0; i < mesh->mNumFaces; ++i) {
+		const aiFace face = mesh->mFaces[i];
 		
-		for (GLuint j = 0; j < face.mNumIndices; ++j) {
+		for (std::size_t j = 0; j < face.mNumIndices; ++j) {
 			indices.emplace_back(face.mIndices[j]);
 		}
 	}
@@ -163,16 +165,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-		/*
-		// 3. Reflectance maps
-		const auto reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
-		textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
-		
-		// 4. Normal maps
-		const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		*/
-
 	}
 
 	// Return a mesh object created from the extracted mesh data
@@ -185,7 +177,7 @@ std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType typ
 	std::vector<GLTexture> textures;
 
 	// Get all textures
-	for (GLuint c = 0; c < mat->GetTextureCount(type); ++c) {
+	for (std::size_t c = 0; c < mat->GetTextureCount(type); ++c) {
 		aiString texturePath;
 		mat->GetTexture(type, c, &texturePath);
 
