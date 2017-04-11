@@ -5,7 +5,7 @@
 #include <string>
 
 /***********************************************************************************/
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures) :
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) :
 	m_vertices(vertices), 
 	m_indices(indices), 
 	m_textures(textures),
@@ -64,6 +64,7 @@ void Mesh::bindTextures(GLShaderProgram& shader) {
 
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
+	GLuint normalNr = 1;
 
 	GLuint index = 0;
 	for (const auto& it : m_textures) {
@@ -81,6 +82,10 @@ void Mesh::bindTextures(GLShaderProgram& shader) {
 
 		case str2int("texture_specular"):
 			number = std::to_string(specularNr++);
+			break;
+
+		case str2int("texture_normal"):
+			number = std::to_string(normalNr++);
 			break;
 		}
 
@@ -116,7 +121,7 @@ void Mesh::setupMesh() {
 	// Vertex Normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Normal)));
-	// Vertex Texture Coords
+	// Vertex GLTexture Coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
 }

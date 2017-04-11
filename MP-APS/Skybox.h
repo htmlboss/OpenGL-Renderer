@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <array>
 
-#include "GLShaderProgram.h"
+#include "GL/GLShaderProgram.h"
 
 class Skybox {
 public:
@@ -18,7 +18,7 @@ private:
 	std::array<std::string, 6> m_faces; // A skybox only ever has 6 faces, so an array is fine (and safer perhaps)
 	GLuint m_vao, m_vbo, m_textureID;
 
-	const std::array<float, 108> m_skyboxVertices = {
+	const std::array<float, 108> m_skyboxVertices {
 		// Positions          
 		-1.0f,  1.0f, -1.0f,
 		-1.0f, -1.0f, -1.0f,

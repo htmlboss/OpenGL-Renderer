@@ -1,63 +1,33 @@
 #include "Texture.h"
 
-int Texture::m_numTextures = 0; //Set initial textures to 0
 /***********************************************************************************/
-Texture::Texture(const std::string_view ModelPath, const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode /*= ResourceLoader::ColorMode::RGB*/) :
-	m_texturePath(TexturePath), 
-	m_samplerName(samplerName) {
-	
-	m_fullPath = ModelPath;
-	m_fullPath += std::string(TexturePath);
-
-	glGenTextures(1, &m_texture);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	// Set texture parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	// Texture filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // linearly interpolates between the two closest mipmaps and samples the texture via linear interpolation.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Mipmaps do not apply to magnification.
-	// Anisotropic filtering
-	GLfloat aniso = 0.0f;
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso / 2);
-
-	// Load image
-	int x, y;
-	int n = 0;
-	const auto data = ResourceLoader::LoadSTBImage(m_fullPath.c_str(), &x, &y, &n, colorMode);
-	
-	if (!data) {
-		throw std::runtime_error("");
-	}
-
-	switch (colorMode) {
-	case ResourceLoader::GREY:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		break;
-
-	case ResourceLoader::ColorMode::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		break;
-
-	case ResourceLoader::ColorMode::RGB_A:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		break;
-	}
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// Cleanup
-	glBindTexture(GL_TEXTURE_2D, 0);
-	delete[] data;
-
-	++m_numTextures;
+Texture::Texture(unsigned char* data, const std::size_t width, const std::size_t height, const std::size_t components, const std::size_t ID) : 
+																																				m_width(width), 
+																																				m_height(height), 
+																																				m_components(components),
+																																				m_data(data),
+																																				m_texID(ID) {
+	data = nullptr;
 }
 
 /***********************************************************************************/
-Texture::~Texture() {
+Texture::Texture(Texture& other) :	m_width(other.m_width), 
+									m_height(other.m_height), 
+									m_components(other.m_components), 
+									m_data(other.m_data),
+									m_texID(other.m_texID) {
+	other.m_data = nullptr;
 }
-
-/***********************************************************************************/
-void Texture::Bind2D() {
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+/*
+/***********************************************************************************
+Texture& Texture::operator=(const Texture& rhs) {
+	m_data.reset(new unsigned char(*rhs.m_data));
+	return *this;
 }
+*/
+/***********************************************************************************
+Texture& Texture::operator=(Texture&& rhs) {
+	m_data = std::move(rhs.m_data);
+	return *this;
+}
+*/

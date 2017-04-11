@@ -1,11 +1,12 @@
 #pragma once
 
 #include <vector>
-#include <GL/glew.h>
+
+#include "glad/glad.h"
 #include <glm/detail/type_vec3.hpp>
 
-#include "Texture.h"
-#include "GLShaderProgram.h"
+#include "GL/GLTexture.h"
+#include "GL/GLShaderProgram.h"
 
 /***********************************************************************************/
 struct Material {
@@ -24,7 +25,7 @@ struct Vertex {
 /***********************************************************************************/
 class Mesh {
 public:
-	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
 	~Mesh();
 	
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
@@ -40,7 +41,7 @@ private:
 	GLuint m_vao, m_vbo, m_ebo, m_instanceVBO;
 	std::vector<Vertex> m_vertices;
 	std::vector<GLuint> m_indices;
-	std::vector<Texture> m_textures;
+	std::vector<GLTexture> m_textures;
 	std::vector<glm::vec3> m_instanceOffsets;
 };
 

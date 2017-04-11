@@ -5,11 +5,11 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <GL/glew.h>
+#include "glad/glad.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "GLShaderProgram.h"
+#include "GL/GLShaderProgram.h"
 
 class HUDText {
 public:

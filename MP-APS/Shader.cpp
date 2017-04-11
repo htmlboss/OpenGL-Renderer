@@ -1,12 +1,12 @@
 #include "Shader.h"
-#include "ResourceLoader.h"
+#include "ResourceManager.h"
 
 #include <iostream>
 
 /***********************************************************************************/
 Shader::Shader(const std::string_view shaderPath, const GLShaderType type) {
 
-	const auto shaderCode = ResourceLoader::LoadTextFile(shaderPath);
+	const auto shaderCode = ResourceManager::GetInstance().LoadTextFile(shaderPath);
 	compileShader(shaderCode.c_str(), type);
 }
 

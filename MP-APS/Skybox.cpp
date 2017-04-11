@@ -1,10 +1,9 @@
 #include "Skybox.h"
-#include "Texture.h"
+#include "ResourceManager.h"
 
-// Easier to use TS library than hard-code texture files
 #include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
 
+namespace fs = std::experimental::filesystem;
 /***********************************************************************************/
 Skybox::Skybox(const std::string& TextureDirectory) {
 	
@@ -18,8 +17,8 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	
 	// Iterate through given directory and find files (labeled 1-6 for proper load order)
 	int i = 0; // Index for the loop
-	for (auto& it : fs::directory_iterator(TextureDirectory)) {
-		m_faces.at(i) = it.path().generic_string(); // put texture paths into std::array for loading
+	for (const auto& it : fs::directory_iterator(TextureDirectory)) {
+		m_faces[i] = it.path().generic_string(); // put texture paths into std::array for loading
 		++i;
 	}
 
@@ -31,15 +30,11 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	int x, y;
 	int n = 0;
 	i = 0; // Index for the loop
-	for (auto& face : m_faces) {
-		image = ResourceLoader::LoadSTBImage(face.c_str(), &x, &y, &n, ResourceLoader::RGB);
-		
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	for (const auto& face : m_faces) {
+		const auto img = ResourceManager::GetInstance().GetTexture(face, ResourceManager::ColorMode::RGB);
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, img->GetWidth(), img->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, img->GetData());
 		glGenerateMipmap(GL_TEXTURE_2D);
-		
-		// Cleanup
-		delete[] image;
-		image = nullptr;
 		
 		++i;
 	}
@@ -54,10 +49,6 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	GLfloat aniso = 0.0f;
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-
-	// Cleanup
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
 }
 
 /***********************************************************************************/

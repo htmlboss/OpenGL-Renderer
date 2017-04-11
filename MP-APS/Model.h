@@ -5,10 +5,12 @@
 
 #include "Mesh.h"
 
+#include <string_view>
+
 class Model {
 public:
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
-	~Model();
+	~Model() = default;
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
 
@@ -19,10 +21,10 @@ private:
 	bool loadModel(const std::string_view Path, const bool flipWindingOrder);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName);
+	std::vector<GLTexture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName);
 
 	std::vector<Mesh> m_meshes;
-	std::vector<Texture> m_loadedTextures;
+	std::vector<GLTexture> m_loadedTextures;
 
 	const std::string m_name;
 	std::string m_path;

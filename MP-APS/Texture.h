@@ -1,49 +1,26 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <string_view>
-#include "ResourceLoader.h"
+#include <memory>
 
 class Texture {
-
 public:
+	Texture(unsigned char* data, const std::size_t width, const std::size_t height, const std::size_t components, const std::size_t ID);
+	virtual ~Texture() { delete[] m_data; }
 
-	// Texture wrap modes passed to OpenGL
-	enum WrapMode {
-		REPEAT = GL_REPEAT,
-		MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
-		EDGE_CLAMP = GL_CLAMP_TO_EDGE,
-		BORDER_CLAMP = GL_CLAMP_TO_BORDER
-	};
+	Texture(Texture& other);
+	Texture& operator=(const Texture& rhs);
+	Texture& operator=(Texture&& rhs);
 
-	enum TextureType {
-		DIFFUSE = 0,
-		HEIGHT,
-		SPECULAR,
-		AMBIENT // aka reflection map
-	};
+	bool operator==(const Texture& rhs) const { return this->m_texID == rhs.m_texID; }
 
-	//Texture();
-	Texture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceLoader::ColorMode colorMode = ResourceLoader::ColorMode::RGB);
-	~Texture();
+	auto GetWidth() const { return m_width; }
+	auto GetHeight() const { return m_height; }
 
-	bool operator==(const Texture& rhs) const { return m_fullPath == rhs.GetFullPath(); }
-
-	//Bind 2D texture
-	void Bind2D();
-
-	// Returns the global number of UNIQUE textures loaded
-	static int GetLoadedTextures() { return m_numTextures; }
-
-	GLuint GetTexture() const { return m_texture; }
-	std::string GetFullPath() const { return m_fullPath; }
-	std::string GetRelativePath() const { return m_texturePath; }
-	std::string GetSampler() const { return m_samplerName; }
+	auto GetData() const { return m_data; }
 
 private:
-	static int m_numTextures;
-	GLuint m_texture;
-	std::string m_samplerName;
-	std::string m_texturePath, m_fullPath;
+	const std::size_t m_texID;
+	const std::size_t m_width, m_height, m_components;
+	unsigned char* m_data;
 };
 

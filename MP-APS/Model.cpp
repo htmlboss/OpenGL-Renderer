@@ -12,10 +12,6 @@ Model::Model(const std::string_view Path, const std::string_view Name, const boo
 }
 
 /***********************************************************************************/
-Model::~Model() {
-}
-
-/***********************************************************************************/
 void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets) {
 	// Pass list to each mesh
 	for (auto& mesh : m_meshes) {
@@ -102,7 +98,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
-	std::vector<Texture> textures;
+	std::vector<GLTexture> textures;
 
 	for (GLuint i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
@@ -140,13 +136,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		vertices.push_back(vertex);
 	}
 
-	// Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+	// Get indices from each face
 	for (GLuint i = 0; i < mesh->mNumFaces; ++i) {
 		aiFace face = mesh->mFaces[i];
 		
-		// Retrieve all indices of the face and store them in the indices vector
 		for (GLuint j = 0; j < face.mNumIndices; ++j) {
-			indices.push_back(face.mIndices[j]);
+			indices.emplace_back(face.mIndices[j]);
 		}
 	}
 
@@ -172,11 +167,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// 3. Reflectance maps
 		const auto reflectanceMaps = loadMatTextures(material, aiTextureType_AMBIENT, "texture_reflectance");
 		textures.insert(textures.end(), reflectanceMaps.begin(), reflectanceMaps.end());
-
+		
 		// 4. Normal maps
 		const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		*/
+
 	}
 
 	// Return a mesh object created from the extracted mesh data
@@ -184,9 +180,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 }
 
 /***********************************************************************************/
-std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
+std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
 	
-	std::vector<Texture> textures;
+	std::vector<GLTexture> textures;
 
 	// Get all textures
 	for (GLuint c = 0; c < mat->GetTextureCount(type); ++c) {
@@ -207,9 +203,9 @@ std::vector<Texture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type,
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			
 			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
-			Texture texture(texDirPrefix, texturePath.C_Str(), samplerName, Texture::WrapMode::REPEAT);
+			GLTexture texture(texDirPrefix, texturePath.C_Str(), samplerName, GLTexture::WrapMode::REPEAT);
 			
-			std::cout << "Texture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
+			std::cout << "GLTexture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
 
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

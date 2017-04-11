@@ -1,5 +1,5 @@
 #include "SkySphere.h"
-#include "GLShaderProgram.h"
+#include "GL/GLShaderProgram.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

@@ -27,7 +27,7 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	// Diffuse & Specular buffer (Gonna store specular in the alpha channel)
 	glGenTextures(1, &m_gDiffuseSpec);
 	glBindTexture(GL_TEXTURE_2D, m_gDiffuseSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr); // 8 bytes is sufficient
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_gDiffuseSpec, 0);
@@ -44,7 +44,7 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 
 #ifdef _DEBUG
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Framebuffer not complete!" << std::endl;
+		std::cerr << "Framebuffer not complete!\n";
 	}
 #endif
 	// Cleanup
@@ -59,6 +59,26 @@ GBuffer::~GBuffer() {
 void GBuffer::BindGBuffer() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/***********************************************************************************/
+void GBuffer::Resize(const std::size_t width, std::size_t height) {
+	m_width = width;
+	m_height = height;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	// Resize all FBOs and RBO
+	glBindTexture(GL_TEXTURE_2D, m_gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+	glBindTexture(GL_TEXTURE_2D, m_gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+	glBindTexture(GL_TEXTURE_2D, m_gDiffuseSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, m_rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 }
 
 /***********************************************************************************/

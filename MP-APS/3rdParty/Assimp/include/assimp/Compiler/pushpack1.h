@@ -8,6 +8,7 @@
 // MSVC 7,8,9
 // GCC
 // BORLAND (complains about 'pack state changed but not reverted', but works)
+// Clang
 //
 //
 // USAGE:
@@ -25,14 +26,18 @@
 #	pragma pack(push,1)
 #	define PACK_STRUCT
 #elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
+#	if !defined(HOST_MINGW)
+#		define PACK_STRUCT	__attribute__((__packed__))
+#	else
+#		define PACK_STRUCT	__attribute__((gcc_struct, __packed__))
+#	endif
 #else
 #	error Compiler not supported
 #endif
 
 #if defined(_MSC_VER)
 
-// C4103: Packing was changed after the inclusion of the header, propably missing #pragma pop
+// C4103: Packing was changed after the inclusion of the header, probably missing #pragma pop
 #	pragma warning (disable : 4103) 
 #endif
 

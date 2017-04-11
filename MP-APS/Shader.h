@@ -1,8 +1,8 @@
 #pragma once
-#include <GL/glew.h>
+#include "glad/glad.h"
 
+#include <string_view>
 #include <array>
-#include <optional>
 
 class GLShaderProgram;
 
@@ -30,8 +30,5 @@ private:
 	GLuint m_shaderID;
 	GLint m_success;
 	std::array<GLchar, 1024> m_infoLog;
-	//std::optional<GLuint> m_shaderID;
-	//std::optional<GLint> m_success; //  To check for compile-time errors
-	//std::optional< std::array<GLchar, 1024> > m_infoLog;
 };
 
