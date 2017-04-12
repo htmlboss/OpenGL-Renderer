@@ -15,7 +15,7 @@ public:
 
 private:
 	void update();
-	void shutdown();
+	void shutdown() const;
 
 	enum class engineState {
 		LOADING,

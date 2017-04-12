@@ -7,14 +7,16 @@
 #include <string_view>
 #include <iostream>
 
-#include "../Shader.h"
+#include "GLShader.h"
 
 class GLShaderProgram {
 public:
-	GLShaderProgram(const std::string_view programName, std::initializer_list<Shader> shaders);
+	GLShaderProgram(const std::string_view programName, std::initializer_list<GLShader> shaders);
 	~GLShaderProgram();
 
 	void Bind() const;
+
+	void DeleteProgram() const;
 
 	void AddUniform(const std::string_view uniform);
 	void AddUniforms(const std::initializer_list<std::string_view> uniforms);
@@ -26,7 +28,7 @@ public:
 	void SetUniform(const std::string_view uniformName, const glm::mat4x4& value) { glUniformMatrix4fv(m_uniformMap.at(uniformName.data()), 1, GL_FALSE, value_ptr(value)); }
 
 	GLint GetUniformLoc(const std::string& Uniform) const {
-		GLint loc = glGetUniformLocation(m_program, Uniform.c_str());
+		GLint loc = glGetUniformLocation(m_programID, Uniform.c_str());
 		if (loc == -1) {
 			std::cerr << "Uniform: does not exist.\n";
 		}
@@ -34,10 +36,11 @@ public:
 	}
 
 private:
+	void linkAndValidate();
+
 	std::map<std::string_view, GLint> m_uniformMap;
 
-	GLuint m_program;
-	bool m_linked;
+	GLuint m_programID;
 	const std::string m_programName;
 
 	//  To check for compile-time errors

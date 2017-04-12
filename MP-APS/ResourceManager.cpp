@@ -13,7 +13,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 	
 	std::ifstream in(path.data(), std::ios::in);
 	if (!in) {
-		throw std::runtime_error("Failed to open: " + *path.data() + errno);
+		std::cerr << "Failed to open: " + *path.data()  << " " << errno << '\n';
 	}
 
 	return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());

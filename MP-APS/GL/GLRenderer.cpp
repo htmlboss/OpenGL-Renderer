@@ -1,7 +1,6 @@
 #include "GLRenderer.h"
 
 #include "../Skybox.h"
-#include "GLShaderProgram.h"
 #include "../Input.h"
 
 #include <GLFW/glfw3.h>
@@ -40,6 +39,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 
 	m_gBuffer = std::make_unique<GBuffer>(GBuffer(width, height));
 	m_skybox = std::make_unique<Skybox>(Skybox("skybox/ocean/"));
+	//m_shaderSSAO = std::make_unique<GLShaderProgram>(GLShaderProgram("SSAO Shader", {}));
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);

@@ -1,60 +1,43 @@
 #include "GLShaderProgram.h"
+
 #include <iostream>
 
 /***********************************************************************************/
-GLShaderProgram::GLShaderProgram(const std::string_view programName, std::initializer_list<Shader> shaders) : m_programName(programName), m_linked(false) {
+GLShaderProgram::GLShaderProgram(const std::string_view programName, std::initializer_list<GLShader> shaders) : m_programName(programName) {
 	
-	m_program = glCreateProgram();
-	// Attach shaders
-	for (auto& shader : shaders) {
-		glAttachShader(m_program, shader.m_shaderID);
+	m_programID = glCreateProgram();
+
+	for (const auto& shader : shaders) {
+		shader.AttachShader(m_programID);
 	}
 
-	glLinkProgram(m_program);
-	// Check for linking errors
-	glGetProgramiv(m_program, GL_LINK_STATUS, &m_success);
-	if (!m_success) {
-		glGetProgramInfoLog(m_program, m_infoLog.size(), nullptr, m_infoLog.data());
-		std::cerr << "Shader Error: " << m_programName.c_str() << " failed to link:\n" << m_infoLog.data() << std::endl;
-		throw std::runtime_error("");
+	try {
+		linkAndValidate();
 	}
-	m_linked = true;
-
-	// Validate
-	glValidateProgram(m_program);
-	glGetProgramiv(m_program, GL_VALIDATE_STATUS, &m_success);
-	if (!m_success) {
-		glGetProgramInfoLog(m_program, m_infoLog.size(), nullptr, m_infoLog.data());
-		std::cerr << "Shader Error: " << m_programName.c_str() << " failed to validate:\n" << m_infoLog.data() << std::endl;
+	catch (const std::runtime_error& err) {
+		std::cerr << programName << " error: " << err.what() << '\n';
 	}
 
 	// Cleanup
 	for (auto& shader : shaders) {
-		glDetachShader(m_program, shader.m_shaderID);
-		glDeleteShader(shader.m_shaderID);
+		shader.DetachShader(m_programID);
+		shader.DeleteShader();
 	}
 }
 
 /***********************************************************************************/
 GLShaderProgram::~GLShaderProgram() {
-	glDeleteProgram(m_program);
 }
 
 /***********************************************************************************/
 void GLShaderProgram::Bind() const {
-	if (m_linked) {
-		glUseProgram(m_program);
-	}
-	else {
-		std::cerr << m_programName.c_str() << " is not linked! Failed to bind.\n";
-		throw std::runtime_error("");
-	}
+	glUseProgram(m_programID);
 }
 
 /***********************************************************************************/
 void GLShaderProgram::AddUniform(const std::string_view uniform) {
 
-	const GLint uniformLoc = glGetUniformLocation(m_program, uniform.data());
+	const GLint uniformLoc = glGetUniformLocation(m_programID, uniform.data());
 	
 	if (uniformLoc == -1) {
 		std::cerr << "Error: " << uniform.data() << " uniform not found in shader: " << m_programName.c_str() << std::endl;
@@ -68,5 +51,28 @@ void GLShaderProgram::AddUniforms(const std::initializer_list<std::string_view> 
 	
 	for (const auto& it : uniforms) {
 		AddUniform(it);
+	}
+}
+
+/***********************************************************************************/
+void GLShaderProgram::DeleteProgram() const {
+	glDeleteProgram(m_programID);
+}
+
+/***********************************************************************************/
+void GLShaderProgram::linkAndValidate() {
+	
+	glLinkProgram(m_programID);
+	glGetProgramiv(m_programID, GL_LINK_STATUS, &m_success);
+	if (!m_success) {
+		glGetProgramInfoLog(m_programID, m_infoLog.size(), nullptr, m_infoLog.data());
+		throw std::runtime_error(m_infoLog.data());
+	}
+
+	glValidateProgram(m_programID);
+	glGetProgramiv(m_programID, GL_VALIDATE_STATUS, &m_success);
+	if (!m_success) {
+		glGetProgramInfoLog(m_programID, m_infoLog.size(), nullptr, m_infoLog.data());
+		throw std::runtime_error(m_infoLog.data());
 	}
 }

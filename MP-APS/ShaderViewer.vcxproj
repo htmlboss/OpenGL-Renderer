@@ -161,6 +161,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GL\GLRenderer.cpp" />
+    <ClCompile Include="GL\GLShader.cpp" />
     <ClCompile Include="GL\GLShaderProgram.cpp" />
     <ClCompile Include="GL\GLTexture.cpp" />
     <ClCompile Include="GL\GLWindow.cpp" />
@@ -169,7 +170,6 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
-    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SkySphere.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -181,6 +181,7 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GL\GLRenderer.h" />
+    <ClInclude Include="GL\GLShader.h" />
     <ClInclude Include="GL\GLShaderProgram.h" />
     <ClInclude Include="GL\GLTexture.h" />
     <ClInclude Include="GL\GLWindow.h" />
@@ -191,7 +192,6 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ResourceManager.h" />
-    <ClInclude Include="Shader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SkySphere.h" />
     <ClInclude Include="Texture.h" />

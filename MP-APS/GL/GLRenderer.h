@@ -6,9 +6,10 @@
 #include "../GBuffer.h"
 #include "../Camera.h"
 
+#include "GLShaderProgram.h"
+
 #include <memory>
 
-class GLShaderProgram;
 class Skybox;
 
 class GLRenderer : public IRenderer {
@@ -18,7 +19,9 @@ public:
 	~GLRenderer();
 
 	void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const override;
+	
 	void GetDepthBuffer() const override;
+	
 	void EnableBlending() const override;
 	
 	void Render() const override;
@@ -49,6 +52,7 @@ private:
 	glm::mat4 m_projMatrix;
 
 	std::unique_ptr<Skybox> m_skybox;
+	std::unique_ptr<GLShaderProgram> m_shaderSSAO;
 
 	static bool m_shouldResize;
 

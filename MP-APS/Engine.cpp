@@ -8,27 +8,22 @@
 /***********************************************************************************/
 Engine::Engine(const std::size_t width, const std::size_t height) : m_engineState(engineState::LOADING), 
 																	m_mainWindow(new GLWindow(width, height, "MP-APS")), 
-																	m_renderer(new GLRenderer(width, height)) 
-																	{
+																	m_renderer(new GLRenderer(width, height)) {
 }
 
 /***********************************************************************************/
 void Engine::Execute() {
 
-	// Shaders
-	GLShaderProgram lightShader("Lamp Shader", { Shader("shaders/lampvs.glsl", Shader::VertexShader), Shader("shaders/lampps.glsl", Shader::PixelShader) });
-	lightShader.AddUniforms({ "model", "lightColor" });
-
-	GLShaderProgram sphereShader("Sphere Shader", { Shader("shaders/spherevs.glsl", Shader::VertexShader), Shader("shaders/sphereps.glsl", Shader::PixelShader) });
-	sphereShader.AddUniforms({ "projection", "view", "model"});
-	
-	GLShaderProgram skyboxShader("Skybox Shader", { Shader("shaders/skyboxvs.glsl", Shader::VertexShader), Shader("shaders/skyboxps.glsl", Shader::PixelShader) });
+	GLShaderProgram skyboxShader("Skybox Shader", { GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
+													GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) });
 	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
 
-	GLShaderProgram geometryPassShader("Deferred Geometry Pass Shader", { Shader("shaders/geometrypassvs.glsl", Shader::VertexShader), Shader("shaders/geometrypassps.glsl", Shader::PixelShader) });
+	GLShaderProgram geometryPassShader("Deferred Geometry Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"),  GLShader::ShaderType::VertexShader), 
+																			GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader) });
 	geometryPassShader.AddUniforms({ "model", "normalMatrix", "texture_diffuse1", "texture_specular1"});
 
-	GLShaderProgram lightingPassShader("Deferred Lighting Pass Shader", { Shader("shaders/lightingpassvs.glsl", Shader::VertexShader), Shader("shaders/lightingpassps.glsl", Shader::PixelShader) });
+	GLShaderProgram lightingPassShader("Deferred Lighting Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"),  GLShader::ShaderType::VertexShader), 
+																			GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::PixelShader) });
 	lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
 	
 	// Set samplers
@@ -38,7 +33,7 @@ void Engine::Execute() {
 	lightingPassShader.SetUniformi("gAlbedoSpec", 2);
 
 	// Models
-	Model sponza("models/crytek-sponza/sponza.obj", "Crytek Sponza");
+	Model cathedral("models/cathedral/sibenik.obj", "Sibenik Cathedral");
 
 
 	m_engineState = engineState::READY;
@@ -54,16 +49,16 @@ void Engine::Execute() {
 		geometryPassShader.Bind();
 
 		glm::mat4 model;
-		model = glm::scale(model, glm::vec3(0.1f));
+		model = glm::scale(model, glm::vec3(3.0f));
 		geometryPassShader.SetUniform("model", model);
 		geometryPassShader.SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-		sponza.Draw(geometryPassShader);
+		cathedral.Draw(geometryPassShader);
 
 		m_renderer->EndGeometryPass();
 		
 		// Lighting pass
 		m_renderer->BeginLightingPass();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 		lightingPassShader.Bind();
 		m_renderer->m_gBuffer->BindTextures();
 
@@ -86,6 +81,6 @@ void Engine::update() {
 }
 
 /***********************************************************************************/
-void Engine::shutdown() {
+void Engine::shutdown() const {
 	m_mainWindow->DestroyWindow();
 }
