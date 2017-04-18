@@ -18,22 +18,10 @@ void Engine::Execute() {
 													GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) });
 	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
 
-	GLShaderProgram geometryPassShader("Deferred Geometry Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"),  GLShader::ShaderType::VertexShader), 
-																			GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader) });
-	geometryPassShader.AddUniforms({ "model", "normalMatrix", "texture_diffuse1", "texture_specular1"});
-
-	GLShaderProgram lightingPassShader("Deferred Lighting Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"),  GLShader::ShaderType::VertexShader), 
-																			GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::PixelShader) });
-	lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
-	
-	// Set samplers
-	lightingPassShader.Bind();
-	lightingPassShader.SetUniformi("gPosition", 0);
-	lightingPassShader.SetUniformi("gNormal", 1);
-	lightingPassShader.SetUniformi("gAlbedoSpec", 2);
-
 	// Models
-	Model cathedral("models/cathedral/sibenik.obj", "Sibenik Cathedral");
+	auto cathedral = std::make_shared<Model>("models/cathedral/sibenik.obj", "Sibenik Cathedral");
+	cathedral->Scale(glm::vec3(3.0f));
+	m_renderer->AddModels(cathedral);
 
 
 	m_engineState = engineState::READY;
@@ -44,25 +32,10 @@ void Engine::Execute() {
 		this->update();
 
 		// Geometry pass
-		m_renderer->BeginGeometryPass();
+		m_renderer->DoGeometryPass();
 
-		geometryPassShader.Bind();
-
-		glm::mat4 model;
-		model = glm::scale(model, glm::vec3(3.0f));
-		geometryPassShader.SetUniform("model", model);
-		geometryPassShader.SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-		cathedral.Draw(geometryPassShader);
-
-		m_renderer->EndGeometryPass();
-		
 		// Lighting pass
-		m_renderer->BeginLightingPass();
-		glClear(GL_DEPTH_BUFFER_BIT);
-		lightingPassShader.Bind();
-		m_renderer->m_gBuffer->BindTextures();
-
-		lightingPassShader.SetUniform("viewPos", m_renderer->GetCameraPos());
+		m_renderer->DoDeferredLighting();
 
 		m_renderer->Render();
 		m_renderer->RenderSkybox(skyboxShader);
@@ -82,5 +55,6 @@ void Engine::update() {
 
 /***********************************************************************************/
 void Engine::shutdown() const {
+	m_renderer->Shutdown();
 	m_mainWindow->DestroyWindow();
 }

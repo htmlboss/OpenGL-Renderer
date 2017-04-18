@@ -21,7 +21,7 @@ void SkySphere::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, con
 	shader.SetUniform("view", view);
 	shader.SetUniform("projection", ProjectionMat);
 
-	m_model.Draw(shader);
+	m_model.Draw(&shader);
 
 	glDepthFunc(GL_LESS);
 }

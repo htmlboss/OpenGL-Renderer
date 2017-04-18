@@ -15,11 +15,11 @@ public:
 	~Mesh();
 	
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
-	void Draw(GLShaderProgram& shader);
-	void DrawInstanced(GLShaderProgram& shader);
+	void Draw(GLShaderProgram* shader);
+	void DrawInstanced(GLShaderProgram* shader);
 
 private:
-	void bindTextures(GLShaderProgram& shader);
+	void bindTextures(GLShaderProgram* shader);
 	void setupMesh();
 
 	bool m_uniformsAdded;

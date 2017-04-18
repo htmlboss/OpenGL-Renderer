@@ -1,14 +1,18 @@
 #include "Model.h"
 
 #include <assimp/postprocess.h>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 
 /***********************************************************************************/
-Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder /*= false*/) : m_name(Name), m_path(Path) {
+Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
 	
 	if(!loadModel(Path, flipWindingOrder)) {
 		std::cerr << "Failed to load: " << Name << '\n';
 	}
+
+
 }
 
 /***********************************************************************************/
@@ -20,17 +24,26 @@ void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffset
 }
 
 /***********************************************************************************/
-void Model::Draw(GLShaderProgram& shader) {
+void Model::Draw(GLShaderProgram* shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.Draw(shader);
 	}
 }
 
 /***********************************************************************************/
-void Model::DrawInstanced(GLShaderProgram& shader) {
+void Model::DrawInstanced(GLShaderProgram* shader) {
 	for (auto& mesh : m_meshes) {
 		mesh.DrawInstanced(shader);
 	}
+}
+
+/***********************************************************************************/
+glm::mat4 Model::GetModelMatrix() const {
+	glm::mat4 modelMatrix;
+		
+	modelMatrix = glm::scale(modelMatrix, m_scale);
+
+	return modelMatrix;
 }
 
 /***********************************************************************************/

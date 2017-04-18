@@ -41,9 +41,6 @@
     <ClCompile Include="SkySphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="3rdParty\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,6 +68,9 @@
     <ClCompile Include="GL\GLShader.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="GL\GBuffer.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -95,9 +95,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SkySphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\IWindow.h">
@@ -134,6 +131,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GL\GLShader.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GBuffer.h">
       <Filter>GL</Filter>
     </ClInclude>
   </ItemGroup>

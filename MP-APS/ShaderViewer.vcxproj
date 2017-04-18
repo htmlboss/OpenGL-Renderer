@@ -159,7 +159,7 @@
     <ClCompile Include="3rdParty\glad\src\glad.c" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="GL\GBuffer.cpp" />
     <ClCompile Include="GL\GLRenderer.cpp" />
     <ClCompile Include="GL\GLShader.cpp" />
     <ClCompile Include="GL\GLShaderProgram.cpp" />
@@ -179,7 +179,7 @@
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="GL\GBuffer.h" />
     <ClInclude Include="GL\GLRenderer.h" />
     <ClInclude Include="GL\GLShader.h" />
     <ClInclude Include="GL\GLShaderProgram.h" />

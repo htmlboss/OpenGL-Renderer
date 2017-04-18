@@ -21,9 +21,8 @@ public:
 	virtual void Update(const double delta) = 0;
 	
 	// Deferred Stuff
-	virtual void BeginGeometryPass() const = 0;
-	virtual void EndGeometryPass() const = 0;
-	virtual void BeginLightingPass() const = 0;
+	virtual void DoGeometryPass() = 0;
+	virtual void DoDeferredLighting() const = 0;
 
 	static std::array<bool, 1024> m_keys;
 

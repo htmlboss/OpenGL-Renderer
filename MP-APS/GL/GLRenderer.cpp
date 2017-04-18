@@ -70,6 +70,16 @@ GLRenderer::~GLRenderer() {
 }
 
 /***********************************************************************************/
+void GLRenderer::Shutdown() {
+	m_gBuffer->Shutdown();
+}
+
+/***********************************************************************************/
+void GLRenderer::AddModels(const std::shared_ptr<Model>& model) {
+	m_models.push_back(model);
+}
+
+/***********************************************************************************/
 void GLRenderer::ClearColor(const float r, const float g, const float b, const float a) const {
 	glClearColor(r, g, b, a);
 }
@@ -166,15 +176,30 @@ void GLRenderer::Update(const double deltaTime) {
 }
 
 /***********************************************************************************/
-void GLRenderer::BeginGeometryPass() const {
+void GLRenderer::DoGeometryPass() {
+	
+	m_gBuffer->BindGeometryShader();
 	m_gBuffer->BindGBuffer();
-}
 
-/***********************************************************************************/
-void GLRenderer::EndGeometryPass() const {
+	auto shader = m_gBuffer->GetGeometryShader();
+
+	for (auto& model : m_models) {
+
+		const auto modelMatrix = model->GetModelMatrix();
+		shader->SetUniform("model", modelMatrix);
+		shader->SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+		
+		model->Draw(shader);
+	}
+
 	m_gBuffer->UnBindGBuffer();
 }
 
 /***********************************************************************************/
-void GLRenderer::BeginLightingPass() const {
+void GLRenderer::DoDeferredLighting() const {
+	
+	glClear(GL_DEPTH_BUFFER_BIT);
+	m_gBuffer->BindLightingShader();
+	m_gBuffer->BindTextures();
+	m_gBuffer->SetCameraPos(m_camera->GetPosition());
 }

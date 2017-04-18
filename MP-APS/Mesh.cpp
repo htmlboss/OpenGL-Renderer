@@ -38,7 +38,7 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 }
 
 /***********************************************************************************/
-void Mesh::Draw(GLShaderProgram& shader) {
+void Mesh::Draw(GLShaderProgram* shader) {
 	
 	bindTextures(shader);
 
@@ -48,7 +48,7 @@ void Mesh::Draw(GLShaderProgram& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::DrawInstanced(GLShaderProgram& shader) {
+void Mesh::DrawInstanced(GLShaderProgram* shader) {
 	
 	bindTextures(shader);
 
@@ -58,7 +58,7 @@ void Mesh::DrawInstanced(GLShaderProgram& shader) {
 }
 
 /***********************************************************************************/
-void Mesh::bindTextures(GLShaderProgram& shader) {
+void Mesh::bindTextures(GLShaderProgram* shader) {
 	using namespace Utils;
 
 	GLuint diffuseNr = 1;
@@ -88,7 +88,7 @@ void Mesh::bindTextures(GLShaderProgram& shader) {
 			break;
 		}
 
-		shader.SetUniformi(name + number, index);
+		shader->SetUniformi(name + number, index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
 
 		++index;
