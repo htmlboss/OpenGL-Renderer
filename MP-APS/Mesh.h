@@ -11,8 +11,9 @@
 /***********************************************************************************/
 class Mesh {
 public:
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
-	~Mesh();
+	~Mesh() = default;
 	
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
 	void Draw(GLShaderProgram* shader);

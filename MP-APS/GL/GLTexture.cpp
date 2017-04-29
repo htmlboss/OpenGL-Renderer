@@ -21,7 +21,7 @@ GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view Te
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso / 2);
 
-	auto texData = ResourceManager::GetInstance().GetTexture(m_fullPath, colorMode);
+	const auto texData = ResourceManager::GetInstance().GetTexture(m_fullPath, colorMode);
 
 	switch (colorMode) {
 	case ResourceManager::ColorMode::GREY:

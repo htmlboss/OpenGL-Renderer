@@ -3,7 +3,7 @@
 
 class Timer {
 public:
-	Timer();
+	Timer() noexcept;
 	~Timer() = default;
 
 	Timer(const Timer&) = delete;

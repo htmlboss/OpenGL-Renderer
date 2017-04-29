@@ -3,6 +3,11 @@
 
 #include <string>
 
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_vertices(vertices), m_indices(indices) {
+
+	setupMesh();
+}
+
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) :
 	m_vertices(vertices), 
@@ -12,10 +17,6 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 
 	//Construct mesh
 	setupMesh();
-}
-
-/***********************************************************************************/
-Mesh::~Mesh() {
 }
 
 /***********************************************************************************/
@@ -66,6 +67,7 @@ void Mesh::bindTextures(GLShaderProgram* shader) {
 	GLuint normalNr = 1;
 
 	GLuint index = 0;
+	
 	for (const auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
 											  // Retrieve texture number (the N in diffuse_textureN)
@@ -93,7 +95,9 @@ void Mesh::bindTextures(GLShaderProgram* shader) {
 
 		++index;
 	}
+	
 	glActiveTexture(GL_TEXTURE0);
+	
 }
 
 /***********************************************************************************/

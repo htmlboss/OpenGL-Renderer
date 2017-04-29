@@ -1,4 +1,4 @@
-#version 440
+#version 440 core
 
 out vec4 FragColor;
 
@@ -7,15 +7,9 @@ in vec2 TexCoords;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D ssao;
+
 uniform vec3 viewPos;
-
-struct PointLight {
-    vec3 Position;
-    vec3 Color;
-
-    float Linear;
-    float Quadratic;
-};
 
 struct DirLight {
   vec3 direction;

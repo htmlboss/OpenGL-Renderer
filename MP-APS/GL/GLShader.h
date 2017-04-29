@@ -10,7 +10,8 @@ public:
 	enum class ShaderType {
 		PixelShader = GL_FRAGMENT_SHADER,
 		VertexShader = GL_VERTEX_SHADER,
-		GeometryShader = GL_GEOMETRY_SHADER
+		GeometryShader = GL_GEOMETRY_SHADER,
+		ComputerShader = GL_COMPUTE_SHADER
 	};
 
 	GLShader(const std::string& shaderCode, const ShaderType type);

@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 /***********************************************************************************/
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) : 
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) noexcept : 
 	m_front(glm::vec3(0.0f, 0.0f, -1.0f)), 
 	m_FOV(FOV),
 	m_position(position),

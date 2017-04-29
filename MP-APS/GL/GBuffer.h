@@ -20,7 +20,8 @@ public:
 	
 	void SetCameraPos(const glm::vec3& pos);
 
-	void BindTextures() const;
+	void BindPosNorm() const;
+	void BindPosNormDiffSpec() const;
 
 	// Write depth buffer to default framebuffer
 	void BlitDepthBuffer() const;

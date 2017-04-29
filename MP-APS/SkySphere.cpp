@@ -12,16 +12,16 @@ SkySphere::~SkySphere() {
 }
 
 /***********************************************************************************/
-void SkySphere::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos) {
+void SkySphere::Draw(GLShaderProgram* shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos) {
 	glDepthFunc(GL_LEQUAL);
-	shader.Bind();
+	shader->Bind();
 	glActiveTexture(GL_TEXTURE0);
 
 	const auto view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix
-	shader.SetUniform("view", view);
-	shader.SetUniform("projection", ProjectionMat);
+	shader->SetUniform("view", view);
+	shader->SetUniform("projection", ProjectionMat);
 
-	m_model.Draw(&shader);
+	m_model.Draw(shader);
 
 	glDepthFunc(GL_LESS);
 }

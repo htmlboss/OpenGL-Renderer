@@ -14,6 +14,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 	std::ifstream in(path.data(), std::ios::in);
 	if (!in) {
 		std::cerr << "Failed to open: " + *path.data()  << " " << errno << '\n';
+		return std::string("Bad string!");
 	}
 
 	return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());

@@ -9,11 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Interfaces">
-      <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GL">
       <UniqueIdentifier>{14b2a9a3-677a-4d70-9f10-b68720d8a227}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="GL\GBuffer.cpp">
       <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +138,12 @@
     </ClInclude>
     <ClInclude Include="GL\GBuffer.h">
       <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

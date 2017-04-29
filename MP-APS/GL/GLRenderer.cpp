@@ -37,9 +37,17 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glDepthFunc(GL_LESS);
 
-	m_gBuffer = std::make_unique<GBuffer>(GBuffer(width, height));
+	m_gBuffer = std::make_unique<GBuffer>(width, height);
 	m_skybox = std::make_unique<Skybox>(Skybox("skybox/ocean/"));
-	//m_shaderSSAO = std::make_unique<GLShaderProgram>(GLShaderProgram("SSAO Shader", {}));
+	m_skyboxShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Skybox Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
+																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) }));
+	m_skyboxShader->AddUniforms({ "projection", "view", "skybox" });
+	
+	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardvs.glsl"), GLShader::ShaderType::VertexShader), 
+																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardps.glsl"), GLShader::ShaderType::PixelShader) }));
+	m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" });
+
+	m_terrain = std::make_unique<Terrain>(0, 0);
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
@@ -98,24 +106,30 @@ void GLRenderer::GetDepthBuffer() const {
 }
 
 /***********************************************************************************/
-void GLRenderer::EnableBlending() const {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Alpha blending
+void GLRenderer::Render() {
+
+	//DoGeometryPass();
+	//DoDeferredLighting();
+	//renderQuad();
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	renderGeometry();
+	m_terrain->Draw(m_forwardShader.get());
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	renderSkybox();
 }
 
 /***********************************************************************************/
-void GLRenderer::Render() const {
-
+void GLRenderer::renderQuad() const {
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 }
 
 /***********************************************************************************/
-void GLRenderer::RenderSkybox(GLShaderProgram& shader) const {
+void GLRenderer::renderSkybox() const {
 	
-	GetDepthBuffer();
-	m_skybox->Draw(shader, m_camera->GetViewMatrix(), m_projMatrix);
+	//GetDepthBuffer();
+	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 }
 
 /***********************************************************************************/
@@ -173,6 +187,23 @@ void GLRenderer::Update(const double deltaTime) {
 	const auto view = m_camera->GetViewMatrix();
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/***********************************************************************************/
+void GLRenderer::renderGeometry() {
+	for (auto& model : m_models) {
+
+		const auto modelMatrix = model->GetModelMatrix();
+		m_forwardShader->Bind();
+		m_forwardShader->SetUniform("modelMatrix", modelMatrix);
+		m_forwardShader->SetUniform("lightPos", glm::vec3(0.0f, 2.0f, 5.0f));
+		m_forwardShader->SetUniform("lightColor", glm::vec3(1.0f));
+		//m_forwardShader->SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+		
+		model->Draw(m_forwardShader.get());
+	}
 }
 
 /***********************************************************************************/
@@ -183,14 +214,7 @@ void GLRenderer::DoGeometryPass() {
 
 	auto shader = m_gBuffer->GetGeometryShader();
 
-	for (auto& model : m_models) {
-
-		const auto modelMatrix = model->GetModelMatrix();
-		shader->SetUniform("model", modelMatrix);
-		shader->SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
-		
-		model->Draw(shader);
-	}
+	renderGeometry();
 
 	m_gBuffer->UnBindGBuffer();
 }
@@ -198,8 +222,8 @@ void GLRenderer::DoGeometryPass() {
 /***********************************************************************************/
 void GLRenderer::DoDeferredLighting() const {
 	
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_gBuffer->BindLightingShader();
-	m_gBuffer->BindTextures();
+	m_gBuffer->BindPosNormDiffSpec(); // Textures 0, 1, 2
 	m_gBuffer->SetCameraPos(m_camera->GetPosition());
 }

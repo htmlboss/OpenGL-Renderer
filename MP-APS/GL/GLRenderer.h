@@ -3,12 +3,10 @@
 
 #include "../Interfaces/IRenderer.h"
 
-#include "GLShaderProgram.h"
 #include "GBuffer.h"
 #include "../Camera.h"
-#include "../Model.h"
+#include "../Terrain.h"
 
-#include <memory>
 #include <vector>
 
 class Skybox;
@@ -26,11 +24,9 @@ public:
 
 	void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const override;
 	
-	void GetDepthBuffer() const override;
-	void EnableBlending() const override;
+	void GetDepthBuffer() const;
 	
-	void Render() const override;
-	void RenderSkybox(GLShaderProgram& shader) const;
+	void Render() override;
 
 	static glm::vec3 GetCameraPos() { return m_camera->GetPosition(); }
 
@@ -44,8 +40,14 @@ public:
 	void DoDeferredLighting() const override;
 
 private:
-	static std::size_t m_width, m_height;
+	void renderQuad() const;
+	void renderGeometry();
+	void renderSkybox() const;
 	
+	static std::size_t m_width, m_height;
+	static bool m_shouldResize;
+	
+	// Store all loaded models
 	std::vector<std::shared_ptr<Model>> m_models;
 
 	GLuint m_uboMatrices;
@@ -54,9 +56,10 @@ private:
 	static std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<GBuffer> m_gBuffer;
 	std::unique_ptr<Skybox> m_skybox;
-	std::unique_ptr<GLShaderProgram> m_shaderSSAO;
+	std::unique_ptr<Terrain> m_terrain;
 
-	static bool m_shouldResize;
+	GLShaderProgramPtr m_forwardShader;
+	GLShaderProgramPtr m_skyboxShader;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

@@ -1,4 +1,5 @@
 #include "Model.h"
+#include "GL/GLRenderer.h"
 
 #include <assimp/postprocess.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,6 +14,16 @@ Model::Model(const std::string_view Path, const std::string_view Name, const boo
 	}
 
 
+}
+
+/***********************************************************************************/
+Model::Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept {
+	m_meshes.emplace_back(vertices, indices, textures);
+}
+
+/***********************************************************************************/
+Model::Model(const Mesh& mesh) {
+	m_meshes.push_back(std::move(mesh));
 }
 
 /***********************************************************************************/
@@ -38,7 +49,7 @@ void Model::DrawInstanced(GLShaderProgram* shader) {
 }
 
 /***********************************************************************************/
-glm::mat4 Model::GetModelMatrix() const {
+glm::mat4 Model::GetModelMatrix() const noexcept {
 	glm::mat4 modelMatrix;
 		
 	modelMatrix = glm::scale(modelMatrix, m_scale);
@@ -83,13 +94,15 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 
 	// Check if scene is not null and model is done loading
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cerr << "Assimp Error for " << m_name << ": " << importer.GetErrorString() << std::endl;
+		std::cerr << "Assimp Error for " << m_name << ": " << importer.GetErrorString() << '\n';
+		importer.FreeScene();
 		return false;
 	}
 
 	m_path = Path.substr(0, Path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 
+	importer.FreeScene();
 	std::cout << "---Loaded Model: " << m_name << '\n';
 	return true;
 }
@@ -98,13 +111,13 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 void Model::processNode(aiNode* node, const aiScene* scene) {
 
 	// Process all node meshes
-	for (GLuint i = 0; i < node->mNumMeshes; ++i) {
+	for (std::size_t i = 0; i < node->mNumMeshes; ++i) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		m_meshes.push_back(processMesh(mesh, scene));
 	}
 
 	// Process their children
-	for (GLuint i = 0; i < node->mNumChildren; ++i) {
+	for (std::size_t i = 0; i < node->mNumChildren; ++i) {
 		processNode(node->mChildren[i], scene);
 	}
 }
@@ -122,6 +135,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.Position->x = mesh->mVertices[i].x;
 			vertex.Position->y = mesh->mVertices[i].y;
 			vertex.Position->z = mesh->mVertices[i].z;
+
+			// Construct bounding box
 		}
 		
 		if (mesh->HasNormals()) {
@@ -177,7 +192,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// 2. Specular maps
 		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
 	}
 
 	// Return a mesh object created from the extracted mesh data
@@ -188,7 +202,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
 	
 	std::vector<GLTexture> textures;
-
+	
 	// Get all textures
 	for (std::size_t c = 0; c < mat->GetTextureCount(type); ++c) {
 		aiString texturePath;
@@ -216,6 +230,5 @@ std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType typ
 			m_loadedTextures.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 		}
 	}
-
 	return textures;
 }

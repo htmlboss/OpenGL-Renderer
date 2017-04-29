@@ -14,14 +14,10 @@ Engine::Engine(const std::size_t width, const std::size_t height) : m_engineStat
 /***********************************************************************************/
 void Engine::Execute() {
 
-	GLShaderProgram skyboxShader("Skybox Shader", { GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
-													GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) });
-	skyboxShader.AddUniforms({ "projection", "view", "skybox" });
-
 	// Models
-	auto cathedral = std::make_shared<Model>("models/cathedral/sibenik.obj", "Sibenik Cathedral");
-	cathedral->Scale(glm::vec3(3.0f));
-	m_renderer->AddModels(cathedral);
+	auto dragon = std::make_shared<Model>("models/dragon/dragon.obj", "Dragon");
+	dragon->Scale(glm::vec3(1.0f));
+	m_renderer->AddModels(dragon);
 
 
 	m_engineState = engineState::READY;
@@ -31,14 +27,7 @@ void Engine::Execute() {
 	while (!m_mainWindow->ShouldClose()) {
 		this->update();
 
-		// Geometry pass
-		m_renderer->DoGeometryPass();
-
-		// Lighting pass
-		m_renderer->DoDeferredLighting();
-
 		m_renderer->Render();
-		m_renderer->RenderSkybox(skyboxShader);
 
 		m_mainWindow->SwapBuffers();
 	}

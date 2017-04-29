@@ -119,12 +119,17 @@ void GBuffer::SetCameraPos(const glm::vec3& pos) {
 }
 
 /***********************************************************************************/
-void GBuffer::BindTextures() const {
-
+void GBuffer::BindPosNorm() const {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_gPosition);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_gNormal);
+}
+
+/***********************************************************************************/
+void GBuffer::BindPosNormDiffSpec() const {
+
+	this->BindPosNorm();
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_gDiffuseSpec);
 }

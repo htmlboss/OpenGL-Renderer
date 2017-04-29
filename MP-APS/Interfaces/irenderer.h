@@ -14,9 +14,7 @@ public:
 	virtual ~IRenderer() = default;
 
 	virtual void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const = 0;
-	virtual void GetDepthBuffer() const = 0;
-	virtual void EnableBlending() const = 0;
-	virtual void Render() const = 0;
+	virtual void Render() = 0;
 
 	virtual void Update(const double delta) = 0;
 	

@@ -19,7 +19,8 @@ private:
 
 	enum class engineState {
 		LOADING,
-		READY
+		READY,
+		PAUSED
 	};
 	engineState m_engineState;
 

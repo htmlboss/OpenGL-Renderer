@@ -3,11 +3,12 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "GLShader.h"
+
 #include <map>
 #include <string_view>
 #include <iostream>
-
-#include "GLShader.h"
+#include <memory>
 
 class GLShaderProgram {
 public:
@@ -48,3 +49,4 @@ private:
 	std::array<GLchar, 1024> m_infoLog;
 };
 
+using GLShaderProgramPtr = std::unique_ptr<GLShaderProgram>;

@@ -2,7 +2,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-Timer::Timer() : m_delta(0.0), m_lastFrame(0.0), m_lastTime(0.0), m_nbFrames(0) {}
+Timer::Timer() noexcept : m_delta(0.0), m_lastFrame(0.0), m_lastTime(0.0), m_nbFrames(0) {}
 
 /***********************************************************************************/
 void Timer::Update(const double time) {
