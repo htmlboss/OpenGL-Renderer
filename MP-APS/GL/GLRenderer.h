@@ -3,6 +3,7 @@
 
 #include "../Interfaces/IRenderer.h"
 
+#include "GLFramebuffer.h"
 #include "GBuffer.h"
 #include "../Camera.h"
 #include "../Terrain.h"
@@ -60,6 +61,11 @@ private:
 
 	GLShaderProgramPtr m_forwardShader;
 	GLShaderProgramPtr m_skyboxShader;
+	GLShaderProgramPtr m_hdrShader;
+
+	// HDR
+	GLuint m_hdrColorBufferTexture;
+	GLFramebufferPtr m_hdrFBO;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

@@ -8,14 +8,14 @@
 class GLTexture {
 
 public:
-	enum WrapMode {
+	enum class WrapMode {
 		REPEAT = GL_REPEAT,
 		MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
 		EDGE_CLAMP = GL_CLAMP_TO_EDGE,
 		BORDER_CLAMP = GL_CLAMP_TO_BORDER
 	};
 
-	enum TextureType {
+	enum class TextureType {
 		DIFFUSE = 0,
 		HEIGHT,
 		SPECULAR,

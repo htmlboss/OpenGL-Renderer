@@ -7,6 +7,7 @@ namespace fs = std::experimental::filesystem;
 /***********************************************************************************/
 Skybox::Skybox(const std::string& TextureDirectory) {
 	
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
 	glBindVertexArray(m_vao);
@@ -26,9 +27,6 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	
-	unsigned char* image = nullptr;
-	int x, y;
-	int n = 0;
 	i = 0; // Index for the loop
 	for (const auto& face : m_faces) {
 		const auto img = ResourceManager::GetInstance().GetTexture(face, ResourceManager::ColorMode::RGB);

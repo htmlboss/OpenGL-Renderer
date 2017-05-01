@@ -6,7 +6,7 @@
 class GBuffer {
 public:
 	GBuffer(const std::size_t width, const std::size_t height);
-	~GBuffer();
+	~GBuffer() = default;
 
 	void Shutdown();
 
@@ -29,6 +29,7 @@ public:
 	GLShaderProgram* GetGeometryShader() { return &m_geometryPassShader; }
 private:
 	GLuint m_gBuffer, m_gPosition, m_gNormal, m_gDiffuseSpec, m_rboDepth;
+	
 	std::size_t m_width, m_height;
 
 	GLShaderProgram m_geometryPassShader, m_lightingPassShader;

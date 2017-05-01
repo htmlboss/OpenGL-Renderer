@@ -58,17 +58,11 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rboDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboDepth);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Framebuffer not complete!\n";
+	
+	const auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if ( err != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "Framebuffer not complete: " << err << '\n';
 	}
-
-	// Cleanup
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-/***********************************************************************************/
-GBuffer::~GBuffer() {
 }
 
 /***********************************************************************************/

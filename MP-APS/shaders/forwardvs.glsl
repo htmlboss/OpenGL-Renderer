@@ -21,7 +21,7 @@ void main() {
     const vec4 worldPos = modelMatrix * vec4(position, 1.0f);
     
     gl_Position = projection * view * worldPos;
-    Color = normal;
+    Color = position;
     Normal = (modelMatrix * vec4(normal, 0.0f)).xyz;
     dirToLight = lightPos - worldPos.xyz;
     TexCoords = texCoords;

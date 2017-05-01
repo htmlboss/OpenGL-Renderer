@@ -42,7 +42,7 @@ private:
 	double m_yaw;
 	double m_pitch;
 
-	float m_speed = 15.0f;
-	const double m_sensitivity = 0.25;
+	float m_speed = 25.0f;
+	const double m_sensitivity = 0.3;
 	const float m_FOV;
 };

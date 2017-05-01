@@ -74,6 +74,9 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GL\GLFramebuffer.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -144,6 +147,9 @@
     </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLFramebuffer.h">
+      <Filter>GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -46,6 +46,7 @@ void Mesh::Draw(GLShaderProgram* shader) {
 	// Draw mesh
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /***********************************************************************************/
