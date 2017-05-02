@@ -31,8 +31,7 @@ std::vector<Vertex> Terrain::generateVertices() const {
 		for (auto j = 0; j < VERTEX_COUNT; ++j) {
 			
 			vertices.emplace_back(Vertex(	{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1) * SIZE, 0.0f, static_cast<float>(i) / static_cast<float>((VERTEX_COUNT - 1)) * SIZE}, // Position (x, y, z)
-											// Scale TexCoords beyond [0, 1] so texture tiles itself
-											{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1) * (SIZE / 2), static_cast<float>(i) / static_cast<float>(VERTEX_COUNT - 1) * (SIZE / 2)}, // TexCoords (u, v)
+											{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1), static_cast<float>(i) / static_cast<float>(VERTEX_COUNT - 1)}, // TexCoords (u, v)
 											{0.0f, 1.0f, 0.0f} )); // Normals (x, y, z)
 		}
 	}

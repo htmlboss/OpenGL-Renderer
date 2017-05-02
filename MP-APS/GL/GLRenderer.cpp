@@ -44,7 +44,12 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	
 	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardvs.glsl"), GLShader::ShaderType::VertexShader), 
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardps.glsl"), GLShader::ShaderType::PixelShader) }));
-	m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
+		m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
+
+	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainvs.glsl"), GLShader::ShaderType::VertexShader),
+																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainps.glsl"), GLShader::ShaderType::PixelShader)}));
+	m_terrainShader->AddUniforms({"modelMatrix", "lightPos", "lightColor", "texture_diffuse1", "shineDamper", "reflectivity"});
+
 	m_hdrShader = std::make_unique<GLShaderProgram>(GLShaderProgram("HDR Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrvs.glsl"), GLShader::ShaderType::VertexShader),
 																					GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrps.glsl"), GLShader::ShaderType::PixelShader)}));
 	m_hdrShader->AddUniform("hdrBuffer");
@@ -101,7 +106,9 @@ GLRenderer::~GLRenderer() {
 
 /***********************************************************************************/
 void GLRenderer::Shutdown() {
+	std::cout << "Cleaning up GLRenderer.\n";
 	m_forwardShader->DeleteProgram();
+	m_terrainShader->DeleteProgram();
 	m_hdrShader->DeleteProgram();
 	m_gBuffer->Shutdown();
 }
@@ -138,7 +145,7 @@ void GLRenderer::Render() {
 	m_hdrFBO->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	renderGeometry();
-	m_terrain->Draw(m_forwardShader.get());
+	m_terrain->Draw(m_terrainShader.get());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_hdrShader->Bind();
 	glActiveTexture(GL_TEXTURE0);

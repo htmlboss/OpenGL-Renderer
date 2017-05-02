@@ -56,11 +56,13 @@ private:
 
 	static std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<GBuffer> m_gBuffer;
+
 	std::unique_ptr<Skybox> m_skybox;
 	std::unique_ptr<Terrain> m_terrain;
 
 	GLShaderProgramPtr m_forwardShader;
 	GLShaderProgramPtr m_skyboxShader;
+	GLShaderProgramPtr m_terrainShader;
 	GLShaderProgramPtr m_hdrShader;
 
 	// HDR
