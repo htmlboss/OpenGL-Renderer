@@ -1,24 +1,17 @@
 #include "Engine.h"
-#include "Model.h"
 
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 
 /***********************************************************************************/
-Engine::Engine(const std::size_t width, const std::size_t height) : m_engineState(engineState::LOADING), 
-																	m_mainWindow(new GLWindow(width, height, "MP-APS")), 
-																	m_renderer(new GLRenderer(width, height)) {
+Engine::Engine(const std::size_t width, const std::size_t height, const bool fullscreen) :	m_engineState(engineState::LOADING), 
+																							m_mainWindow(new GLWindow(width, height, "MP-APS", fullscreen)), 
+																							m_renderer(new GLRenderer(width, height)) {
 }
 
 /***********************************************************************************/
 void Engine::Execute() {
-
-	// Models
-	auto dragon = std::make_shared<Model>("models/dragon/dragon.obj", "Dragon");
-	dragon->Scale(glm::vec3(1.0f));
-	m_renderer->AddModels(dragon);
-
 
 	m_engineState = engineState::READY;
 	std::cout << "\nEngine initialization complete!\n\n";

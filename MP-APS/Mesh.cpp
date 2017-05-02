@@ -95,10 +95,7 @@ void Mesh::bindTextures(GLShaderProgram* shader) {
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
 
 		++index;
-	}
-	
-	glActiveTexture(GL_TEXTURE0);
-	
+	}	
 }
 
 /***********************************************************************************/

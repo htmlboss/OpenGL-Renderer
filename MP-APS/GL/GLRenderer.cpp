@@ -27,6 +27,8 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n' 
 			  << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
 
+	m_width = width;
+	m_height = height;
 	glViewport(0, 0, width, height);
 
 	glFrontFace(GL_CCW);
@@ -36,7 +38,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glDepthFunc(GL_LESS);
 
-	m_gBuffer = std::make_unique<GBuffer>(width, height);
+	//m_gBuffer = std::make_unique<GBuffer>(width, height);
 	m_skybox = std::make_unique<Skybox>(Skybox("skybox/dusk/"));
 	m_skyboxShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Skybox Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) }));
@@ -48,7 +50,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 
 	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainvs.glsl"), GLShader::ShaderType::VertexShader),
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainps.glsl"), GLShader::ShaderType::PixelShader)}));
-	m_terrainShader->AddUniforms({"modelMatrix", "lightPos", "lightColor", "texture_diffuse1", "shineDamper", "reflectivity"});
+	m_terrainShader->AddUniforms({"modelMatrix", "lightPos", "lightColor", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "shineDamper", "reflectivity"});
 
 	m_hdrShader = std::make_unique<GLShaderProgram>(GLShaderProgram("HDR Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrvs.glsl"), GLShader::ShaderType::VertexShader),
 																					GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrps.glsl"), GLShader::ShaderType::PixelShader)}));
@@ -87,14 +89,14 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	GLuint rboDepth;
 	glGenTextures(1, &m_hdrColorBufferTexture);
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1280, 720, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1280, 720);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 	// - Attach buffers
 	m_hdrFBO->AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
 	m_hdrFBO->AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
@@ -110,7 +112,9 @@ void GLRenderer::Shutdown() {
 	m_forwardShader->DeleteProgram();
 	m_terrainShader->DeleteProgram();
 	m_hdrShader->DeleteProgram();
-	m_gBuffer->Shutdown();
+	if (m_gBuffer) {
+		m_gBuffer->Shutdown();
+	}
 }
 
 /***********************************************************************************/
@@ -144,7 +148,9 @@ void GLRenderer::Render() {
 	//renderQuad();
 	m_hdrFBO->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	renderGeometry();
+	if (m_models.size() != 0) {
+		renderGeometry();
+	}
 	m_terrain->Draw(m_terrainShader.get());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_hdrShader->Bind();
@@ -203,22 +209,22 @@ void GLRenderer::Update(const double deltaTime) {
 
 	// Update Keyboard
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_W)) {
-		m_camera->ProcessKeyboard(Camera::FORWARD, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::FORWARD, deltaTime);
 	}
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_S)) {
-		m_camera->ProcessKeyboard(Camera::BACKWARD, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::BACKWARD, deltaTime);
 	}
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_A)) {
-		m_camera->ProcessKeyboard(Camera::LEFT, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::LEFT, deltaTime);
 	}
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_D)) {
-		m_camera->ProcessKeyboard(Camera::RIGHT, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::RIGHT, deltaTime);
 	}
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_SPACE)) {
-		m_camera->ProcessKeyboard(Camera::UP, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::UP, deltaTime);
 	}
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-		m_camera->ProcessKeyboard(Camera::DOWN, deltaTime);
+		m_camera->ProcessKeyboard(Camera::Camera_Movement::DOWN, deltaTime);
 	}
 
 	// Update view matrix inside UBO

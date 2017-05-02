@@ -16,22 +16,22 @@ void Camera::ProcessKeyboard(const Camera_Movement direction, const double delta
 	const float velocity = m_speed * static_cast<float>(deltaTime);
 
 	switch (direction) {
-	case FORWARD:
+	case Camera_Movement::FORWARD:
 		m_position += m_front * velocity;
 		break;
-	case BACKWARD:
+	case Camera_Movement::BACKWARD:
 		m_position -= m_front * velocity;
 		break;
-	case LEFT:
+	case Camera_Movement::LEFT:
 		m_position -= m_right * velocity;
 		break;
-	case RIGHT:
+	case Camera_Movement::RIGHT:
 		m_position += m_right * velocity;
 		break;
-	case UP:
+	case Camera_Movement::UP:
 		m_position += m_worldUp * velocity;
 		break;
-	case DOWN:
+	case Camera_Movement::DOWN:
 		m_position -= m_worldUp * velocity;
 		break;
 	}

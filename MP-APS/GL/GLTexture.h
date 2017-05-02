@@ -22,7 +22,7 @@ public:
 		AMBIENT // aka reflection map
 	};
 
-	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceManager::ColorMode colorMode = ResourceManager::ColorMode::RGB);
+	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode = WrapMode::REPEAT, const ResourceManager::ColorMode colorMode = ResourceManager::ColorMode::RGB);
 	~GLTexture();
 
 	bool operator==(const GLTexture& rhs) const { return m_fullPath == rhs.GetFullPath(); }

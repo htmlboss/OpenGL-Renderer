@@ -9,7 +9,6 @@ Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ) : m_x(gridX *
 #endif
 
 	m_terrainModel = std::make_unique<Model>(this->generateTerrain());
-
 	m_terrainModel->Scale(glm::vec3(1.0f));
 }
 
@@ -19,7 +18,7 @@ Mesh Terrain::generateTerrain() const {
 	auto f1 = std::async(std::launch::async, &Terrain::generateVertices, this);
 	auto f2 = std::async(std::launch::async, &Terrain::calculateIndices, this);
 
-	return Mesh(f1.get(), f2.get(), std::vector<GLTexture>({GLTexture("", "textures/grass.jpg", "texture_diffuse", GLTexture::WrapMode::REPEAT)}));
+	return Mesh(f1.get(), f2.get(), loadTextures());
 }
 
 /***********************************************************************************/
@@ -61,4 +60,17 @@ std::vector<GLuint> Terrain::calculateIndices() const {
 	}
 
 	return indices;
+}
+
+/***********************************************************************************/
+std::vector<GLTexture> Terrain::loadTextures() const {
+	std::vector<GLTexture> textures;
+
+	textures.emplace_back(GLTexture("", "textures/grass.jpg", "texture_diffuse1"));
+	textures.emplace_back(GLTexture("", "textures/flowers.jpg", "texture_diffuse2"));
+	textures.emplace_back(GLTexture("", "textures/soil.jpg", "texture_diffuse3"));
+	textures.emplace_back(GLTexture("", "textures/gravel.jpg", "texture_diffuse4"));
+	textures.emplace_back(GLTexture("", "textures/terrainBlendMap.png", "texture_diffuse5"));
+
+	return textures;
 }

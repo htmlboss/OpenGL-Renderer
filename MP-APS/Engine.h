@@ -8,7 +8,7 @@
 
 class Engine {
 public:
-	Engine(const std::size_t width, const std::size_t height);
+	Engine(const std::size_t width, const std::size_t height, const bool fullscreen = false);
 	~Engine() = default;
 
 	void Execute();

@@ -22,9 +22,12 @@ public:
 
 private:
 	Mesh generateTerrain() const;
+	// Generate vertices
 	std::vector<Vertex> generateVertices() const;
 	// Generate indices
 	std::vector<GLuint> calculateIndices() const;
+	// Load textures
+	std::vector<GLTexture> loadTextures() const;
 
 	ModelPtr m_terrainModel;
 	const std::size_t SIZE = 800, VERTEX_COUNT = 128; // Terrain size and side vertex count

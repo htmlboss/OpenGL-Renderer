@@ -5,7 +5,7 @@
 class Camera {
 
 public:
-	enum Camera_Movement {
+	enum class Camera_Movement {
 		FORWARD,
 		BACKWARD,
 		LEFT,
@@ -15,7 +15,7 @@ public:
 	};
 
 	// Constructor with vectors
-	Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f, float FOV = 45.0f) noexcept;
+	Camera(glm::vec3 position = glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f, float FOV = 45.0f) noexcept;
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
 	void ProcessKeyboard(const Camera_Movement direction, const double deltaTime);
