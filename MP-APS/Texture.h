@@ -13,8 +13,8 @@ public:
 
 	bool operator==(const Texture& rhs) const { return this->m_texID == rhs.m_texID; }
 
-	auto GetWidth() const { return m_width; }
-	auto GetHeight() const { return m_height; }
+	auto GetWidth() const noexcept { return m_width; }
+	auto GetHeight() const noexcept { return m_height; }
 
 	auto GetData() const { return m_data; }
 

@@ -12,7 +12,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float F
 }
 
 /***********************************************************************************/
-void Camera::ProcessKeyboard(const Camera_Movement direction, const double deltaTime) {
+void Camera::ProcessKeyboard(const Camera_Movement direction, const double deltaTime) noexcept {
 	const float velocity = m_speed * static_cast<float>(deltaTime);
 
 	switch (direction) {
@@ -38,7 +38,7 @@ void Camera::ProcessKeyboard(const Camera_Movement direction, const double delta
 }
 
 /***********************************************************************************/
-void Camera::ProcessMouseMovement(double xoffset, double yoffset, const bool constrainPitch /*= true*/) {
+void Camera::ProcessMouseMovement(double xoffset, double yoffset, const bool constrainPitch /*= true*/) noexcept {
 	xoffset *= m_sensitivity;
 	yoffset *= m_sensitivity;
 

@@ -28,7 +28,7 @@ std::shared_ptr<Texture> ResourceManager::GetTexture(const std::string_view path
 	if (val == m_loadedTextures.end()) {
 		// Image has not been loaded.
 		int x, y, comp;
-		auto data = stbi_load(path.data(), &x, &y, &comp, static_cast<int>(mode));
+		auto data = stbi_load(path.data(), &x, &y, &comp, STBI_rgb);
 
 		if (data == nullptr) {
 			std::cerr << "stb_image error (" + std::string(path) + "): " + stbi_failure_reason() << '\n';

@@ -19,7 +19,7 @@ public:
 		DIFFUSE = 0,
 		HEIGHT,
 		SPECULAR,
-		AMBIENT // aka reflection map
+		AMBIENT
 	};
 
 	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode = WrapMode::REPEAT, const ResourceManager::ColorMode colorMode = ResourceManager::ColorMode::RGB);
@@ -27,13 +27,12 @@ public:
 
 	bool operator==(const GLTexture& rhs) const { return m_fullPath == rhs.GetFullPath(); }
 
-	//Bind 2D texture
 	void Bind2D();
 
-	GLuint GetTexture() const { return m_texture; }
-	std::string GetFullPath() const { return m_fullPath; }
-	std::string GetRelativePath() const { return m_texturePath; }
-	std::string GetSampler() const { return m_samplerName; }
+	GLuint GetTexture() const noexcept { return m_texture; }
+	std::string GetFullPath() const noexcept { return m_fullPath; }
+	std::string GetRelativePath() const noexcept { return m_texturePath; }
+	std::string GetSampler() const noexcept { return m_samplerName; }
 
 private:
 	GLuint m_texture;

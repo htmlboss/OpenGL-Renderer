@@ -1,12 +1,11 @@
 #include "Terrain.h"
+#include "ResourceManager.h"
 
 #include <future>
 
 /***********************************************************************************/
 Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ) : m_x(gridX * SIZE), m_z(gridZ * SIZE) {
-#ifdef _DEBUG
-	std::cout << "Generating terrain: \nDimensions: " << VERTEX_COUNT << "x" << VERTEX_COUNT << "\nOrigin: " << m_x << " " << m_z << '\n';
-#endif
+	std::cout << "Generating terrain.\n";
 
 	m_terrainModel = std::make_unique<Model>(this->generateTerrain());
 	m_terrainModel->Scale(glm::vec3(1.0f));
@@ -14,6 +13,9 @@ Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ) : m_x(gridX *
 
 /***********************************************************************************/
 Mesh Terrain::generateTerrain() const {
+
+	m_heightmap = ResourceManager::GetInstance().GetTexture("textures/heightmap.png", ResourceManager::ColorMode::GREY);
+	VERTEX_COUNT = m_heightmap->GetHeight();
 
 	auto f1 = std::async(std::launch::async, &Terrain::generateVertices, this);
 	auto f2 = std::async(std::launch::async, &Terrain::calculateIndices, this);
@@ -29,9 +31,14 @@ std::vector<Vertex> Terrain::generateVertices() const {
 	for (auto i = 0; i < VERTEX_COUNT; ++i) {
 		for (auto j = 0; j < VERTEX_COUNT; ++j) {
 			
-			vertices.emplace_back(Vertex(	{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1) * SIZE, 0.0f, static_cast<float>(i) / static_cast<float>((VERTEX_COUNT - 1)) * SIZE}, // Position (x, y, z)
-											{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1), static_cast<float>(i) / static_cast<float>(VERTEX_COUNT - 1)}, // TexCoords (u, v)
-											{0.0f, 1.0f, 0.0f} )); // Normals (x, y, z)
+			vertices.emplace_back(Vertex(	{	static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1) * SIZE,	// X
+												0.0f,																	// Y
+												static_cast<float>(i) / static_cast<float>((VERTEX_COUNT - 1)) * SIZE	// Z
+											},
+
+											{static_cast<float>(j) / static_cast<float>(VERTEX_COUNT - 1),			// U
+											static_cast<float>(i) / static_cast<float>(VERTEX_COUNT - 1)},			// V
+											{0.0f, 1.0f, 0.0f} ));	// Normals (x, y, z)
 		}
 	}
 
@@ -73,4 +80,18 @@ std::vector<GLTexture> Terrain::loadTextures() const {
 	textures.emplace_back(GLTexture("", "textures/terrainBlendMap.png", "texture_diffuse5"));
 
 	return textures;
+}
+
+/***********************************************************************************/
+float Terrain::generateHeight(const int x, int z) const {
+	// Are we inside heightmap
+	if (x < 0 || x >= m_heightmap->GetHeight() || z < 0 || z >= m_heightmap->GetHeight()) {
+		return 0.0f;
+	}
+
+	float height = m_heightmap->GetData()[z, x];
+	
+	std::cout << height << '\n';
+
+	return height;
 }

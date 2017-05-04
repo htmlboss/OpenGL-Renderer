@@ -32,8 +32,8 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	glViewport(0, 0, width, height);
 
 	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glDepthFunc(GL_LESS);
@@ -151,7 +151,9 @@ void GLRenderer::Render() {
 	if (m_models.size() != 0) {
 		renderGeometry();
 	}
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	m_terrain->Draw(m_terrainShader.get());
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_hdrShader->Bind();
 	glActiveTexture(GL_TEXTURE0);

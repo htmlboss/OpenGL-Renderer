@@ -15,6 +15,9 @@
     <Filter Include="Interfaces">
       <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3D11">
+      <UniqueIdentifier>{546fabd0-e4c7-4f65-b1d6-e8f4e89ded78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -153,7 +156,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="..\README.md" />
   </ItemGroup>
 </Project>

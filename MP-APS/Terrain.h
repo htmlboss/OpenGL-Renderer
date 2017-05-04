@@ -28,9 +28,15 @@ private:
 	std::vector<GLuint> calculateIndices() const;
 	// Load textures
 	std::vector<GLTexture> loadTextures() const;
+	// Generate height
+	float generateHeight(const int x, int z) const;
 
 	ModelPtr m_terrainModel;
-	const std::size_t SIZE = 800, VERTEX_COUNT = 128; // Terrain size and side vertex count
+	mutable std::shared_ptr<Texture> m_heightmap;
+
+	mutable std::size_t VERTEX_COUNT;
+	const std::size_t SIZE = 800, MAX_HEIGHT = 40, MAX_PIXEL_COLOR = 256*256*256;
+	const int MIN_HEIGHT = -40;
 	const std::size_t m_x, m_z; // since +Y is vertical
 };
 
