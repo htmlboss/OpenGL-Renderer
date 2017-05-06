@@ -13,10 +13,10 @@ public:
 
 	bool operator==(const Texture& rhs) const { return this->m_texID == rhs.m_texID; }
 
-	auto GetWidth() const noexcept { return m_width; }
-	auto GetHeight() const noexcept { return m_height; }
+	auto width() const noexcept { return m_width; }
+	auto height() const noexcept { return m_height; }
 
-	auto GetData() const { return m_data; }
+	auto data() const { return m_data; }
 
 private:
 	const std::size_t m_texID;

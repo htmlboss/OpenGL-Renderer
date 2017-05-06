@@ -31,7 +31,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	for (const auto& face : m_faces) {
 		const auto img = ResourceManager::GetInstance().GetTexture(face, ResourceManager::ColorMode::RGB);
 
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, img->GetWidth(), img->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, img->GetData());
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, img->width(), img->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, img->data());
 		glGenerateMipmap(GL_TEXTURE_2D);
 		
 		++i;

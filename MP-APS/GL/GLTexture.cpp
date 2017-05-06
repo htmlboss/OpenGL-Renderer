@@ -26,15 +26,15 @@ GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view Te
 
 	switch (colorMode) {
 	case ResourceManager::ColorMode::GREY:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texData->GetWidth(), texData->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->GetData());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texData->width(), texData->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->data());
 		break;
 
 	case ResourceManager::ColorMode::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, texData->GetWidth(), texData->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->GetData());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, texData->width(), texData->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->data());
 		break;
 
 	case ResourceManager::ColorMode::RGB_A:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, texData->GetWidth(), texData->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texData->GetData());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, texData->width(), texData->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texData->data());
 		break;
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);

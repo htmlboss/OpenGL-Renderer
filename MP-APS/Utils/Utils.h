@@ -1,8 +1,11 @@
 /*
  * Utilities library:
- * Random stuff I find online that can help
  */
 #pragma once
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace Utils {
 
@@ -14,11 +17,20 @@ constexpr std::size_t str2int(const char* str, const int h = 0) {
 }
 
 /*
- * Linear interpolate between 2 floats
+ * Linear interpolatation
  */
 constexpr float lerp(const float a, const float b, const float f) {
 	return a + f*(b - a);
 }
 
+/*
+ * Cosine interpolatation
+ */
+inline float cosInterpoloate(const float a, const float b, const float blend) {
+	const auto theta = blend * M_PI;
+	const auto f = (1.0f - std::cos(theta)) * 0.5f;
+
+	return a*(1.0f - f) + b*f;
+}
 
 } // namespace Utils

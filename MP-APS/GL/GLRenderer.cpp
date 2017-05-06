@@ -32,8 +32,8 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	glViewport(0, 0, width, height);
 
 	glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glDepthFunc(GL_LESS);
@@ -46,11 +46,11 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	
 	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardvs.glsl"), GLShader::ShaderType::VertexShader), 
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardps.glsl"), GLShader::ShaderType::PixelShader) }));
-		m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
+	m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
 
 	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainvs.glsl"), GLShader::ShaderType::VertexShader),
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainps.glsl"), GLShader::ShaderType::PixelShader)}));
-	m_terrainShader->AddUniforms({"modelMatrix", "lightPos", "lightColor", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "shineDamper", "reflectivity"});
+	m_terrainShader->AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
 
 	m_hdrShader = std::make_unique<GLShaderProgram>(GLShaderProgram("HDR Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrvs.glsl"), GLShader::ShaderType::VertexShader),
 																					GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrps.glsl"), GLShader::ShaderType::PixelShader)}));
@@ -80,7 +80,6 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
-
 
 	// Create HDR FBO
 	m_hdrFBO = std::make_unique<GLFramebuffer>(width, height);
@@ -152,7 +151,7 @@ void GLRenderer::Render() {
 		renderGeometry();
 	}
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	m_terrain->Draw(m_terrainShader.get());
+	m_terrain->Draw(m_terrainShader.get(), m_camera->GetPosition());
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_hdrShader->Bind();

@@ -80,6 +80,9 @@
     <ClCompile Include="GL\GLFramebuffer.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="HeightGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -154,8 +157,12 @@
     <ClInclude Include="GL\GLFramebuffer.h">
       <Filter>GL</Filter>
     </ClInclude>
+    <ClInclude Include="HeightGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

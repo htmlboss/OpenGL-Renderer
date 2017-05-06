@@ -13,5 +13,5 @@
 * Skybox.
 * Assimp model loading.
 * Deferred shading.
-* Terrain.
+* Procedural terrain (first iteration, very slow).
 * HDR.
