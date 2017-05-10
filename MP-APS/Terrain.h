@@ -16,7 +16,7 @@ public:
 		shader->SetUniform("modelMatrix", m_terrainModel->GetModelMatrix());
 		shader->SetUniform("light.direction", {-0.2f, -1.0f, -0.3f});
 		shader->SetUniform("light.ambient", {0.1f, 0.1f, 0.1f});
-		shader->SetUniform("light.diffuse", glm::vec3(0.5f, 1.0f, 0.0f));
+		shader->SetUniform("light.diffuse", glm::vec3(0.5f, 0.5f, 0.0f));
 		shader->SetUniform("light.specular", glm::vec3(1.0f));
 		shader->SetUniform("viewPos", cameraPos);
 
