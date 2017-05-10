@@ -4,14 +4,14 @@
 
 class HeightGenerator {
 public:
-	HeightGenerator();
+	HeightGenerator() noexcept;
 	~HeightGenerator() = default;
 
 	float GenerateHeight(const int x, const int z) const;
 
 private:
 	// Get noise at a particular point
-	float getNoise(const int x, const int z) const;
+	float getNoise(const int x, const int z) const noexcept;
 	// Averages out noise over a 3x3 grid to remove sharpness
 	/*
 	* *---*---*
@@ -20,7 +20,7 @@ private:
 	* |   |   |
 	* *---*---*
 	*/
-	float getSmoothNoise(const int x, const int z) const;
+	float getSmoothNoise(const int x, const int z) const noexcept;
 	// Create smooth curves ( ͡° ͜ʖ ͡°)
 	float getInterpolatedNoise(const float x, const float z) const;
 

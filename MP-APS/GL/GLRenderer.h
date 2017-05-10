@@ -51,7 +51,7 @@ private:
 	// Store all loaded models
 	std::vector<std::shared_ptr<Model>> m_models;
 
-	GLuint m_uboMatrices, m_uboLights;
+	GLuint m_uboMatrices;
 	glm::mat4 m_projMatrix;
 
 	static std::unique_ptr<Camera> m_camera;

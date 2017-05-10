@@ -50,6 +50,7 @@ void main() {
 	const vec3 reflectDir = reflect(-lightDir, norm);
 	const float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 64.0f);
 	const vec3 specular = light.specular * spec; // Need specular map
-	
-	out_Color =  vec4(diffuse + ambient + specular, 1.0f);
+
+
+	out_Color =  vec4(ambient + diffuse, 1.0f);
 }

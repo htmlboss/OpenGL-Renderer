@@ -1,7 +1,6 @@
 #pragma once
 #include "glad/glad.h"
 
-#include <string_view>
 #include <array>
 
 class GLShader {
@@ -11,7 +10,8 @@ public:
 		PixelShader = GL_FRAGMENT_SHADER,
 		VertexShader = GL_VERTEX_SHADER,
 		GeometryShader = GL_GEOMETRY_SHADER,
-		ComputerShader = GL_COMPUTE_SHADER
+		ComputeShader = GL_COMPUTE_SHADER,
+		TessCtrlShader = GL_TESS_CONTROL_SHADER
 	};
 
 	GLShader(const std::string& shaderCode, const ShaderType type);

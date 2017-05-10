@@ -39,7 +39,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	glDepthFunc(GL_LESS);
 
 	//m_gBuffer = std::make_unique<GBuffer>(width, height);
-	m_skybox = std::make_unique<Skybox>(Skybox("skybox/dusk/"));
+	m_skybox = std::make_unique<Skybox>(Skybox("skybox/cloudtop/"));
 	m_skyboxShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Skybox Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
 																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) }));
 	m_skyboxShader->AddUniforms({ "projection", "view", "skybox" });
