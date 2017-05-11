@@ -6,7 +6,7 @@
 #include <future>
 
 /***********************************************************************************/
-HeightGenerator::HeightGenerator() noexcept : m_amplitude(70.0f), m_roughness(0.3f), m_octaves(3) {
+HeightGenerator::HeightGenerator() noexcept : m_amplitude(70.0f), m_roughness(0.3f), m_octaves(3), m_xOffset(0), m_zOffset(0) {
 	std::random_device rd;
 	std::mt19937_64 mt(rd());
 	
@@ -14,6 +14,15 @@ HeightGenerator::HeightGenerator() noexcept : m_amplitude(70.0f), m_roughness(0.
 	m_seed = dist(mt);
 	
 	std::cout << "Terrain seed: " << m_seed << '\n';
+}
+
+/***********************************************************************************/
+constexpr HeightGenerator::HeightGenerator(const int gridX, const int gridZ, const std::size_t vertexCount, const std::size_t seed) noexcept :	m_amplitude(70.0f), 
+																																				m_roughness(0.3f), 
+																																				m_octaves(3),
+																																				m_seed(seed),
+																																				m_xOffset(gridX * (vertexCount - 1)), 
+																																				m_zOffset(gridZ * (vertexCount - 1)) {
 }
 
 /***********************************************************************************/
@@ -26,7 +35,7 @@ float HeightGenerator::GenerateHeight(const int x, const int z) const {
 		const auto freq = std::pow(2, i) / d;
 		const auto amp = std::pow(m_roughness, i) * m_amplitude;
 
-		total += getInterpolatedNoise(x * freq, z * freq) * amp;
+		total += getInterpolatedNoise((x + m_xOffset) * freq, (z + m_zOffset) * freq) * amp;
 	}
 
 	return total;

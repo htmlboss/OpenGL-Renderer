@@ -34,7 +34,7 @@ private:
 
 	std::vector<std::vector<float>> m_heightData;
 
-	mutable std::size_t VERTEX_COUNT;
+	std::size_t VERTEX_COUNT;
 	const std::size_t SIZE = 800, MAX_HEIGHT = 40;
 	const std::size_t m_x, m_z; // since +Y is vertical
 };
