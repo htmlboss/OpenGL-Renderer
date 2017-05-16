@@ -12,8 +12,7 @@ class Model {
 public:
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
-	Model(const Mesh& mesh);
-	~Model() = default;
+	Model(const Mesh& mesh) noexcept;
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
 

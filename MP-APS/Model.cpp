@@ -12,8 +12,6 @@ Model::Model(const std::string_view Path, const std::string_view Name, const boo
 	if(!loadModel(Path, flipWindingOrder)) {
 		std::cerr << "Failed to load: " << Name << '\n';
 	}
-
-
 }
 
 /***********************************************************************************/
@@ -22,7 +20,7 @@ Model::Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& ind
 }
 
 /***********************************************************************************/
-Model::Model(const Mesh& mesh) {
+Model::Model(const Mesh& mesh) noexcept {
 	m_meshes.push_back(std::move(mesh));
 }
 
@@ -125,7 +123,6 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 /***********************************************************************************/
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
 	std::vector<GLTexture> textures;
 
 	for (std::size_t i = 0; i < mesh->mNumVertices; ++i) {
@@ -167,34 +164,35 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	// Get indices from each face
+	std::vector<GLuint> indices;
 	for (std::size_t i = 0; i < mesh->mNumFaces; ++i) {
-		const aiFace face = mesh->mFaces[i];
+		const auto face = mesh->mFaces[i];
 		
 		for (std::size_t j = 0; j < face.mNumIndices; ++j) {
 			indices.emplace_back(face.mIndices[j]);
 		}
 	}
 
-	// Process materials
+	// Process material
 	if (mesh->mMaterialIndex >= 0) {
 		auto* material = scene->mMaterials[mesh->mMaterialIndex];
-		// We assume a convention for sampler names in the shaders. Each diffuse texture should be named
-		// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-		// Same applies to other texture as the following list summarizes:
-		// Diffuse: texture_diffuseN
-		// Specular: texture_specularN
-		// Normal: texture_normalN
 
-		// 1. Diffuse maps
-		const auto diffuseMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		// PBR textures
+		const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "albedoMap");
+		textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
+
+		const auto normalMaps = loadMatTextures(material, aiTextureType_NORMALS, "normalMap");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		
-		// 2. Specular maps
-		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	}
+		const auto metallicMaps = loadMatTextures(material, aiTextureType_SPECULAR, "metallicMap");
+		textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
-	// Return a mesh object created from the extracted mesh data
+		const auto roughnessMaps = loadMatTextures(material, aiTextureType_SHININESS, "roughnessMap");
+		textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+
+		const auto aoMaps = loadMatTextures(material, aiTextureType_AMBIENT, "aoMap");
+		textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
+	}
 	return Mesh(vertices, indices, textures);
 }
 

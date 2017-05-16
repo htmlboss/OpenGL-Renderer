@@ -26,10 +26,6 @@ GLShaderProgram::GLShaderProgram(const std::string_view programName, std::initia
 }
 
 /***********************************************************************************/
-GLShaderProgram::~GLShaderProgram() {
-}
-
-/***********************************************************************************/
 void GLShaderProgram::Bind() const {
 	glUseProgram(m_programID);
 }
@@ -56,7 +52,9 @@ void GLShaderProgram::AddUniforms(const std::initializer_list<std::string_view> 
 
 /***********************************************************************************/
 void GLShaderProgram::DeleteProgram() const {
-	glDeleteProgram(m_programID);
+	if (m_programID != 0) {
+		glDeleteProgram(m_programID);
+	}
 }
 
 /***********************************************************************************/

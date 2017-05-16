@@ -3,14 +3,13 @@
 
 #include <iostream>
 
-
 /***********************************************************************************/
-GLShader::GLShader(const std::string& shaderCode, const ShaderType type) {
+GLShader::GLShader(const std::string_view path, const ShaderType type) {
 	
 	m_shaderID = glCreateShader(static_cast<decltype(0x8B30)>(type));
 
 	try {
-		compile(shaderCode.c_str());
+		compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
 	}
 	catch (const std::runtime_error& err) {
 		std::cerr << "Shader Error: " << m_shaderID << ". " << err.what() << '\n';

@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <iostream>
+
 std::array<bool, 1024> IRenderer::m_keys;
 bool GLRenderer::m_firstMouse = true;
 double GLRenderer::m_prevX = 1280.0 / 2.0;
@@ -16,7 +18,7 @@ std::size_t GLRenderer::m_height = 0;
 std::unique_ptr<Camera> GLRenderer::m_camera = std::make_unique<Camera>();
 
 /***********************************************************************************/
-GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
+GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRenderer() {
 	
 	std::cout << "Using OpenGL Renderer.\n\n";
 
@@ -40,22 +42,20 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 
 	//m_gBuffer = std::make_unique<GBuffer>(width, height);
 	m_skybox = std::make_unique<Skybox>(Skybox("skybox/cloudtop/"));
-	m_skyboxShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Skybox Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxvs.glsl"), GLShader::ShaderType::VertexShader), 
-																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/skyboxps.glsl"), GLShader::ShaderType::PixelShader) }));
+	m_skyboxShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Skybox Shader", {	GLShader("shaders/skyboxvs.glsl", GLShader::ShaderType::VertexShader), 
+																							GLShader("shaders/skyboxps.glsl", GLShader::ShaderType::PixelShader) }));
 	m_skyboxShader->AddUniforms({ "projection", "view", "skybox" });
 	
-	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardvs.glsl"), GLShader::ShaderType::VertexShader), 
-																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/forwardps.glsl"), GLShader::ShaderType::PixelShader) }));
+	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader("shaders/forwardvs.glsl", GLShader::ShaderType::VertexShader), 
+																							GLShader("shaders/forwardps.glsl", GLShader::ShaderType::PixelShader) }));
 	m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
 
-	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainvs.glsl"), GLShader::ShaderType::VertexShader),
-																							GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/terrainps.glsl"), GLShader::ShaderType::PixelShader)}));
+	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader("shaders/terrainvs.glsl", GLShader::ShaderType::VertexShader),
+																							GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader)}));
 	m_terrainShader->AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
 
-	m_hdrShader = std::make_unique<GLShaderProgram>(GLShaderProgram("HDR Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrvs.glsl"), GLShader::ShaderType::VertexShader),
-																					GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/hdrps.glsl"), GLShader::ShaderType::PixelShader)}));
-	m_hdrShader->AddUniform("hdrBuffer");
 
+	m_postProcess = std::make_unique<GLPostProcess>(width, height);
 	m_terrain = std::make_unique<Terrain>(0, 0);
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
@@ -80,29 +80,6 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer() {
 	
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
-
-	// Create HDR FBO
-	m_hdrFBO = std::make_unique<GLFramebuffer>(width, height);
-	m_hdrFBO->Bind();
-
-	GLuint rboDepth;
-	glGenTextures(1, &m_hdrColorBufferTexture);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
-	glGenRenderbuffers(1, &rboDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	// - Attach buffers
-	m_hdrFBO->AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
-	m_hdrFBO->AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
-}
-
-/***********************************************************************************/
-GLRenderer::~GLRenderer() {
 }
 
 /***********************************************************************************/
@@ -110,8 +87,7 @@ void GLRenderer::Shutdown() {
 	std::cout << "Cleaning up GLRenderer.\n";
 	m_forwardShader->DeleteProgram();
 	m_terrainShader->DeleteProgram();
-	m_hdrShader->DeleteProgram();
-	if (m_gBuffer) {
+	if (m_gBuffer != nullptr) {
 		m_gBuffer->Shutdown();
 	}
 }
@@ -127,7 +103,7 @@ void GLRenderer::ClearColor(const float r, const float g, const float b, const f
 }
 
 /***********************************************************************************/
-void GLRenderer::Resize(const size_t width, const size_t height) {
+void GLRenderer::Resize(const std::size_t width, const std::size_t height) {
 	m_shouldResize = true;
 
 	m_width = width;
@@ -145,7 +121,7 @@ void GLRenderer::Render() {
 	//DoGeometryPass();
 	//DoDeferredLighting();
 	//renderQuad();
-	m_hdrFBO->Bind();
+	m_postProcess->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (m_models.size() != 0) {
 		renderGeometry();
@@ -153,12 +129,9 @@ void GLRenderer::Render() {
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	m_terrain->Draw(m_terrainShader.get(), m_camera->GetPosition());
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	m_hdrShader->Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
+	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
+	m_postProcess->Update();
 	renderQuad();
-	renderSkybox();
 }
 
 /***********************************************************************************/
@@ -166,15 +139,6 @@ void GLRenderer::renderQuad() const {
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
-}
-
-/***********************************************************************************/
-void GLRenderer::renderSkybox() const {
-	
-	//GetDepthBuffer();
-	m_hdrFBO->Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 }
 
 /***********************************************************************************/
@@ -204,6 +168,7 @@ void GLRenderer::Update(const double deltaTime) {
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(m_projMatrix));
 		glViewport(0, 0, m_width, m_height);
 		m_gBuffer->Resize(m_width, m_height);
+		m_postProcess->Resize(m_width, m_height);
 
 		m_shouldResize = false;
 	}

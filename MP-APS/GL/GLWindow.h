@@ -3,6 +3,7 @@
 #include "../Interfaces/IWindow.h"
 
 #include <string_view>
+#include <functional>
 
 struct GLFWwindow;
 
@@ -26,10 +27,12 @@ public:
 	static void DisableVSync();
 
 	void Update() const;
-	bool ShouldClose() const { return m_shouldWindowClose; }
+	bool ShouldClose() const noexcept { return m_shouldWindowClose; }
+	bool IsFocused() const noexcept { return m_focused; }
 	
 private:
 	GLFWwindow* m_window;
-	const int m_width, m_height;
+
+	bool m_focused = true;
 };
 

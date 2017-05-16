@@ -14,8 +14,7 @@ public:
 		TessCtrlShader = GL_TESS_CONTROL_SHADER
 	};
 
-	GLShader(const std::string& shaderCode, const ShaderType type);
-	~GLShader() = default;
+	GLShader(const std::string_view path, const ShaderType type);
 
 	void AttachShader(const GLuint Program) const { glAttachShader(Program, m_shaderID); }
 	void DetachShader(const GLuint Program) const { glDetachShader(Program, m_shaderID); }

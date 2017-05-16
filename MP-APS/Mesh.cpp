@@ -2,7 +2,10 @@
 #include "Utils/Utils.h"
 
 #include <string>
+#include <cstddef>
+#include <stddef.h>
 
+/***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_vertices(vertices), m_indices(indices) {
 
 	setupMesh();
@@ -31,11 +34,11 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// Vertex Instance offset
-	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(5);
 	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glVertexAttribDivisor(3, 1); // Tell OpenGL this is an instanced vertex attribute.
+	glVertexAttribDivisor(5, 1); // Tell OpenGL this is an instanced vertex attribute.
 }
 
 /***********************************************************************************/
@@ -63,9 +66,7 @@ void Mesh::DrawInstanced(GLShaderProgram* shader) {
 void Mesh::bindTextures(GLShaderProgram* shader) {
 	using namespace Utils;
 
-	GLuint diffuseNr = 1;
-	GLuint specularNr = 1;
-	GLuint normalNr = 1;
+	GLuint albedoNr = 1, normalNr = 1, metallicNr = 1, roughnessNr = 1, aoNr = 1;
 
 	GLuint index = 0;
 	
@@ -78,16 +79,20 @@ void Mesh::bindTextures(GLShaderProgram* shader) {
 		std::string number;
 
 		switch (textureNameHashed) {
-		case str2int("texture_diffuse"):
-			number = std::to_string(diffuseNr++);
+		case str2int("albedoMap"):
+			number = std::to_string(albedoNr++);
 			break;
-
-		case str2int("texture_specular"):
-			number = std::to_string(specularNr++);
-			break;
-
-		case str2int("texture_normal"):
+		case str2int("normalMap"):
 			number = std::to_string(normalNr++);
+			break;
+		case str2int("metallicMap"):
+			number = std::to_string(metallicNr++);
+			break;
+		case str2int("roughnessMap"):
+			number = std::to_string(roughnessNr++);
+			break;
+		case str2int("aoMap"):
+			number = std::to_string(aoNr++);
 			break;
 		}
 
@@ -119,9 +124,16 @@ void Mesh::setupMesh() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 	// Vertex GLTexture Coords
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
 	// Vertex Normals
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Normal)));
+	// Vertex Tangents
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Tangent)));
+	// Vertex Bitangets
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, Bitangent)));
+
 }

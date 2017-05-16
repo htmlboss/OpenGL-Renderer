@@ -29,12 +29,12 @@ public:
 
 	std::string LoadTextFile(const std::string_view path);
 
-	std::shared_ptr<Texture> GetTexture(const std::string_view path, const ColorMode mode);
+	TexturePtr GetTexture(const std::string_view path, const ColorMode mode);
 
-	auto GetNumLoadedImages() const { return m_loadedTextures.size(); }
+	auto GetNumLoadedImages() const noexcept { return m_loadedTextures.size(); }
 
 private:
 	std::size_t m_currentTexID = 0;
-	std::unordered_map<std::string, std::shared_ptr<Texture>> m_loadedTextures;
+	std::unordered_map<std::string, TexturePtr> m_loadedTextures;
 };
 

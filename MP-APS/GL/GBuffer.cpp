@@ -6,7 +6,8 @@
 #include "../ResourceManager.h"
 
 /***********************************************************************************/
-GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_height(height),	
+GBuffer::GBuffer(const std::size_t width, const std::size_t height) :	IRenderComponent("GLBuffer", width, height),
+																		m_gBufferFB("GBuffer FBO", width, height),
 															m_geometryPassShader("Geometry Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"),  GLShader::ShaderType::VertexShader), 
 																											GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader) }), 
 															m_lightingPassShader("Lighting Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"),  GLShader::ShaderType::VertexShader), 
@@ -21,14 +22,12 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	m_lightingPassShader.SetUniformi("gPosition", 0);
 	m_lightingPassShader.SetUniformi("gNormal", 1);
 	m_lightingPassShader.SetUniformi("gAlbedoSpec", 2);
-	
-	glGenFramebuffers(1, &m_gBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
 
+	m_gBufferFB.Bind();
 	// Position color buffer
 	glGenTextures(1, &m_gPosition);
 	glBindTexture(GL_TEXTURE_2D, m_gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_gPosition, 0);
@@ -36,7 +35,7 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	// Normal color buffer
 	glGenTextures(1, &m_gNormal);
 	glBindTexture(GL_TEXTURE_2D, m_gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_gNormal, 0);
@@ -44,7 +43,7 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	// Diffuse & Specular buffer (Gonna store specular in the alpha channel)
 	glGenTextures(1, &m_gDiffuseSpec);
 	glBindTexture(GL_TEXTURE_2D, m_gDiffuseSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_gDiffuseSpec, 0);
@@ -56,7 +55,7 @@ GBuffer::GBuffer(const size_t width, const size_t height) : m_width(width), m_he
 	// Generate render buffer
 	glGenRenderbuffers(1, &m_rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboDepth);
 	
 	const auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -73,7 +72,7 @@ void GBuffer::Shutdown() {
 
 /***********************************************************************************/
 void GBuffer::BindGBuffer() const {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	m_gBufferFB.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -92,7 +91,7 @@ void GBuffer::Resize(const std::size_t width, std::size_t height) {
 	m_width = width;
 	m_height = height;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	m_gBufferFB.Bind();
 	// Resize all FBOs and RBO
 	glBindTexture(GL_TEXTURE_2D, m_gPosition);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -131,8 +130,7 @@ void GBuffer::BindPosNormDiffSpec() const {
 /***********************************************************************************/
 void GBuffer::BlitDepthBuffer() const {
 	
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	m_gBufferFB.Bind();
+	m_gBufferFB.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0);
+	m_gBufferFB.Unbind();
 }

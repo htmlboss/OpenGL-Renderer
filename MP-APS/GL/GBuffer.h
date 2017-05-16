@@ -1,9 +1,10 @@
 #pragma once
-#include "glad/glad.h"
+#include "../Interfaces/IRenderComponent.h"
 
 #include "GLShaderProgram.h"
+#include "GLFramebuffer.h"
 
-class GBuffer {
+class GBuffer : public IRenderComponent {
 public:
 	GBuffer(const std::size_t width, const std::size_t height);
 	~GBuffer() = default;
@@ -16,7 +17,7 @@ public:
 	void BindGeometryShader() const;
 	void BindLightingShader() const;
 
-	void Resize(const std::size_t width, std::size_t height);
+	void Resize(const std::size_t width, const std::size_t height) override;
 	
 	void SetCameraPos(const glm::vec3& pos);
 
@@ -28,9 +29,8 @@ public:
 
 	GLShaderProgram* GetGeometryShader() { return &m_geometryPassShader; }
 private:
-	GLuint m_gBuffer, m_gPosition, m_gNormal, m_gDiffuseSpec, m_rboDepth;
-	
-	std::size_t m_width, m_height;
+	GLFramebuffer m_gBufferFB;
+	GLuint m_gPosition, m_gNormal, m_gDiffuseSpec, m_rboDepth;
 
 	GLShaderProgram m_geometryPassShader, m_lightingPassShader;
 };

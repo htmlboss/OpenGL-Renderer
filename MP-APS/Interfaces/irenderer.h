@@ -10,7 +10,7 @@
 class IRenderer {
 	using Vec3 = std::array<float, 3>;
 public:
-	IRenderer() = default;
+	IRenderer() noexcept {};
 	virtual ~IRenderer() = default;
 
 	virtual void ClearColor(const float r = 0.0f, const float g = 0.0f, const float b = 0.0f, const float a = 1.0f) const = 0;

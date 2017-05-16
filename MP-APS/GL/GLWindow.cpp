@@ -6,15 +6,14 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLWindow::GLWindow(const std::size_t width, const std::size_t height, const std::string_view windowName, const bool fullscreen) :	m_window(nullptr), 
-																																	m_width(width), m_height(height) {
+GLWindow::GLWindow(const std::size_t width, const std::size_t height, const std::string_view windowName, const bool fullscreen) :	IWindow(width, height),
+																																	m_window(nullptr) {
 	std::cout << "**************************************************" << '\n';
-#define genericCallback(functionName)\
+#define genericInputCallback(functionName)\
 	[](GLFWwindow* window, auto... args) {\
-		const auto pointer = static_cast<Input*>(glfwGetWindowUserPointer(window));\
-		if (pointer->functionName) { pointer->functionName(args...); }\
+		const auto ptr = static_cast<Input*>(glfwGetWindowUserPointer(window));\
+		if (ptr->functionName) { ptr->functionName(args...); }\
 	}
-	
 
 	if (!glfwInit()) {
 		throw std::runtime_error("Failed to start GLFW.");
@@ -35,13 +34,13 @@ GLWindow::GLWindow(const std::size_t width, const std::size_t height, const std:
 		m_window = glfwCreateWindow(width, height, windowName.data(), nullptr, nullptr);	
 	}
 	if (!m_window) {
-		throw std::runtime_error("Failed to create GLFW window");
+		throw std::runtime_error("Failed to create GLFW window.");
 	}
 	glfwMakeContextCurrent(m_window);
-
-	glfwSetWindowSizeCallback(m_window, genericCallback(Input::GetInstance()->windowResized));
-	glfwSetKeyCallback(m_window, genericCallback(Input::GetInstance()->keyPressed));
-	glfwSetCursorPosCallback(m_window, genericCallback(Input::GetInstance()->mouseMoved));
+	glfwFocusWindow(m_window);
+	glfwSetWindowSizeCallback(m_window, genericInputCallback(Input::GetInstance()->windowResized));
+	glfwSetKeyCallback(m_window, genericInputCallback(Input::GetInstance()->keyPressed));
+	glfwSetCursorPosCallback(m_window, genericInputCallback(Input::GetInstance()->mouseMoved));
 
 	// Center window
 	const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());

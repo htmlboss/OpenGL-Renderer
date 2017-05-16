@@ -4,7 +4,7 @@
 
 class IWindow {
 public:
-	IWindow() : m_shouldWindowClose(false) {}
+	IWindow(const std::size_t width, const std::size_t height) noexcept : m_width(width), m_height(height), m_shouldWindowClose(false) {}
 	virtual ~IWindow() = default;
 
 	IWindow(const IWindow&) = delete;
@@ -17,4 +17,6 @@ protected:
 	virtual void DestroyWindow() const = 0;
 
 	mutable bool m_shouldWindowClose;
+
+	std::size_t m_width, m_height;
 };

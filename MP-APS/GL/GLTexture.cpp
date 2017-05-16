@@ -43,10 +43,6 @@ GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view Te
 }
 
 /***********************************************************************************/
-GLTexture::~GLTexture() {
-}
-
-/***********************************************************************************/
 void GLTexture::Bind2D() {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }

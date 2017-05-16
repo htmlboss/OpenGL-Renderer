@@ -3,7 +3,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLFramebuffer::GLFramebuffer(const std::size_t width, const std::size_t height) : m_width(width), m_height(height) {
+GLFramebuffer::GLFramebuffer(const std::string_view name, const std::size_t width, const std::size_t height) : IRenderComponent(name, width, height) {
 	glGenFramebuffers(1, &m_fbo);
 }
 
@@ -25,6 +25,11 @@ void GLFramebuffer::Bind() const {
 }
 
 /***********************************************************************************/
+void GLFramebuffer::Unbind() const {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/***********************************************************************************/
 void GLFramebuffer::Blit(const BufferBitMasks bufferBit, const GLint targetID) const {
 	Bind();
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetID);
@@ -32,10 +37,15 @@ void GLFramebuffer::Blit(const BufferBitMasks bufferBit, const GLint targetID) c
 }
 
 /***********************************************************************************/
-void GLFramebuffer::checkErrors() {
+void GLFramebuffer::Resize(const std::size_t width, const std::size_t height) {
+	m_width = width;
+	m_height = height;
+}
+/***********************************************************************************/
+void GLFramebuffer::checkErrors() const {
 	const auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (err != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Framebuffer not complete: " << err << '\n';
+		std::cerr << m_name << " not complete: " << err << '\n';
 	}
 }

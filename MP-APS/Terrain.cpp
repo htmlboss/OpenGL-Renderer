@@ -2,6 +2,7 @@
 #include "HeightGenerator.h"
 
 #include <future>
+#include <iostream>
 
 /***********************************************************************************/
 Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ) noexcept : m_x(gridX * SIZE), m_z(gridZ * SIZE) {

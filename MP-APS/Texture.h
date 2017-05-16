@@ -24,3 +24,4 @@ private:
 	unsigned char* m_data;
 };
 
+using TexturePtr = std::shared_ptr<Texture>;

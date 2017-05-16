@@ -49,6 +49,7 @@ public:
 	{
 		GLRenderer::Resize(width, height);
 	};
+
 private:
 	// Keyboard
 	std::array<bool, 1024> m_keys;

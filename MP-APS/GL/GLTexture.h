@@ -3,8 +3,6 @@
 #include "glad/glad.h"
 #include "../ResourceManager.h"
 
-#include <string_view>
-
 class GLTexture {
 
 public:
@@ -15,15 +13,8 @@ public:
 		BORDER_CLAMP = GL_CLAMP_TO_BORDER
 	};
 
-	enum class TextureType {
-		DIFFUSE = 0,
-		HEIGHT,
-		SPECULAR,
-		AMBIENT
-	};
-
 	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode = WrapMode::REPEAT, const ResourceManager::ColorMode colorMode = ResourceManager::ColorMode::RGB);
-	~GLTexture();
+	~GLTexture() = default;
 
 	bool operator==(const GLTexture& rhs) const { return m_fullPath == rhs.GetFullPath(); }
 
@@ -36,7 +27,6 @@ public:
 
 private:
 	GLuint m_texture;
-	std::string m_samplerName;
-	std::string m_texturePath, m_fullPath;
+	std::string m_samplerName, m_texturePath, m_fullPath;
 };
 

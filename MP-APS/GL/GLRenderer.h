@@ -3,12 +3,12 @@
 
 #include "../Interfaces/IRenderer.h"
 
-#include "GLFramebuffer.h"
 #include "GBuffer.h"
 #include "../Camera.h"
 #include "../Terrain.h"
 
 #include <vector>
+#include "GLPostProcess.h"
 
 class Skybox;
 
@@ -16,7 +16,6 @@ class GLRenderer : public IRenderer {
 
 public:
 	GLRenderer(const std::size_t width, const std::size_t height);
-	~GLRenderer();
 
 	void Update(const double deltaTime) override;
 	void Shutdown();
@@ -43,7 +42,6 @@ public:
 private:
 	void renderQuad() const;
 	void renderGeometry();
-	void renderSkybox() const;
 	
 	static std::size_t m_width, m_height;
 	static bool m_shouldResize;
@@ -59,15 +57,11 @@ private:
 
 	std::unique_ptr<Skybox> m_skybox;
 	std::unique_ptr<Terrain> m_terrain;
+	std::unique_ptr<GLPostProcess> m_postProcess;
 
 	GLShaderProgramPtr m_forwardShader;
 	GLShaderProgramPtr m_skyboxShader;
 	GLShaderProgramPtr m_terrainShader;
-	GLShaderProgramPtr m_hdrShader;
-
-	// HDR
-	GLuint m_hdrColorBufferTexture;
-	GLFramebufferPtr m_hdrFBO;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

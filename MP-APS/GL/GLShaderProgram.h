@@ -7,13 +7,11 @@
 
 #include <map>
 #include <string_view>
-#include <iostream>
 #include <memory>
 
 class GLShaderProgram {
 public:
 	GLShaderProgram(const std::string_view programName, std::initializer_list<GLShader> shaders);
-	~GLShaderProgram();
 
 	void Bind() const;
 
@@ -25,16 +23,9 @@ public:
 	void SetUniformi(const std::string_view uniformName, const GLint value) { glUniform1i(m_uniformMap.at(uniformName.data()), value); }
 	void SetUniformf(const std::string_view uniformName, const GLfloat value) { glUniform1f(m_uniformMap.at(uniformName.data()), value); }
 	void SetUniform(const std::string_view uniformName, const glm::vec3& value) { glUniform3f(m_uniformMap.at(uniformName.data()), value.x, value.y, value.z); }
+	void SetUniform(const std::string_view uniformName, const glm::vec4& value) { glUniform4f(m_uniformMap.at(uniformName.data()), value.x, value.y, value.z, value.w); }
 	void SetUniform(const std::string_view uniformName, const glm::mat3x3& value) { glUniformMatrix3fv(m_uniformMap.at(uniformName.data()), 1, GL_FALSE, value_ptr(value)); }
 	void SetUniform(const std::string_view uniformName, const glm::mat4x4& value) { glUniformMatrix4fv(m_uniformMap.at(uniformName.data()), 1, GL_FALSE, value_ptr(value)); }
-
-	GLint GetUniformLoc(const std::string& Uniform) const {
-		GLint loc = glGetUniformLocation(m_programID, Uniform.c_str());
-		if (loc == -1) {
-			std::cerr << "Uniform: does not exist.\n";
-		}
-		return loc;
-	}
 
 private:
 	void linkAndValidate();

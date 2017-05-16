@@ -3,6 +3,9 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 texCoords;
 layout (location = 2) in vec3 normal;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec3 bitangent;
+layout (location = 5) in vec3 offset;
 
 layout (std140, binding = 0) uniform Matrices {
   mat4 projection;
@@ -15,8 +18,9 @@ out vec3 FragPos;
 out vec3 Normal;
 
 void main() {
-	gl_Position = projection * view * modelMatrix * vec4(position, 1.0f);
 	TexCoords = texCoords;
-	Normal = mat3(transpose(inverse(modelMatrix))) * normal;
-	FragPos = vec3(modelMatrix * vec4(position, 1.0f));
+    FragPos = vec3(modelMatrix * vec4(position + offset, 1.0f));
+    Normal = mat3(modelMatrix) * normal;
+
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 }
