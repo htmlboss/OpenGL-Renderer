@@ -48,11 +48,11 @@ void Model::DrawInstanced(GLShaderProgram* shader) {
 
 /***********************************************************************************/
 glm::mat4 Model::GetModelMatrix() const noexcept {
-	glm::mat4 modelMatrix;
-		
-	modelMatrix = glm::scale(modelMatrix, m_scale);
+	
+	const auto scale = glm::scale(glm::mat4(1.0f), m_scale);
+	const auto translate = glm::translate(glm::mat4(1.0f), m_position);
 
-	return modelMatrix;
+	return scale * translate;
 }
 
 /***********************************************************************************/

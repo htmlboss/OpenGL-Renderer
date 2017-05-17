@@ -26,7 +26,7 @@ void main() {
     
     const vec4 blendMapColor = texture(texture_diffuse5, TexCoords);
     const float bgTex = 1.0f - (blendMapColor.r + blendMapColor.g + blendMapColor.b);
-    const vec2 tiledTexCoords = TexCoords * 70.0f; // Scale tex coords
+    const vec2 tiledTexCoords = TexCoords * 100.0f; // Scale tex coords
 
     const vec4 bgGrassAmount = texture(texture_diffuse1, tiledTexCoords) * bgTex;           // How much grass is showing
     const vec4 rDirtAmount = texture(texture_diffuse3, tiledTexCoords) * blendMapColor.r;   // Red component on blend map

@@ -11,7 +11,8 @@ public:
 		VertexShader = GL_VERTEX_SHADER,
 		GeometryShader = GL_GEOMETRY_SHADER,
 		ComputeShader = GL_COMPUTE_SHADER,
-		TessCtrlShader = GL_TESS_CONTROL_SHADER
+		TessCtrlShader = GL_TESS_CONTROL_SHADER,
+		TessEvalShader = GL_TESS_EVALUATION_SHADER
 	};
 
 	GLShader(const std::string_view path, const ShaderType type);

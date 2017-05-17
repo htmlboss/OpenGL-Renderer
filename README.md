@@ -14,12 +14,12 @@
 * Instancing.
 * Skybox.
 * Assimp model loading.
-* Deferred shading.
-* Procedural terrain (first iteration, very slow).
-* Post processing (HDR, saturation).
+* Deferred shading (needs to be re-written).
+* Procedural terrain (first iteration).
+* Post processing (HDR, saturation, vibrance).
 
 ## Coming Soon
-* PBR.
+* PBR + IBL (WIP).
 * Shadows.
 * Camera collision w/ terrain.
-* Post processing (vibrance, bloom).
+* Post processing (bloom, lens flares).

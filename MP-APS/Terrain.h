@@ -8,8 +8,7 @@ class HeightGenerator;
 
 class Terrain {
 public:
-	Terrain(const std::size_t gridX, const std::size_t gridZ) noexcept;
-	~Terrain() = default;
+	Terrain(const std::size_t gridX, const std::size_t gridZ, const std::size_t seed) noexcept;
 
 	void Draw(GLShaderProgram* shader, const glm::vec3& cameraPos) const {
 		shader->Bind();
@@ -24,7 +23,7 @@ public:
 	}
 
 private:
-	Mesh generateTerrain();
+	Mesh generateTerrain(const std::size_t x, const std::size_t z);
 	std::vector<Vertex> generateVertices(const HeightGenerator& generator) const;
 	std::vector<GLuint> calculateIndices() const noexcept;
 	std::vector<GLTexture> loadTextures() const;
@@ -35,7 +34,7 @@ private:
 	std::vector<std::vector<float>> m_heightData;
 
 	std::size_t VERTEX_COUNT;
-	const std::size_t SIZE = 800, MAX_HEIGHT = 40;
-	const std::size_t m_x, m_z; // since +Y is vertical
+	const std::size_t SIZE = 1000, MAX_HEIGHT = 75;
+	const std::size_t m_seed;
 };
 

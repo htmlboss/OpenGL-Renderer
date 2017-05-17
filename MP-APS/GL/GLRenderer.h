@@ -56,7 +56,7 @@ private:
 	std::unique_ptr<GBuffer> m_gBuffer;
 
 	std::unique_ptr<Skybox> m_skybox;
-	std::unique_ptr<Terrain> m_terrain;
+	std::unique_ptr<Terrain> m_terrain1;
 	std::unique_ptr<GLPostProcess> m_postProcess;
 
 	GLShaderProgramPtr m_forwardShader;

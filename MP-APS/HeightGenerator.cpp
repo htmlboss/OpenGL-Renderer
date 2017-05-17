@@ -6,30 +6,20 @@
 #include <future>
 
 /***********************************************************************************/
-HeightGenerator::HeightGenerator() noexcept : m_amplitude(70.0f), m_roughness(0.3f), m_octaves(3), m_xOffset(0), m_zOffset(0) {
-	std::random_device rd;
-	std::mt19937_64 mt(rd());
-	
-	static const std::uniform_int_distribution<std::size_t> dist(0, std::numeric_limits<std::size_t>::max());
-	m_seed = dist(mt);
-	
+HeightGenerator::HeightGenerator(const int gridX, const int gridZ, const std::size_t vertexCount, const std::size_t seed) noexcept :	m_amplitude(70.0f), 
+																																		m_roughness(0.3f), 
+																																		m_octaves(3),
+																																		m_seed(seed),
+																																		m_xOffset(gridX * (vertexCount - 1)), 
+																																		m_zOffset(gridZ * (vertexCount - 1)) {
 	std::cout << "Terrain seed: " << m_seed << '\n';
 }
 
 /***********************************************************************************/
-constexpr HeightGenerator::HeightGenerator(const int gridX, const int gridZ, const std::size_t vertexCount, const std::size_t seed) noexcept :	m_amplitude(70.0f), 
-																																				m_roughness(0.3f), 
-																																				m_octaves(3),
-																																				m_seed(seed),
-																																				m_xOffset(gridX * (vertexCount - 1)), 
-																																				m_zOffset(gridZ * (vertexCount - 1)) {
-}
-
-/***********************************************************************************/
 float HeightGenerator::GenerateHeight(const int x, const int z) const {
-	// Larger denominators result in smoother terrain
+
 	auto total = 0.0f;
-	const float d = std::pow(2, m_octaves - 1);
+	const auto d = std::pow(2, m_octaves - 1);
 
 	for (auto i = 0; i < m_octaves; ++i) {
 		const auto freq = std::pow(2, i) / d;
@@ -42,7 +32,7 @@ float HeightGenerator::GenerateHeight(const int x, const int z) const {
 }
 
 /***********************************************************************************/
-float HeightGenerator::getNoise(const int x, const int z) const noexcept {
+auto HeightGenerator::getNoise(const int x, const int z) const noexcept {
 	static const std::uniform_real_distribution<float> dis(-1.0f, std::nextafter(1.0f, std::numeric_limits<float>::max())); // Return value [-1, 1]
 	std::mt19937_64 mt(x * 49632 + z * 325176 + m_seed);
 
@@ -50,7 +40,7 @@ float HeightGenerator::getNoise(const int x, const int z) const noexcept {
 }
 
 /***********************************************************************************/
-float HeightGenerator::getSmoothNoise(const int x, const int z) const noexcept {
+auto HeightGenerator::getSmoothNoise(const int x, const int z) const noexcept {
 	const auto corners =	( getNoise(x-1, z-1)	// top left
 							+ getNoise(x+1, z-1)	// top right
 							+ getNoise(x-1, z+1)	// bottom left

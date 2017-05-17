@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include "../Utils/Utils.h"
 
 std::array<bool, 1024> IRenderer::m_keys;
 bool GLRenderer::m_firstMouse = true;
@@ -56,12 +57,13 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 
 
 	m_postProcess = std::make_unique<GLPostProcess>(width, height);
-	m_terrain = std::make_unique<Terrain>(0, 0);
+	const auto seed = Utils::randomInt(std::size_t(0), std::numeric_limits<std::size_t>::max());
+	m_terrain1 = std::make_unique<Terrain>(0, 0, seed);
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW); // Allocate memory, but do not fill
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_uboMatrices, 0, 2 * sizeof(glm::mat4));
 
 	m_projMatrix = m_camera->GetProjMatrix(width, height);
@@ -127,7 +129,7 @@ void GLRenderer::Render() {
 		renderGeometry();
 	}
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	m_terrain->Draw(m_terrainShader.get(), m_camera->GetPosition());
+	m_terrain1->Draw(m_terrainShader.get(), m_camera->GetPosition());
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 	m_postProcess->Update();

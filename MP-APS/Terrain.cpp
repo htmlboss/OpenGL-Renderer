@@ -5,17 +5,19 @@
 #include <iostream>
 
 /***********************************************************************************/
-Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ) noexcept : m_x(gridX * SIZE), m_z(gridZ * SIZE) {
+Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ, const std::size_t seed) noexcept : m_seed(seed) {
 	std::cout << "Generating terrain.\n";
 
-	m_terrainModel = std::make_unique<Model>(this->generateTerrain());
+	m_terrainModel = std::make_unique<Model>(this->generateTerrain(gridX, gridZ));
+	m_terrainModel->Translate(glm::vec3(gridX * SIZE, 0.0f, gridZ * SIZE));
 	m_terrainModel->Scale(glm::vec3(1.0f));
 }
 
 /***********************************************************************************/
-Mesh Terrain::generateTerrain() {
-	HeightGenerator heightGenerator;
+Mesh Terrain::generateTerrain(const std::size_t x, const std::size_t z) {
 	VERTEX_COUNT = 128;
+
+	HeightGenerator heightGenerator(x, z, VERTEX_COUNT, m_seed);
 	
 	for (auto i = 0; i < VERTEX_COUNT; ++i) {
 		std::vector<float> rows;

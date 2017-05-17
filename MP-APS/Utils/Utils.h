@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cmath>
+#include <random>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -33,6 +34,32 @@ inline auto cosInterpoloate(const float a, const float b, const float blend) {
 	const auto f = (1.0f - std::cos(theta)) * 0.5f;
 
 	return a*(1.0f - f) + b*f;
+}
+
+/*
+ * Random integer within [low, high] using mt19937_64 engine
+ */
+template<typename T>
+constexpr auto randomInt(const T low, const T high) {
+	std::random_device rd;
+	std::mt19937_64 mt(rd());
+	
+	static const std::uniform_int_distribution<T> dist(low, std::nextafter(high, std::numeric_limits<T>::max()));
+
+	return dist(mt);
+}
+
+/*
+ * Random float/double within [low, high] using mt19937_64 engine
+ */
+template<typename T>
+constexpr auto randomFloat(const T low, const T high) {
+	std::random_device rd;
+	std::mt19937_64 mt(rd());
+
+	static const std::uniform_real_distribution<T> dist(low, std::nextafter(high, std::numeric_limits<T>::max()));
+
+	return dist(mt);
 }
 
 } // namespace Utils
