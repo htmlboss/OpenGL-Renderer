@@ -19,7 +19,6 @@
 * Post processing (HDR, saturation, vibrance).
 
 ## Coming Soon
-* PBR + IBL (WIP).
-* Shadows.
-* Camera collision w/ terrain.
 * Post processing (bloom, lens flares).
+* GUI.
+* Frustim culling.

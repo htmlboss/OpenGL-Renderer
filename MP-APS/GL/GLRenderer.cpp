@@ -2,12 +2,13 @@
 
 #include "../Skybox.h"
 #include "../Input.h"
+#include "../Utils/Utils.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
-#include "../Utils/Utils.h"
+#include <string_view>
 
 std::array<bool, 1024> IRenderer::m_keys;
 bool GLRenderer::m_firstMouse = true;
@@ -32,7 +33,6 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 
 	m_width = width;
 	m_height = height;
-	glViewport(0, 0, width, height);
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -54,7 +54,6 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader("shaders/terrainvs.glsl", GLShader::ShaderType::VertexShader),
 																							GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader)}));
 	m_terrainShader->AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
-
 
 	m_postProcess = std::make_unique<GLPostProcess>(width, height);
 	const auto seed = Utils::randomInt(std::size_t(0), std::numeric_limits<std::size_t>::max());
@@ -82,6 +81,8 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 	
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
+
+	glViewport(0, 0, m_width, m_height);
 }
 
 /***********************************************************************************/
@@ -120,17 +121,12 @@ void GLRenderer::GetDepthBuffer() const {
 /***********************************************************************************/
 void GLRenderer::Render() {
 
-	//DoGeometryPass();
-	//DoDeferredLighting();
-	//renderQuad();
 	m_postProcess->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if (m_models.size() != 0) {
-		renderGeometry();
-	}
-	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+
 	m_terrain1->Draw(m_terrainShader.get(), m_camera->GetPosition());
-	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
 	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 	m_postProcess->Update();
 	renderQuad();
@@ -208,13 +204,9 @@ void GLRenderer::renderGeometry() {
 	for (auto& model : m_models) {
 
 		const auto modelMatrix = model->GetModelMatrix();
-		m_forwardShader->Bind();
-		m_forwardShader->SetUniform("modelMatrix", modelMatrix);
-		m_forwardShader->SetUniform("lightPos", glm::vec3(0.0f, 2.0f, 5.0f));
-		m_forwardShader->SetUniform("lightColor", glm::vec3(1.0f));
-		//m_forwardShader->SetUniform("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+		m_PBRShader->SetUniform("modelMatrix", modelMatrix);
 		
-		model->Draw(m_forwardShader.get());
+		model->Draw(m_PBRShader.get());
 	}
 }
 

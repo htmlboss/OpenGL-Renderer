@@ -21,7 +21,7 @@ out mat3 TBN;
 
 void main() {
     TexCoords = texCoords;
-    FragPos = vec3(modelMatrix * vec4(position + offset, 1.0f));
+    FragPos = vec3(modelMatrix * vec4(position + offset, 1.0));
     Normal = mat3(modelMatrix) * normal;
 
     // TBN Matrix

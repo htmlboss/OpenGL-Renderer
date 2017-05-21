@@ -6,8 +6,9 @@
 
 /***********************************************************************************/
 Engine::Engine(const std::size_t width, const std::size_t height, const bool fullscreen) :	m_engineState(engineState::LOADING), 
-																							m_mainWindow(new GLWindow(width, height, "MP-APS", fullscreen)), 
+																							m_mainWindow(new GLWindow(width, height, "MP-APS", fullscreen)),
 																							m_renderer(new GLRenderer(width, height)) {
+
 }
 
 /***********************************************************************************/
@@ -19,7 +20,7 @@ void Engine::Execute() {
 
 	while (!m_mainWindow->ShouldClose()) {
 		this->update();
-
+		
 		m_renderer->Render();
 
 		m_mainWindow->SwapBuffers();

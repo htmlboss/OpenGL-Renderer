@@ -15,8 +15,8 @@
     <Filter Include="Interfaces">
       <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="D3D11">
-      <UniqueIdentifier>{546fabd0-e4c7-4f65-b1d6-e8f4e89ded78}</UniqueIdentifier>
+    <Filter Include="Atmosphere">
+      <UniqueIdentifier>{13dfee4c-ddee-488a-b549-e9b2b68355e9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GL\GLPostProcess.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GLVertexArray.cpp">
       <Filter>GL</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,6 +170,9 @@
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="GL\GLPostProcess.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLVertexArray.h">
       <Filter>GL</Filter>
     </ClInclude>
   </ItemGroup>

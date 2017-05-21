@@ -12,11 +12,15 @@ uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 
+// lights
+uniform vec3 lightPositions[4];
+uniform vec3 lightColors[4];
+
 uniform vec3 camPos;
 
 out vec4 FragColor;
 
-const float PI = 3.14159265359f;
+const float PI = 3.14159265359;
 
 vec3 GetNormal() {
     const vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0f - 1.0f;
@@ -55,14 +59,17 @@ float GeometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughn
     return ggx1 * ggx2;
 }
 
+vec3 FresnelSchlick(const float cosTheta, const vec3 F0) {
+    return F0 + (1.0f - F0) * pow(1.0f- cosTheta, 5.0f);
+}
+
 vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 F0, const float roughness) {
     return F0 + (max(vec3(1.0f - roughness), F0) - F0) * pow(1.0f - cosTheta, 5.0f);
 }
 
 void main() {
-
-    const vec3 albedo     = pow(texture(albedoMap, TexCoords).rgb, 2.2f);
-    const vec3 normal     = GetNormal();
+    vec3 albedo = vec3(pow(texture(albedoMap, TexCoords).rgb, vec3(2.2)));
+    vec3 normal = GetNormal();
     const float metallic  = texture(metallicMap, TexCoords).r;
     const float roughness = texture(roughnessMap, TexCoords).r;
     const float ao        = texture(aoMap, TexCoords).r;
@@ -70,14 +77,38 @@ void main() {
     const vec3 N = normalize(Normal);
     const vec3 V = normalize(camPos - FragPos);
 
-    vec3 F0 = vec3(0.04f); 
+    vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
     // Reflectance equation
-    vec3 Lo = vec3(0.0f);
+    vec3 Lo = vec3(0.0);
+    for (int i = 0; i < 4; ++i) {
+        // Per-light radiance
+        const vec3 L = normalize(lightPositions[i] - FragPos);
+        const vec3 H = normalize(V + L);
+        const float distance = length(lightPositions[i] - FragPos);
+        const float attenuation = 1.0 / (distance * distance);
+        const vec3 radiance = lightColors[i] * attenuation;
 
-    const vec3 ambient = vec3(0.03f) * albedo * ao;
+        // Cook-Torrance BRDF
+        float D = DistributionGGX(N, H, roughness);
+        vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+        float G = GeometrySmith(N, V, L, roughness);
+
+        vec3 Ks = F;
+        vec3 Kd = vec3(1.0) - Ks;
+        Kd *= 1.0 - metallic;
+
+        vec3 numerator = D * F * G;
+        const float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // Prevent divide-by-zero
+        const vec3 specular = numerator / denominator;
+
+        const float NdotL = max(dot(N, L), 0.0);
+        Lo += (Kd * albedo / PI + specular) * radiance * NdotL;
+    }
+
+    const vec3 ambient = vec3(0.03) * albedo * ao;
     const vec3 color = ambient + Lo;
 
-    FragColor = vec4(color, 1.0f);
+    FragColor = vec4(color, 1.0);
 }

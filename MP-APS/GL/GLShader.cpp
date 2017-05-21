@@ -12,7 +12,7 @@ GLShader::GLShader(const std::string_view path, const ShaderType type) {
 		compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
 	}
 	catch (const std::runtime_error& err) {
-		std::cerr << "Shader Error: " << m_shaderID << ". " << err.what() << '\n';
+		std::cerr << "\nShader Error: " << path << ":\n" << err.what() << '\n';
 	}
 }
 

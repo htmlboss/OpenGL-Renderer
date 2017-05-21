@@ -1,12 +1,13 @@
 #pragma once
 
-#include <vector>
-
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 #include "Vertex.h"
 #include "GL/GLTexture.h"
 #include "GL/GLShaderProgram.h"
+#include "GL/GLVertexArray.h"
+
+#include <vector>
 
 /***********************************************************************************/
 class Mesh {
@@ -24,7 +25,7 @@ private:
 
 	bool m_uniformsAdded;
 
-	GLuint m_vao, m_vbo, m_ebo, m_instanceVBO;
+	GLVertexArray m_vao;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<GLuint> m_indices;

@@ -1,14 +1,14 @@
 #pragma once
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 #include "../Interfaces/IRenderer.h"
 
 #include "GBuffer.h"
+#include "GLPostProcess.h"
 #include "../Camera.h"
 #include "../Terrain.h"
 
 #include <vector>
-#include "GLPostProcess.h"
 
 class Skybox;
 
@@ -62,6 +62,7 @@ private:
 	GLShaderProgramPtr m_forwardShader;
 	GLShaderProgramPtr m_skyboxShader;
 	GLShaderProgramPtr m_terrainShader;
+	GLShaderProgramPtr m_PBRShader;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;
