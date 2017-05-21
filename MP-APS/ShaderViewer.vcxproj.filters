@@ -89,6 +89,9 @@
     <ClCompile Include="GL\GLVertexArray.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -174,6 +177,9 @@
     </ClInclude>
     <ClInclude Include="GL\GLVertexArray.h">
       <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

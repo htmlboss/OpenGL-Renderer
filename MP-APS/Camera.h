@@ -21,7 +21,7 @@ public:
 	void ProcessKeyboard(const Camera_Movement direction, const double deltaTime) noexcept;
 
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-	void ProcessMouseMovement(double xoffset, double yoffset, const bool constrainPitch = true) noexcept;
+	void UpdateView(const bool constrainPitch = true) noexcept;
 
 	glm::mat4x4 GetViewMatrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
 	glm::mat4x4 GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 0.1f, 1000.0f); }
@@ -45,4 +45,7 @@ private:
 	const float m_speed = 50.0f;
 	const double m_sensitivity = 0.3;
 	const float m_FOV;
+
+	bool m_firstMouse;
+	double m_prevX, m_prevY;
 };

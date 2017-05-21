@@ -11,9 +11,6 @@
 #include <string_view>
 
 std::array<bool, 1024> IRenderer::m_keys;
-bool GLRenderer::m_firstMouse = true;
-double GLRenderer::m_prevX = 1280.0 / 2.0;
-double GLRenderer::m_prevY = 720.0 / 2.0;
 bool GLRenderer::m_shouldResize = false;
 std::size_t GLRenderer::m_width = 0;
 std::size_t GLRenderer::m_height = 0;
@@ -140,23 +137,6 @@ void GLRenderer::renderQuad() const {
 }
 
 /***********************************************************************************/
-void GLRenderer::UpdateCameraView(double xPos, double yPos) {
-	
-	if (m_firstMouse) {
-		m_prevX = xPos;
-		m_prevY = yPos;
-		m_firstMouse = false;
-	}
-
-	const auto xOffset = xPos - m_prevX;
-	const auto yOffset = m_prevY - yPos; // Reversed since y-coordinates go from bottom to top
-
-	m_prevX = xPos;
-	m_prevY = yPos;
-	m_camera->ProcessMouseMovement(xOffset, yOffset);
-}
-
-/***********************************************************************************/
 void GLRenderer::Update(const double deltaTime) {
 
 	// Window size changed.
@@ -170,6 +150,8 @@ void GLRenderer::Update(const double deltaTime) {
 
 		m_shouldResize = false;
 	}
+
+	m_camera->UpdateView();
 
 	// Update Keyboard
 	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_W)) {

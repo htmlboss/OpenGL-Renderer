@@ -3,7 +3,7 @@
 #include <functional>
 #include <array>
 
-#include "GLRenderer.h"
+#include "GL/GLRenderer.h"
 
 class Input {
 	Input() = default;
@@ -18,13 +18,22 @@ public:
 	Input(const Input&) = delete;
 	Input& operator=(const Input&) = delete;
 
-	bool IsKeyPressed(const std::size_t key) const { return m_keys[key]; }
+	auto IsKeyPressed(const std::size_t key) const noexcept { 
+#ifdef _DEBUG
+		assert(key < 1024);
+#endif
+		return m_keys[key];
+	}
+
+	auto GetMouseX() const noexcept { return m_xPos; }
+	auto GetMouseY() const noexcept { return m_yPos; }
 
 	// Generic Input Callbacks
 	// Mouse moved
 	std::function<void(double, double)> mouseMoved = [this](auto xPos, auto yPos)
 	{
-		GLRenderer::UpdateCameraView(xPos, yPos);
+		this->m_xPos = xPos;
+		this->m_yPos = yPos;
 	};
 
 	// Key Pressed
@@ -53,4 +62,7 @@ public:
 private:
 	// Keyboard
 	std::array<bool, 1024> m_keys;
+
+	// Mouse
+	double m_xPos, m_yPos;
 };

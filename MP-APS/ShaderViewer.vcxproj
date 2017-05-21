@@ -318,6 +318,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SkySphere.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -347,6 +348,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SkySphere.h" />
     <ClInclude Include="Terrain.h" />

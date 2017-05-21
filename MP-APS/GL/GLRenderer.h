@@ -32,9 +32,6 @@ public:
 
 	static void Resize(const std::size_t width, const std::size_t height);
 
-	// Update view from mouse movement
-	static void UpdateCameraView(double xPos, double yPos);
-
 	// Deferred
 	void DoGeometryPass() override;
 	void DoDeferredLighting() const override;
@@ -66,8 +63,4 @@ private:
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;
-
-	// Mouse stuff
-	static bool m_firstMouse;
-	static double m_prevX, m_prevY;
 };

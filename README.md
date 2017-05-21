@@ -20,5 +20,4 @@
 
 ## Coming Soon
 * Post processing (bloom, lens flares).
-* GUI.
 * Frustim culling.

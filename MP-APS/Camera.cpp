@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Input.h"
 
 /***********************************************************************************/
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) noexcept : 
@@ -6,7 +7,10 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float F
 	m_FOV(FOV),
 	m_position(position),
 	m_yaw(yaw),
-	m_pitch(pitch) {
+	m_pitch(pitch),
+	m_firstMouse(true),
+	m_prevX(0.0),
+	m_prevY(0.0) {
 
 	updateVectors();
 }
@@ -38,25 +42,41 @@ void Camera::ProcessKeyboard(const Camera_Movement direction, const double delta
 }
 
 /***********************************************************************************/
-void Camera::ProcessMouseMovement(double xoffset, double yoffset, const bool constrainPitch /*= true*/) noexcept {
-	xoffset *= m_sensitivity;
-	yoffset *= m_sensitivity;
-
-	m_yaw += xoffset;
-	m_pitch += yoffset;
-
-	// Make sure that when pitch is out of bounds, screen doesn't get flipped
-	if (constrainPitch) {
-		if (m_pitch > 89.0f) {
-			m_pitch = 89.0f;
+void Camera::UpdateView(const bool constrainPitch /*= true*/) noexcept {
+	
+	const auto xPos = Input::GetInstance()->GetMouseX();
+	const auto yPos = Input::GetInstance()->GetMouseY();
+	
+	// If the mouse position has changed, recalculate vectors
+	if (xPos != m_prevX || yPos != m_prevY) {
+		if (m_firstMouse) {
+			m_prevX = xPos;
+			m_prevY = yPos;
+			m_firstMouse = false;
 		}
-		if (m_pitch < -89.0f) {
-			m_pitch = -89.0f;
+
+		auto xOffset = (xPos - m_prevX) * m_sensitivity;
+		auto yOffset = (m_prevY - yPos) * m_sensitivity; // Reversed since y-coordinates go from bottom to top
+
+		m_prevX = xPos;
+		m_prevY = yPos;
+
+		m_yaw += xOffset;
+		m_pitch += yOffset;
+
+		// Make sure that when pitch is out of bounds, screen doesn't get flipped
+		if (constrainPitch) {
+			if (m_pitch > 89.0f) {
+				m_pitch = 89.0f;
+			}
+			if (m_pitch < -89.0f) {
+				m_pitch = -89.0f;
+			}
 		}
+
+		// Update Front, Right and Up Vectors using the updated Eular angles
+		updateVectors();
 	}
-
-	// Update Front, Right and Up Vectors using the updated Eular angles
-	updateVectors();
 }
 
 /***********************************************************************************/
