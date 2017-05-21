@@ -1,6 +1,8 @@
 #include "Camera.h"
 #include "Input.h"
 
+#include <GLFW/glfw3.h>
+
 /***********************************************************************************/
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) noexcept : 
 	m_front(glm::vec3(0.0f, 0.0f, -1.0f)), 
@@ -16,33 +18,59 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float F
 }
 
 /***********************************************************************************/
-void Camera::ProcessKeyboard(const Camera_Movement direction, const double deltaTime) noexcept {
+void Camera::Update(const double deltaTime) noexcept {
+	// Update view from mouse movement
+	updateView();
+
+	// Update Keyboard
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_W)) {
+		processKeyboard(Direction::FORWARD, deltaTime);
+	}
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_S)) {
+		processKeyboard(Direction::BACKWARD, deltaTime);
+	}
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_A)) {
+		processKeyboard(Direction::LEFT, deltaTime);
+	}
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_D)) {
+		processKeyboard(Direction::RIGHT, deltaTime);
+	}
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_SPACE)) {
+		processKeyboard(Direction::UP, deltaTime);
+	}
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+		processKeyboard(Direction::DOWN, deltaTime);
+	}
+}
+
+/***********************************************************************************/
+void Camera::processKeyboard(const Direction direction, const double deltaTime) noexcept {
 	const float velocity = m_speed * static_cast<float>(deltaTime);
 
 	switch (direction) {
-	case Camera_Movement::FORWARD:
+	case Direction::FORWARD:
 		m_position += m_front * velocity;
 		break;
-	case Camera_Movement::BACKWARD:
+	case Direction::BACKWARD:
 		m_position -= m_front * velocity;
 		break;
-	case Camera_Movement::LEFT:
+	case Direction::LEFT:
 		m_position -= m_right * velocity;
 		break;
-	case Camera_Movement::RIGHT:
+	case Direction::RIGHT:
 		m_position += m_right * velocity;
 		break;
-	case Camera_Movement::UP:
+	case Direction::UP:
 		m_position += m_worldUp * velocity;
 		break;
-	case Camera_Movement::DOWN:
+	case Direction::DOWN:
 		m_position -= m_worldUp * velocity;
 		break;
 	}
 }
 
 /***********************************************************************************/
-void Camera::UpdateView(const bool constrainPitch /*= true*/) noexcept {
+void Camera::updateView(const bool constrainPitch /*= true*/) noexcept {
 	
 	const auto xPos = Input::GetInstance()->GetMouseX();
 	const auto yPos = Input::GetInstance()->GetMouseY();
@@ -66,11 +94,11 @@ void Camera::UpdateView(const bool constrainPitch /*= true*/) noexcept {
 
 		// Make sure that when pitch is out of bounds, screen doesn't get flipped
 		if (constrainPitch) {
-			if (m_pitch > 89.0f) {
-				m_pitch = 89.0f;
+			if (m_pitch > 89.0) {
+				m_pitch = 89.0;
 			}
-			if (m_pitch < -89.0f) {
-				m_pitch = -89.0f;
+			if (m_pitch < -89.0) {
+				m_pitch = -89.0;
 			}
 		}
 
@@ -82,10 +110,11 @@ void Camera::UpdateView(const bool constrainPitch /*= true*/) noexcept {
 /***********************************************************************************/
 void Camera::updateVectors() {
 	// Calculate the new Front vector
-	glm::vec3 front;
-	front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-	front.y = sin(glm::radians(m_pitch));
-	front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	glm::vec3 front{
+		front.x = glm::cos(glm::radians(m_yaw)) * glm::cos(glm::radians(m_pitch)),
+		front.y = glm::sin(glm::radians(m_pitch)),
+		front.z = glm::sin(glm::radians(m_yaw)) * glm::cos(glm::radians(m_pitch))
+	};
 	
 	m_front = glm::normalize(front);
 	m_right = glm::normalize(glm::cross(m_front, m_worldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.

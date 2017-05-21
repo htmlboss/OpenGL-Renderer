@@ -151,27 +151,7 @@ void GLRenderer::Update(const double deltaTime) {
 		m_shouldResize = false;
 	}
 
-	m_camera->UpdateView();
-
-	// Update Keyboard
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_W)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::FORWARD, deltaTime);
-	}
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_S)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::BACKWARD, deltaTime);
-	}
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_A)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::LEFT, deltaTime);
-	}
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_D)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::RIGHT, deltaTime);
-	}
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_SPACE)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::UP, deltaTime);
-	}
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-		m_camera->ProcessKeyboard(Camera::Camera_Movement::DOWN, deltaTime);
-	}
+	m_camera->Update(deltaTime);
 
 	// Update view matrix inside UBO
 	const auto view = m_camera->GetViewMatrix();
