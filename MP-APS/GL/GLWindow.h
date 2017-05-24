@@ -23,8 +23,8 @@ public:
 	void EnableCursor() const;
 	void DisableCursor() const;
 
-	static void EnableVSync();
-	static void DisableVSync();
+	void EnableVSync() const;
+	void DisableVSync() const;
 
 	void Update() const;
 	bool ShouldClose() const noexcept { return m_shouldWindowClose; }

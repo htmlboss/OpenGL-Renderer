@@ -7,8 +7,7 @@
 
 class Skybox {
 public:
-	Skybox(const std::string& TextureDirectory);
-	~Skybox();
+	Skybox(const std::string_view TextureDirectory);
 
 	// Bind texture if passing to other shaders
 	void BindTexture() { glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID); }

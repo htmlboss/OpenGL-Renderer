@@ -28,7 +28,7 @@ public:
 	
 	void Render() override;
 
-	static glm::vec3 GetCameraPos() { return m_camera->GetPosition(); }
+	auto GetCameraPos() const noexcept { return m_camera->GetPosition(); }
 
 	static void Resize(const std::size_t width, const std::size_t height);
 
@@ -49,7 +49,7 @@ private:
 	GLuint m_uboMatrices;
 	glm::mat4 m_projMatrix;
 
-	static std::unique_ptr<Camera> m_camera;
+	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<GBuffer> m_gBuffer;
 
 	std::unique_ptr<Skybox> m_skybox;

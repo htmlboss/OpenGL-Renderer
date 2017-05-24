@@ -5,7 +5,7 @@
 
 namespace fs = std::experimental::filesystem;
 /***********************************************************************************/
-Skybox::Skybox(const std::string& TextureDirectory) {
+Skybox::Skybox(const std::string_view TextureDirectory) {
 	
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -19,7 +19,7 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	
 	// Iterate through given directory and find files (labeled 1-6 for proper load order)
 	int i = 0; // Index for the loop
-	for (const auto& it : fs::directory_iterator(TextureDirectory)) {
+	for (const auto& it : fs::directory_iterator(TextureDirectory.data())) {
 		m_faces[i] = it.path().generic_string(); // put texture paths into std::array for loading
 		++i;
 	}
@@ -48,10 +48,6 @@ Skybox::Skybox(const std::string& TextureDirectory) {
 	GLfloat aniso = 0.0f;
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-}
-
-/***********************************************************************************/
-Skybox::~Skybox() {
 }
 
 /***********************************************************************************/

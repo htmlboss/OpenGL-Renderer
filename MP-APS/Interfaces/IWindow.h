@@ -4,7 +4,7 @@
 
 class IWindow {
 public:
-	IWindow(const std::size_t width, const std::size_t height) noexcept : m_width(width), m_height(height), m_shouldWindowClose(false) {}
+	constexpr IWindow(const std::size_t width, const std::size_t height) noexcept : m_shouldWindowClose(false), m_width(width), m_height(height) {}
 	virtual ~IWindow() = default;
 
 	IWindow(const IWindow&) = delete;

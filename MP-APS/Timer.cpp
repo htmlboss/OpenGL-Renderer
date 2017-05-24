@@ -1,12 +1,13 @@
 #include "Timer.h"
+
 #include <iostream>
 
 /***********************************************************************************/
 Timer::Timer() noexcept : m_delta(0.0), m_lastFrame(0.0), m_lastTime(0.0), m_nbFrames(0) {}
 
 /***********************************************************************************/
-void Timer::Update(const double time) {
-	auto currentFrame = time;
+void Timer::Update(const double time) noexcept {
+	const auto currentFrame = time;
 	++m_nbFrames;
 
 	// Calculates frame time (in milliseconds)

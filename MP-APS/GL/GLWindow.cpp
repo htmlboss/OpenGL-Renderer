@@ -81,12 +81,12 @@ void GLWindow::DisableCursor() const {
 }
 
 /***********************************************************************************/
-void GLWindow::EnableVSync() {
+void GLWindow::EnableVSync() const {
 	glfwSwapInterval(1);
 }
 
 /***********************************************************************************/
-void GLWindow::DisableVSync() {
+void GLWindow::DisableVSync() const {
 	glfwSwapInterval(0);
 }
 

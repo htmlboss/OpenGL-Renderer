@@ -4,11 +4,7 @@
 
 #include <array>
 
-#define KEY_PRESSED(KEY) (IRenderer::m_keys.at(KEY) = true, (void)0 )
-#define KEY_RELEASED(KEY) (IRenderer::m_keys.at(KEY) = false, (void)0 )
-
 class IRenderer {
-	using Vec3 = std::array<float, 3>;
 public:
 	IRenderer() noexcept {};
 	virtual ~IRenderer() = default;
@@ -21,8 +17,6 @@ public:
 	// Deferred Stuff
 	virtual void DoGeometryPass() = 0;
 	virtual void DoDeferredLighting() const = 0;
-
-	static std::array<bool, 1024> m_keys;
 
 protected:
 

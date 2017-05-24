@@ -1,7 +1,6 @@
 #include "GLRenderer.h"
 
 #include "../Skybox.h"
-#include "../Input.h"
 #include "../Utils/Utils.h"
 
 #include <GLFW/glfw3.h>
@@ -10,14 +9,12 @@
 #include <iostream>
 #include <string_view>
 
-std::array<bool, 1024> IRenderer::m_keys;
 bool GLRenderer::m_shouldResize = false;
 std::size_t GLRenderer::m_width = 0;
 std::size_t GLRenderer::m_height = 0;
-std::unique_ptr<Camera> GLRenderer::m_camera = std::make_unique<Camera>();
 
 /***********************************************************************************/
-GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRenderer() {
+GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRenderer(), m_camera(new Camera()) {
 	
 	std::cout << "Using OpenGL Renderer.\n\n";
 
@@ -133,7 +130,6 @@ void GLRenderer::Render() {
 void GLRenderer::renderQuad() const {
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
 }
 
 /***********************************************************************************/
