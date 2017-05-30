@@ -14,10 +14,21 @@
 * Instancing.
 * Skybox.
 * Assimp model loading.
-* Deferred shading (needs to be re-written).
 * Procedural terrain (first iteration).
 * Post processing (HDR, saturation, vibrance).
+* Frustum culling (manual AABB testing).
+* Forward shading.
 
 ## Coming Soon
 * Post processing (bloom, lens flares).
-* Frustim culling.
+* Rewritten deferred shading (w/ PBR).
+* Extended frustum culling:
+    * Sphere and point testing.
+    * Optimization pass.
+    * Automatic AABB construction during model load.
+        * AABB hierarchy.
+    * Terrain AABB.
+    * Updating bounding volumes if necessary during update loop.
+
+## Research Used
+*  _Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix_ ([http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf](http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf)). Gribb, Hartman (2001).

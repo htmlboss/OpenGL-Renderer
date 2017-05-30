@@ -12,23 +12,25 @@ layout (std140, binding = 0) uniform Matrices {
   mat4 view;
 };
 uniform mat4 modelMatrix;
-uniform mat3 normalMatrix;
+//uniform mat3 normalMatrix;
 
 out vec2 TexCoords;
 out vec3 FragPos;
 out vec3 Normal;
-out mat3 TBN;
+//out mat3 TBN;
 
 void main() {
     TexCoords = texCoords;
     FragPos = vec3(modelMatrix * vec4(position + offset, 1.0));
     Normal = mat3(modelMatrix) * normal;
 
+/*
     // TBN Matrix
     const vec3 T = normalize(normalMatrix * tangent);
     const vec3 B = normalize(normalMatrix * bitangent);
     const vec3 N = normalize(normalMatrix * normal);
     TBN = transpose(mat3(T, B, N));
+*/
 
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }

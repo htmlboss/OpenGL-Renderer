@@ -94,6 +94,7 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cerr << "Assimp Error for " << m_name << ": " << importer.GetErrorString() << '\n';
 		importer.FreeScene();
+
 		return false;
 	}
 

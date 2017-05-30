@@ -2,6 +2,8 @@
 
 #include "../Skybox.h"
 #include "../Utils/Utils.h"
+#include "../ViewFrustum.h"
+#include "../BoundingBox.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -43,7 +45,7 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 	
 	m_forwardShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Forward Shader", {	GLShader("shaders/forwardvs.glsl", GLShader::ShaderType::VertexShader), 
 																							GLShader("shaders/forwardps.glsl", GLShader::ShaderType::PixelShader) }));
-	m_forwardShader->AddUniforms({ "modelMatrix", "lightPos", "lightColor" , "texture_diffuse1"});
+	m_forwardShader->AddUniforms({"modelMatrix"});
 
 	m_terrainShader = std::make_unique<GLShaderProgram>(GLShaderProgram("Terrain Shader", {	GLShader("shaders/terrainvs.glsl", GLShader::ShaderType::VertexShader),
 																							GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader)}));
@@ -115,11 +117,24 @@ void GLRenderer::GetDepthBuffer() const {
 /***********************************************************************************/
 void GLRenderer::Render() {
 
+	ViewFrustum frustum(m_camera->GetViewMatrix(), m_projMatrix);
+	BoundingBox bb({ 10.0f, 0.0f, 10.0f }, {15.0f, 5.0f, 15.0f}, { 10.0f, 0.0f, 10.0f });
+
+	const auto result = frustum.TestIntersection(std::make_shared<BoundingBox>(bb));
+
+	if (result == BoundingVolume::TestResult::INSIDE) {
+		std::cout << "inside.";
+	}
+
 	m_postProcess->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
 	m_terrain1->Draw(m_terrainShader.get(), m_camera->GetPosition());
+
+	m_forwardShader->Bind();
+	m_forwardShader->SetUniform("modelMatrix", m_models[0]->GetModelMatrix());
+	m_models[0]->Draw(m_forwardShader.get());
 
 	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 	m_postProcess->Update();

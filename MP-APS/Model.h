@@ -4,15 +4,15 @@
 #include <assimp/scene.h>
 
 #include "Mesh.h"
+#include "BoundingBox.h"
 
 #include <string_view>
-#include <unordered_set>
 
 class Model {
 public:
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
-	Model(const Mesh& mesh) noexcept;
+	explicit Model(const Mesh& mesh) noexcept;
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
 
@@ -26,6 +26,8 @@ public:
 	// Build model matrix from stored transformation data
 	glm::mat4 GetModelMatrix() const noexcept;
 
+	auto GetBoundingBox() const noexcept { return m_aabb; }
+
 private:
 	bool loadModel(const std::string_view Path, const bool flipWindingOrder);
 	void processNode(aiNode* node, const aiScene* scene);
@@ -34,6 +36,8 @@ private:
 
 	glm::vec3 m_scale, m_position, m_axis;
 	float m_radians;
+
+	BoundingBox m_aabb;
 
 	std::vector<Mesh> m_meshes;
 	std::vector<GLTexture> m_loadedTextures;
