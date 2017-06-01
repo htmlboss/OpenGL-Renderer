@@ -1,6 +1,7 @@
 #include "ViewFrustum.h"
 
 #include "BoundingBox.h"
+#include "AABB.hpp"
 
 #include <glm/detail/func_geometric.hpp>
 
@@ -68,6 +69,32 @@ ViewFrustum::ViewFrustum(const glm::mat4& v, const glm::mat4& p) {
 /***********************************************************************************/
 BoundingVolume::TestResult ViewFrustum::TestIntersection(const glm::vec3& point) const {
 	return TestResult::INTERSECT;
+}
+
+/***********************************************************************************/
+BoundingVolume::TestResult ViewFrustum::TestIntersection(const AABB& aabb) const {
+	
+	const glm::vec3 b[] { aabb.getMin(), aabb.getMax() };
+
+	auto result = TestResult::INSIDE;
+
+	for (auto i =0; i < 6; ++i) {
+		const auto px = m_planes[i].x > 0.0f;
+		const auto py = m_planes[i].y > 0.0f;
+		const auto pz = m_planes[i].z > 0.0f;
+
+		const auto dp = m_planes[i].x * b[px].x + m_planes[i].y * b[py].y + m_planes[i].z * b[pz].z;
+		const auto dp2 = m_planes[i].x * b[1 - px].x + m_planes[i].y * b[1 - py].y + m_planes[i].z * b[1 - pz].z;
+
+		if (dp < -m_planes[i].w) {
+			return TestResult::OUTSIDE;
+		}
+
+		if (dp2 <= -m_planes[i].w) {
+			result = TestResult::INTERSECT;
+		}
+	}
+	return result;
 }
 
 /***********************************************************************************/

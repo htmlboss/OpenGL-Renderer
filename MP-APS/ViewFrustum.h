@@ -11,6 +11,8 @@
 #undef NEAR
 #endif
 
+class AABB;
+
 class ViewFrustum : BoundingVolume {
 public:
 	ViewFrustum(const glm::mat4& viewMatrix, const glm::mat4& projMatrix);
@@ -32,6 +34,7 @@ public:
 	};
 
 	TestResult TestIntersection(const glm::vec3& point) const override;
+	TestResult TestIntersection(const AABB& aabb) const;
 	TestResult TestIntersection(const std::shared_ptr<const BoundingBox> box) const override;
 	TestResult TestIntersection(const std::shared_ptr<const BoundingSphere> sphere) const override;
 

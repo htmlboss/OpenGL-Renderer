@@ -15,8 +15,8 @@ Engine::Engine(const std::size_t width, const std::size_t height, const bool ful
 void Engine::Execute() {
 
 	auto model = std::make_shared<Model>("models/dragon/dragon.obj", "Dragon");
-	model->Translate({ 0.0f, 0.0f, 0.0f });
-	model->Scale({ 1.0f, 1.0f, 1.0f });
+	model->Translate({ 10.0f, 0.0f, 10.0f });
+	model->Scale({ 3.0f, 3.0f, 3.0f });
 	m_renderer->AddModels(model);
 
 	m_engineState = engineState::READY;

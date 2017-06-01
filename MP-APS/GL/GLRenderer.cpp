@@ -3,7 +3,6 @@
 #include "../Skybox.h"
 #include "../Utils/Utils.h"
 #include "../ViewFrustum.h"
-#include "../BoundingBox.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -118,26 +117,22 @@ void GLRenderer::GetDepthBuffer() const {
 void GLRenderer::Render() {
 
 	ViewFrustum frustum(m_camera->GetViewMatrix(), m_projMatrix);
-
-	const auto result = frustum.TestIntersection(std::make_shared<BoundingBox>(m_models[0]->GetBoundingBox()));
-
-	if (result == BoundingVolume::TestResult::INSIDE) {
-		std::cout << "inside.";
-	}
-	if (result == BoundingVolume::TestResult::INTERSECT) {
-		std::cout << "Intersect.";
-	}
-
+	
 	m_postProcess->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
 	m_terrain1->Draw(m_terrainShader.get(), m_camera->GetPosition());
 
-
 	m_forwardShader->Bind();
-	m_forwardShader->SetUniform("modelMatrix", m_models[0]->GetModelMatrix());
-	m_models[0]->Draw(m_forwardShader.get());
+	for (const auto& it : m_models) {
+		const auto result = frustum.TestIntersection(it->GetBoundingBox());
+		
+		if (result == BoundingVolume::TestResult::INSIDE || result == BoundingVolume::TestResult::INTERSECT) {
+			m_forwardShader->SetUniform("modelMatrix", it->GetModelMatrix());
+			it->Draw(m_forwardShader.get());
+		}
+	}
 
 	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 	m_postProcess->Update();

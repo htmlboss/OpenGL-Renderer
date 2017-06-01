@@ -47,6 +47,18 @@ void Model::DrawInstanced(GLShaderProgram* shader) {
 }
 
 /***********************************************************************************/
+void Model::Scale(const glm::vec3& scale) noexcept {
+	m_scale = scale;
+	m_aabb.scale(scale, glm::vec3(0.0f));
+}
+
+/***********************************************************************************/
+void Model::Translate(const glm::vec3& pos) noexcept {
+	m_position = pos;
+	m_aabb.translate(pos);
+}
+
+/***********************************************************************************/
 glm::mat4 Model::GetModelMatrix() const noexcept {
 	
 	const auto scale = glm::scale(glm::mat4(1.0f), m_scale);
@@ -174,12 +186,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		vertices.push_back(vertex);
 	}
 
-	std::cout << min.x << " " << min.y << " " << min.z << '\n';
-
-	m_aabb.minimum = min;
-	m_aabb.maximum = max;
-
-	m_aabb.position = glm::vec3(0.0);
+	//m_aabb.minimum = min;
+	//m_aabb.maximum = max;
+	m_aabb.extend(min);
+	m_aabb.extend(max);
 
 	// Get indices from each face
 	std::vector<GLuint> indices;

@@ -301,7 +301,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="3rdParty\glad\src\glad.c" />
-    <ClCompile Include="BoundingBox.cpp" />
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="GL\GBuffer.cpp" />
@@ -329,7 +329,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h" />
-    <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="AABB.hpp" />
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />

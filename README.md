@@ -16,19 +16,26 @@
 * Assimp model loading.
 * Procedural terrain (first iteration).
 * Post processing (HDR, saturation, vibrance).
-* Frustum culling (manual AABB testing).
+* Frustum culling (AABB only).
 * Forward shading.
 
-## Coming Soon
+## Coming "Soon"
 * Post processing (bloom, lens flares).
 * Rewritten deferred shading (w/ PBR).
+* GPU terrain generation.
 * Extended frustum culling:
     * Sphere and point testing.
-    * Optimization pass.
-    * Automatic AABB construction during model load.
-        * AABB hierarchy.
+    * AABB hierarchy.
     * Terrain AABB.
-    * Updating bounding volumes if necessary during update loop.
+
+## Third Party Code
+* Assimp.
+* GLM.
+* GLAD.
+* GLFW.
+* FreeType.
+* stb.
+* GLM AABB wrapper: ([https://github.com/iauns/cpm-glm-aabb](https://github.com/iauns/cpm-glm-aabb)).
 
 ## Research Used
 *  _Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix_ ([http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf](http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf)). Gribb, Hartman (2001).

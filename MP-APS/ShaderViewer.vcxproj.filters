@@ -95,7 +95,7 @@
     <ClCompile Include="ViewFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundingBox.cpp">
+    <ClCompile Include="AABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,7 +193,7 @@
     <ClInclude Include="BoundingVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundingBox.h">
+    <ClInclude Include="AABB.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

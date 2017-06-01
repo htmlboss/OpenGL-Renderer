@@ -4,7 +4,7 @@
 #include <assimp/scene.h>
 
 #include "Mesh.h"
-#include "BoundingBox.h"
+#include "AABB.hpp"
 
 #include <string_view>
 
@@ -20,9 +20,9 @@ public:
 	void DrawInstanced(GLShaderProgram* shader);
 
 	// Transformations
-	void Scale(const glm::vec3& scale) noexcept { m_scale = scale; }
+	void Scale(const glm::vec3& scale) noexcept;
 	void Rotate(const float radians, const glm::vec3& axis) noexcept { m_radians = radians; m_axis = axis; }
-	void Translate(const glm::vec3& pos) noexcept { m_position = pos; }
+	void Translate(const glm::vec3& pos) noexcept;
 	// Build model matrix from stored transformation data
 	glm::mat4 GetModelMatrix() const noexcept;
 
@@ -37,7 +37,7 @@ private:
 	glm::vec3 m_scale, m_position, m_axis;
 	float m_radians;
 
-	BoundingBox m_aabb;
+	AABB m_aabb;
 
 	std::vector<Mesh> m_meshes;
 	std::vector<GLTexture> m_loadedTextures;
