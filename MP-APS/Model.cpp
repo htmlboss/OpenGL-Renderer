@@ -125,6 +125,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<GLTexture> textures;
+	glm::vec3 min, max;
 
 	for (std::size_t i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
@@ -134,7 +135,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.Position->y = mesh->mVertices[i].y;
 			vertex.Position->z = mesh->mVertices[i].z;
 
-			// Construct bounding box
+						// Construct bounding box
+			if (vertex.Position->x < min.x) min.x = vertex.Position->x;
+			if (vertex.Position->x > max.x) max.x = vertex.Position->x;
+			
+			if (vertex.Position->y < min.y) min.y = vertex.Position->y;
+			if (vertex.Position->y > max.y) max.y = vertex.Position->y;
+			
+			if (vertex.Position->z < min.z) min.z = vertex.Position->z;
+			if (vertex.Position->z > max.z) max.z = vertex.Position->z;
+
 		}
 		
 		if (mesh->HasNormals()) {
@@ -163,6 +173,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 		vertices.push_back(vertex);
 	}
+
+	std::cout << min.x << " " << min.y << " " << min.z << '\n';
+
+	m_aabb.minimum = min;
+	m_aabb.maximum = max;
+
+	m_aabb.position = glm::vec3(0.0);
 
 	// Get indices from each face
 	std::vector<GLuint> indices;

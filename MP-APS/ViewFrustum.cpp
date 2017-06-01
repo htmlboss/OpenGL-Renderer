@@ -62,6 +62,7 @@ ViewFrustum::ViewFrustum(const glm::mat4& v, const glm::mat4& p) {
 	m_planes[FAR].z = clipMatrix[3][2] - clipMatrix[2][2];
 	m_planes[FAR].w = clipMatrix[3][3] - clipMatrix[2][3];
 	m_planes[FAR] = glm::normalize(m_planes[FAR]);
+
 }
 
 /***********************************************************************************/
@@ -72,22 +73,27 @@ BoundingVolume::TestResult ViewFrustum::TestIntersection(const glm::vec3& point)
 /***********************************************************************************/
 BoundingVolume::TestResult ViewFrustum::TestIntersection(const std::shared_ptr<const BoundingBox> box) const {
 	
-	for (auto i = 0; i < 6; ++i) {
-		
-		const auto pos = m_planes[i].w;
-		const auto normal = glm::vec3(m_planes[i]);
+	const glm::vec3 b[] { box->minimum, box->maximum };
 
-		if (glm::dot(normal, box->GetPositiveVertex(normal)) + pos < 0.0f) {
+	auto result = TestResult::INSIDE;
+
+	for (auto i =0; i < 6; ++i) {
+		const auto px = m_planes[i].x > 0.0f;
+		const auto py = m_planes[i].y > 0.0f;
+		const auto pz = m_planes[i].z > 0.0f;
+
+		const auto dp = m_planes[i].x * b[px].x + m_planes[i].y * b[py].y + m_planes[i].z * b[pz].z;
+		const auto dp2 = m_planes[i].x * b[1 - px].x + m_planes[i].y * b[1 - py].y + m_planes[i].z * b[1 - pz].z;
+
+		if (dp < -m_planes[i].w) {
 			return TestResult::OUTSIDE;
 		}
 
-		if (glm::dot(normal, box->GetNegativeVertex(normal)) + pos < 0.0f) {
-			return TestResult::INTERSECT;
+		if (dp2 <= -m_planes[i].w) {
+			result = TestResult::INTERSECT;
 		}
-
 	}
-
-	return TestResult::INSIDE;
+	return result;
 }
 
 /***********************************************************************************/

@@ -44,6 +44,8 @@ private:
 
 	const std::string m_name;
 	std::string m_path;
+
+
 };
 
 using ModelPtr = std::unique_ptr<Model>;

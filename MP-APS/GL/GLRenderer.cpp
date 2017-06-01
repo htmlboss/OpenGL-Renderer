@@ -118,12 +118,14 @@ void GLRenderer::GetDepthBuffer() const {
 void GLRenderer::Render() {
 
 	ViewFrustum frustum(m_camera->GetViewMatrix(), m_projMatrix);
-	BoundingBox bb({ 10.0f, 0.0f, 10.0f }, {15.0f, 5.0f, 15.0f}, { 10.0f, 0.0f, 10.0f });
 
-	const auto result = frustum.TestIntersection(std::make_shared<BoundingBox>(bb));
+	const auto result = frustum.TestIntersection(std::make_shared<BoundingBox>(m_models[0]->GetBoundingBox()));
 
 	if (result == BoundingVolume::TestResult::INSIDE) {
 		std::cout << "inside.";
+	}
+	if (result == BoundingVolume::TestResult::INTERSECT) {
+		std::cout << "Intersect.";
 	}
 
 	m_postProcess->Bind();
@@ -132,6 +134,7 @@ void GLRenderer::Render() {
 
 	m_terrain1->Draw(m_terrainShader.get(), m_camera->GetPosition());
 
+
 	m_forwardShader->Bind();
 	m_forwardShader->SetUniform("modelMatrix", m_models[0]->GetModelMatrix());
 	m_models[0]->Draw(m_forwardShader.get());
@@ -139,6 +142,7 @@ void GLRenderer::Render() {
 	m_skybox->Draw(*m_skyboxShader, m_camera->GetViewMatrix(), m_projMatrix);
 	m_postProcess->Update();
 	renderQuad();
+
 }
 
 /***********************************************************************************/
