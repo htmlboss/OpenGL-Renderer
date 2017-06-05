@@ -1,4 +1,5 @@
 #include "GLPostProcess.h"
+#include <glad/glad.h>
 
 
 GLPostProcess::GLPostProcess(const std::size_t width, const std::size_t height) :	IRenderComponent("GLPostProcess", width, height),
@@ -31,8 +32,22 @@ void GLPostProcess::Resize(const std::size_t width, const std::size_t height) {
 	m_width = width;
 	m_height = height;
 
+	m_hdrFBO.Reset(width, height);
+	m_hdrFBO.Bind();
+	GLuint rboDepth;
+	glGenTextures(1, &m_hdrColorBufferTexture);
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	// - Attach buffers
+	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
+	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
 }
 
 /***********************************************************************************/

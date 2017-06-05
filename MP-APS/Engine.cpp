@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Input.h"
 
 #include <GLFW/glfw3.h>
 
@@ -36,8 +37,11 @@ void Engine::Execute() {
 
 /***********************************************************************************/
 void Engine::update() {
+	Input::GetInstance()->Update();
 	m_mainWindow->Update();
 	m_timer.Update(glfwGetTime());
+
+	m_scene->Update(m_timer.GetDelta());
 	m_renderer->Update(m_timer.GetDelta());
 }
 

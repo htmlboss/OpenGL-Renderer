@@ -3,16 +3,13 @@
 #include "../Skybox.h"
 #include "../Utils/Utils.h"
 #include "../ViewFrustum.h"
+#include "../Input.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <string_view>
-
-bool GLRenderer::m_shouldResize = false;
-std::size_t GLRenderer::m_width = 0;
-std::size_t GLRenderer::m_height = 0;
 
 /***********************************************************************************/
 GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRenderer(), m_camera(new Camera()) {
@@ -25,9 +22,6 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n' 
 			  << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
-
-	m_width = width;
-	m_height = height;
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -77,7 +71,7 @@ GLRenderer::GLRenderer(const std::size_t width, const std::size_t height) : IRen
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
 
-	glViewport(0, 0, m_width, m_height);
+	glViewport(0, 0, width, height);
 }
 
 /***********************************************************************************/
@@ -98,14 +92,6 @@ void GLRenderer::AddModels(const std::shared_ptr<Model>& model) {
 /***********************************************************************************/
 void GLRenderer::ClearColor(const float r, const float g, const float b, const float a) const {
 	glClearColor(r, g, b, a);
-}
-
-/***********************************************************************************/
-void GLRenderer::Resize(const std::size_t width, const std::size_t height) {
-	m_shouldResize = true;
-
-	m_width = width;
-	m_height = height;
 }
 
 /***********************************************************************************/
@@ -150,15 +136,16 @@ void GLRenderer::renderQuad() const {
 void GLRenderer::Update(const double deltaTime) {
 
 	// Window size changed.
-	if (m_shouldResize) {
-		m_projMatrix = m_camera->GetProjMatrix(m_width, m_height);
+	if (Input::GetInstance()->ShouldResize()) {
+		const auto width = Input::GetInstance()->GetWidth();
+		const auto height = Input::GetInstance()->GetHeight();
+
+		m_projMatrix = m_camera->GetProjMatrix(width, height);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(m_projMatrix));
-		glViewport(0, 0, m_width, m_height);
-		m_gBuffer->Resize(m_width, m_height);
-		m_postProcess->Resize(m_width, m_height);
-
-		m_shouldResize = false;
+		glViewport(0, 0, width, height);
+		//m_gBuffer->Resize(m_width, m_height);
+		m_postProcess->Resize(width, height);
 	}
 
 	m_camera->Update(deltaTime);

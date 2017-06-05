@@ -94,7 +94,7 @@ void GLWindow::DisableVSync() const {
 void GLWindow::Update() const {
 	PollEvents();
 
-	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_ESCAPE)) {
+	if (Input::GetInstance()->IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {
 		m_shouldWindowClose = true;
 		glfwSetWindowShouldClose(m_window, true);
 	}

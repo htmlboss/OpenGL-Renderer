@@ -30,8 +30,6 @@ public:
 
 	auto GetCameraPos() const noexcept { return m_camera->GetPosition(); }
 
-	static void Resize(const std::size_t width, const std::size_t height);
-
 	// Deferred
 	void DoGeometryPass() override;
 	void DoDeferredLighting() const override;
@@ -39,10 +37,7 @@ public:
 private:
 	void renderQuad() const;
 	void renderGeometry();
-	
-	static std::size_t m_width, m_height;
-	static bool m_shouldResize;
-	
+
 	// Store all loaded models
 	std::vector<std::shared_ptr<Model>> m_models;
 

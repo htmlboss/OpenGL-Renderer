@@ -1,8 +1,13 @@
 #pragma once
+
+#include <vector>
+
 class Scene {
 public:
 	Scene();
 
-	void Update();
+	void Update(const double delta);
+
+private:
 };
 

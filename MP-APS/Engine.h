@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "GL/GLWindow.h"
 #include "GL/GLRenderer.h"
+#include "Scene.h"
 
 #include <memory>
 
@@ -28,5 +29,6 @@ private:
 
 	std::unique_ptr<GLWindow> m_mainWindow;
 	std::unique_ptr<GLRenderer> m_renderer;
+	std::unique_ptr<Scene> m_scene;
 };
 

@@ -20,6 +20,21 @@ void GLFramebuffer::AttachRenderBuffer(const GLuint rboID, const AttachmentType 
 }
 
 /***********************************************************************************/
+void GLFramebuffer::Delete() {
+	if (m_fbo) {
+		glDeleteFramebuffers(1, &m_fbo);
+	}
+}
+
+/***********************************************************************************/
+void GLFramebuffer::Reset(const std::size_t width, const std::size_t height) {
+	Delete();
+	glGenFramebuffers(1, &m_fbo);
+	m_width = width;
+	m_height = height;
+}
+
+/***********************************************************************************/
 void GLFramebuffer::Bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 }
@@ -45,7 +60,9 @@ void GLFramebuffer::Resize(const std::size_t width, const std::size_t height) {
 void GLFramebuffer::checkErrors() const {
 	const auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-	if (err != GL_FRAMEBUFFER_COMPLETE) {
+	switch (err) {
+	case !GL_FRAMEBUFFER_COMPLETE:
 		std::cerr << m_name << " not complete: " << err << '\n';
+		break;
 	}
 }

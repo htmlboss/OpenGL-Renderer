@@ -3,8 +3,6 @@
 #include <functional>
 #include <array>
 
-#include "GL/GLRenderer.h"
-
 class Input {
 	Input() = default;
 	~Input() = default;
@@ -18,6 +16,12 @@ public:
 	Input(const Input&) = delete;
 	Input& operator=(const Input&) = delete;
 
+	void Update() noexcept {
+		m_shouldResize = false;
+	}
+
+	// Getters
+	// Keyboard
 	auto IsKeyPressed(const std::size_t key) const noexcept { 
 #ifdef _DEBUG
 		assert(key < 1024);
@@ -25,8 +29,14 @@ public:
 		return m_keys[key];
 	}
 
+	// Mouse
 	auto GetMouseX() const noexcept { return m_xPos; }
 	auto GetMouseY() const noexcept { return m_yPos; }
+
+	// Window
+	auto ShouldResize() const noexcept { return m_shouldResize; }
+	auto GetWidth() const noexcept { return m_width; }
+	auto GetHeight() const noexcept { return m_height; }
 
 	// Generic Input Callbacks
 	// Mouse moved
@@ -56,7 +66,9 @@ public:
 	// Window size changed
 	std::function<void(int, int)> windowResized = [this](auto width, auto height)
 	{
-		GLRenderer::Resize(width, height);
+		this->m_shouldResize = true;
+		this->m_width = width;
+		this->m_height = height;
 	};
 
 private:
@@ -65,4 +77,8 @@ private:
 
 	// Mouse
 	double m_xPos, m_yPos;
+
+	// Resize
+	bool m_shouldResize = false;
+	std::size_t m_width, m_height;
 };
