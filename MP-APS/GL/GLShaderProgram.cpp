@@ -4,19 +4,13 @@
 
 /***********************************************************************************/
 GLShaderProgram::GLShaderProgram(const std::string_view programName, std::initializer_list<GLShader> shaders) : m_programName(programName) {
-	
+
 	m_programID = glCreateProgram();
 
-	for (const auto& shader : shaders) {
-		shader.AttachShader(m_programID);
-	}
+	for (const auto& shader : shaders) { shader.AttachShader(m_programID); }
 
-	try {
-		linkAndValidate();
-	}
-	catch (const std::runtime_error& err) {
-		std::cerr << programName << " error: " << err.what() << '\n';
-	}
+	try { linkAndValidate(); }
+	catch (const std::runtime_error& err) { std::cerr << programName << " error: " << err.what() << '\n'; }
 
 	// Cleanup
 	for (auto& shader : shaders) {
@@ -34,7 +28,7 @@ void GLShaderProgram::Bind() const {
 void GLShaderProgram::AddUniform(const std::string_view uniform) {
 
 	const GLint uniformLoc = glGetUniformLocation(m_programID, uniform.data());
-	
+
 	if (uniformLoc == -1) {
 		std::cerr << "Error: " << uniform.data() << " uniform not found in shader: " << m_programName.c_str() << std::endl;
 		return;
@@ -43,12 +37,7 @@ void GLShaderProgram::AddUniform(const std::string_view uniform) {
 }
 
 /***********************************************************************************/
-void GLShaderProgram::AddUniforms(const std::initializer_list<std::string_view> uniforms) {
-	
-	for (const auto& it : uniforms) {
-		AddUniform(it);
-	}
-}
+void GLShaderProgram::AddUniforms(const std::initializer_list<std::string_view> uniforms) { for (const auto& it : uniforms) { AddUniform(it); } }
 
 /***********************************************************************************/
 void GLShaderProgram::DeleteProgram() const {
@@ -59,7 +48,7 @@ void GLShaderProgram::DeleteProgram() const {
 
 /***********************************************************************************/
 void GLShaderProgram::linkAndValidate() {
-	
+
 	glLinkProgram(m_programID);
 	glGetProgramiv(m_programID, GL_LINK_STATUS, &m_success);
 	if (!m_success) {

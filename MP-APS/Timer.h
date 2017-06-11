@@ -15,4 +15,3 @@ private:
 	double m_delta, m_lastFrame, m_lastTime;
 	uint32_t m_nbFrames;
 };
-

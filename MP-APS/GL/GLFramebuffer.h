@@ -8,7 +8,7 @@
 // Helper class to encapsulate common FBO stuff and clean up repeated code.
 class GLFramebuffer : IRenderComponent {
 public:
-	GLFramebuffer(const std::string_view name, const std::size_t width, const std::size_t height);
+	GLFramebuffer(const std::string_view name, const size_t width, const size_t height);
 
 	enum class AttachmentType {
 		COLOR0 = GL_COLOR_ATTACHMENT0,
@@ -28,7 +28,7 @@ public:
 	};
 
 	void Delete();
-	void Reset(const std::size_t width, const std::size_t height);
+	void Reset(const size_t width, const size_t height);
 
 	void AttachTexture(const GLuint texID, const AttachmentType colorAttach) const;
 	void AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const;
@@ -36,7 +36,7 @@ public:
 	void Unbind() const;
 	void Blit(const BufferBitMasks bufferBit, const GLint targetID) const;
 
-	void Resize(const std::size_t width, const std::size_t height) override;
+	void Resize(const size_t width, const size_t height) override;
 
 private:
 	void checkErrors() const;

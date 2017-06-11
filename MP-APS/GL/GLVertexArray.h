@@ -18,11 +18,10 @@ public:
 		STREAM = GL_STREAM_DRAW
 	};
 
-	void AttachBuffer(const BufferType type, const std::size_t size, const DrawMode mode,const void* data);
+	void AttachBuffer(const BufferType type, const size_t size, const DrawMode mode, const void* data);
 	void Bind() const;
 	void EnableAttribute(const unsigned int index, const int size, const unsigned int offset, const void* data);
 
 private:
 	unsigned int m_vao;
 };
-

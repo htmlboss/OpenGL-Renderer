@@ -8,10 +8,6 @@ SkySphere::SkySphere() : m_model("models/sphere.obj", "SkySphere", true) {
 }
 
 /***********************************************************************************/
-SkySphere::~SkySphere() {
-}
-
-/***********************************************************************************/
 void SkySphere::Draw(GLShaderProgram* shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat, const glm::vec3& CameraPos) {
 	glDepthFunc(GL_LEQUAL);
 	shader->Bind();

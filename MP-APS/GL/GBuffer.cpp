@@ -6,16 +6,16 @@
 #include "../ResourceManager.h"
 
 /***********************************************************************************/
-GBuffer::GBuffer(const std::size_t width, const std::size_t height) :	IRenderComponent("GLBuffer", width, height),
-																		m_gBufferFB("GBuffer FBO", width, height),
-															m_geometryPassShader("Geometry Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"),  GLShader::ShaderType::VertexShader), 
-																											GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader) }), 
-															m_lightingPassShader("Lighting Pass Shader", {	GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"),  GLShader::ShaderType::VertexShader), 
-																											GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::PixelShader) }) {
+GBuffer::GBuffer(const size_t width, const size_t height) : IRenderComponent("GLBuffer", width, height),
+                                                            m_gBufferFB("GBuffer FBO", width, height),
+                                                            m_geometryPassShader("Geometry Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"), GLShader::ShaderType::VertexShader),
+	                                                                                 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader)}),
+                                                            m_lightingPassShader("Lighting Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"), GLShader::ShaderType::VertexShader),
+	                                                                                 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::PixelShader)}) {
 
 	m_geometryPassShader.Bind();
-	m_geometryPassShader.AddUniforms({ "model", "normalMatrix", "texture_diffuse1", "texture_specular1"});
-	
+	m_geometryPassShader.AddUniforms({"model", "normalMatrix", "texture_diffuse1", "texture_specular1"});
+
 	m_lightingPassShader.Bind();
 	m_lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
 	// Set samplers
@@ -49,7 +49,7 @@ GBuffer::GBuffer(const std::size_t width, const std::size_t height) :	IRenderCom
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_gDiffuseSpec, 0);
 
 	// Pass along color attachments
-	std::array<GLuint, 3> attachments = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	std::array<GLuint, 3> attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
 	glDrawBuffers(attachments.size(), attachments.data());
 
 	// Generate render buffer
@@ -57,11 +57,9 @@ GBuffer::GBuffer(const std::size_t width, const std::size_t height) :	IRenderCom
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rboDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboDepth);
-	
+
 	const auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if ( err != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Framebuffer not complete: " << err << '\n';
-	}
+	if (err != GL_FRAMEBUFFER_COMPLETE) { std::cerr << "Framebuffer not complete: " << err << '\n'; }
 }
 
 /***********************************************************************************/
@@ -77,17 +75,13 @@ void GBuffer::BindGBuffer() const {
 }
 
 /***********************************************************************************/
-void GBuffer::BindGeometryShader() const {
-	m_geometryPassShader.Bind();
-}
+void GBuffer::BindGeometryShader() const { m_geometryPassShader.Bind(); }
 
 /***********************************************************************************/
-void GBuffer::BindLightingShader() const {
-	m_lightingPassShader.Bind();
-}
+void GBuffer::BindLightingShader() const { m_lightingPassShader.Bind(); }
 
 /***********************************************************************************/
-void GBuffer::Resize(const std::size_t width, std::size_t height) {
+void GBuffer::Resize(const size_t width, size_t height) {
 	m_width = width;
 	m_height = height;
 
@@ -107,9 +101,7 @@ void GBuffer::Resize(const std::size_t width, std::size_t height) {
 }
 
 /***********************************************************************************/
-void GBuffer::SetCameraPos(const glm::vec3& pos) {
-	m_lightingPassShader.SetUniform("viewPos", pos);
-}
+void GBuffer::SetCameraPos(const glm::vec3& pos) { m_lightingPassShader.SetUniform("viewPos", pos); }
 
 /***********************************************************************************/
 void GBuffer::BindPosNorm() const {
@@ -129,7 +121,7 @@ void GBuffer::BindPosNormDiffSpec() const {
 
 /***********************************************************************************/
 void GBuffer::BlitDepthBuffer() const {
-	
+
 	m_gBufferFB.Bind();
 	m_gBufferFB.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0);
 	m_gBufferFB.Unbind();

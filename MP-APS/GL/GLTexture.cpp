@@ -1,10 +1,12 @@
 #include "GLTexture.h"
 
+#include "../ResourceManager.h"
+
 /***********************************************************************************/
-GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode, const ResourceManager::ColorMode colorMode) :
-	m_texturePath(TexturePath), 
-	m_samplerName(samplerName) {
-	
+GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode) :
+	m_samplerName(samplerName),
+	m_texturePath(TexturePath) {
+
 	m_fullPath = ModelPath;
 	m_fullPath += std::string(TexturePath);
 
@@ -24,21 +26,9 @@ GLTexture::GLTexture(const std::string_view ModelPath, const std::string_view Te
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.0f);
 	}
 
-	const auto texData = ResourceManager::GetInstance().GetTexture(m_fullPath, colorMode);
+	const auto texData = ResourceManager::GetInstance().GetTexture(m_fullPath, ResourceManager::ColorMode::RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, texData->width(), texData->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->data());
 
-	switch (colorMode) {
-	case ResourceManager::ColorMode::GREY:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texData->width(), texData->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->data());
-		break;
-
-	case ResourceManager::ColorMode::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, texData->width(), texData->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, texData->data());
-		break;
-
-	case ResourceManager::ColorMode::RGB_A:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, texData->width(), texData->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texData->data());
-		break;
-	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 

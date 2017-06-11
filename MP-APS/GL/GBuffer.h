@@ -6,19 +6,22 @@
 
 class GBuffer : public IRenderComponent {
 public:
-	GBuffer(const std::size_t width, const std::size_t height);
+	GBuffer(const size_t width, const size_t height);
 	~GBuffer() = default;
 
 	void Shutdown();
 
 	void BindGBuffer() const;
-	void UnBindGBuffer() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
+	void UnBindGBuffer() const {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 
 	void BindGeometryShader() const;
 	void BindLightingShader() const;
 
-	void Resize(const std::size_t width, const std::size_t height) override;
-	
+	void Resize(const size_t width, const size_t height) override;
+
 	void SetCameraPos(const glm::vec3& pos);
 
 	void BindPosNorm() const;
@@ -34,4 +37,3 @@ private:
 
 	GLShaderProgram m_geometryPassShader, m_lightingPassShader;
 };
-

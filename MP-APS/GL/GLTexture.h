@@ -1,7 +1,8 @@
 #pragma once
 
-#include "glad/glad.h"
-#include "../ResourceManager.h"
+#include <glad/glad.h>
+
+#include <string>
 
 class GLTexture {
 
@@ -13,8 +14,7 @@ public:
 		BORDER_CLAMP = GL_CLAMP_TO_BORDER
 	};
 
-	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode = WrapMode::REPEAT, const ResourceManager::ColorMode colorMode = ResourceManager::ColorMode::RGB);
-	~GLTexture() = default;
+	GLTexture(const std::string_view ModelPath, std::string_view TexturePath, const std::string_view samplerName, const WrapMode wrapMode = WrapMode::REPEAT);
 
 	bool operator==(const GLTexture& rhs) const { return m_fullPath == rhs.GetFullPath(); }
 
@@ -29,4 +29,3 @@ private:
 	GLuint m_texture;
 	std::string m_samplerName, m_texturePath, m_fullPath;
 };
-

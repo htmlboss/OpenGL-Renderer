@@ -9,14 +9,14 @@ struct GLFWwindow;
 
 class GLWindow : IWindow {
 public:
-	GLWindow(const std::size_t width, const std::size_t height, const std::string_view windowName, const bool fullscreen = false);
+	GLWindow(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen = false);
 	~GLWindow() = default;
 
 	GLWindow(const GLWindow&) = delete;
 	GLWindow& operator=(const GLWindow&) = delete;
-	
+
 	void PollEvents() const override;
-	void SetWindowPos(const std::size_t x, const std::size_t y) const override;
+	void SetWindowPos(const size_t x, const size_t y) const override;
 	void SwapBuffers() const override;
 	void DestroyWindow() const override;
 
@@ -29,10 +29,9 @@ public:
 	void Update() const;
 	bool ShouldClose() const noexcept { return m_shouldWindowClose; }
 	bool IsFocused() const noexcept { return m_focused; }
-	
+
 private:
 	GLFWwindow* m_window;
 
 	bool m_focused = true;
 };
-

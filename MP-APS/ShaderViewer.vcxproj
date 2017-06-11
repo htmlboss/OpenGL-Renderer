@@ -134,7 +134,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
     <Linkage-freetype>
@@ -159,11 +159,13 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Release\;$(LibraryPath)</LibraryPath>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DX11_Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Release\;$(LibraryPath)</LibraryPath>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -270,6 +272,10 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLM_FORCE_AVX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/std:c++latest /arch:AVX2 %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <StringPooling>true</StringPooling>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -334,6 +340,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GL\GBuffer.h" />
+    <ClInclude Include="GL\GLContext.h" />
     <ClInclude Include="GL\GLFramebuffer.h" />
     <ClInclude Include="GL\GLPostProcess.h" />
     <ClInclude Include="GL\GLRenderer.h" />

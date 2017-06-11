@@ -9,7 +9,7 @@ public:
 
 	void Update(const double deltaTime) noexcept;
 
-	auto GetViewMatrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
+	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
 	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 0.1f, 1000.0f); }
 	auto GetPosition() const noexcept { return m_position; }
 
@@ -22,6 +22,7 @@ private:
 		UP,
 		DOWN
 	};
+
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 	void updateView(const bool constrainPitch = true) noexcept;
 
@@ -41,10 +42,11 @@ private:
 	// Eular Angles
 	double m_yaw, m_pitch;
 
-	const float m_speed = 50.0f;
+	const double m_speed = 50.0;
 	const double m_sensitivity = 0.3;
 	const float m_FOV;
 
+	// Mouse positions
 	bool m_firstMouse;
 	double m_prevX, m_prevY;
 };

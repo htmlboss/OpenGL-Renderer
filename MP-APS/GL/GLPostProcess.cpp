@@ -2,12 +2,12 @@
 #include <glad/glad.h>
 
 
-GLPostProcess::GLPostProcess(const std::size_t width, const std::size_t height) :	IRenderComponent("GLPostProcess", width, height),
-																					m_postProcessShader("Post Process Shader", {	GLShader("shaders/postprocessvs.glsl", GLShader::ShaderType::VertexShader), 
-																																	GLShader("shaders/postprocessps.glsl", GLShader::ShaderType::PixelShader)}),
-																					m_hdrFBO("HDR FBO", width, height) {
+GLPostProcess::GLPostProcess(const size_t width, const size_t height) : IRenderComponent("GLPostProcess", width, height),
+                                                                        m_postProcessShader("Post Process Shader", {GLShader("shaders/postprocessvs.glsl", GLShader::ShaderType::VertexShader),
+	                                                                                            GLShader("shaders/postprocessps.glsl", GLShader::ShaderType::PixelShader)}),
+                                                                        m_hdrFBO("HDR FBO", width, height) {
 
-	m_postProcessShader.AddUniforms({ "hdrBuffer", "saturationFactor", "vibranceCoefficient", "vibranceAmount" });
+	m_postProcessShader.AddUniforms({"hdrBuffer", "saturationFactor", "vibranceCoefficient", "vibranceAmount"});
 
 
 	m_hdrFBO.Bind();
@@ -17,7 +17,7 @@ GLPostProcess::GLPostProcess(const std::size_t width, const std::size_t height) 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
 
@@ -28,7 +28,7 @@ GLPostProcess::GLPostProcess(const std::size_t width, const std::size_t height) 
 }
 
 /***********************************************************************************/
-void GLPostProcess::Resize(const std::size_t width, const std::size_t height) {
+void GLPostProcess::Resize(const size_t width, const size_t height) {
 	m_width = width;
 	m_height = height;
 
@@ -40,7 +40,7 @@ void GLPostProcess::Resize(const std::size_t width, const std::size_t height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
 
@@ -51,9 +51,7 @@ void GLPostProcess::Resize(const std::size_t width, const std::size_t height) {
 }
 
 /***********************************************************************************/
-void GLPostProcess::Bind() {
-	m_hdrFBO.Bind();
-}
+void GLPostProcess::Bind() { m_hdrFBO.Bind(); }
 
 /***********************************************************************************/
 void GLPostProcess::Update() {
@@ -67,11 +65,7 @@ void GLPostProcess::Update() {
 }
 
 /***********************************************************************************/
-void GLPostProcess::Shutdown() const {
-	m_postProcessShader.DeleteProgram();
-}
+void GLPostProcess::Shutdown() const { m_postProcessShader.DeleteProgram(); }
 
 /***********************************************************************************/
-void GLPostProcess::Blit() {
-	m_hdrFBO.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0);
-}
+void GLPostProcess::Blit() { m_hdrFBO.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0); }

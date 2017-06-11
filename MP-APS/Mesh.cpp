@@ -5,17 +5,14 @@
 #include <stddef.h>
 
 /***********************************************************************************/
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_vertices(vertices), m_indices(indices), m_vao() {
-
-	setupMesh();
-}
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_vao(), m_vertices(vertices), m_indices(indices) { setupMesh(); }
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) :
-	m_vertices(vertices), 
-	m_indices(indices), 
-	m_textures(textures),
-	m_uniformsAdded(false) {
+	m_uniformsAdded(false),
+	m_vertices(vertices),
+	m_indices(indices),
+	m_textures(textures) {
 
 	//Construct mesh
 	setupMesh();
@@ -48,7 +45,7 @@ void Mesh::SetInstancing(const std::initializer_list<glm::vec3>& args) {
 
 /***********************************************************************************/
 void Mesh::Draw(GLShaderProgram* shader) {
-	
+
 	bindTextures(shader);
 
 	// Draw mesh
@@ -59,7 +56,7 @@ void Mesh::Draw(GLShaderProgram* shader) {
 
 /***********************************************************************************/
 void Mesh::DrawInstanced(GLShaderProgram* shader) {
-	
+
 	bindTextures(shader);
 
 	// Draw instanced mesh
@@ -74,38 +71,38 @@ void Mesh::bindTextures(GLShaderProgram* shader) {
 	GLuint albedoNr = 1, normalNr = 1, metallicNr = 1, roughnessNr = 1, aoNr = 1;
 
 	GLuint index = 0;
-	
+
 	for (const auto& it : m_textures) {
 		glActiveTexture(GL_TEXTURE0 + index); // Activate proper texture unit before binding
-											  // Retrieve texture number (the N in diffuse_textureN)
-		
+		// Retrieve texture number (the N in diffuse_textureN)
+
 		const auto name = it.GetSampler();
 		const auto textureNameHashed = str2int(name.c_str());
 		std::string number;
 
 		switch (textureNameHashed) {
-		case str2int("albedoMap"):
-			number = std::to_string(albedoNr++);
-			break;
-		case str2int("normalMap"):
-			number = std::to_string(normalNr++);
-			break;
-		case str2int("metallicMap"):
-			number = std::to_string(metallicNr++);
-			break;
-		case str2int("roughnessMap"):
-			number = std::to_string(roughnessNr++);
-			break;
-		case str2int("aoMap"):
-			number = std::to_string(aoNr++);
-			break;
+			case str2int("albedoMap"):
+				number = std::to_string(albedoNr++);
+				break;
+			case str2int("normalMap"):
+				number = std::to_string(normalNr++);
+				break;
+			case str2int("metallicMap"):
+				number = std::to_string(metallicNr++);
+				break;
+			case str2int("roughnessMap"):
+				number = std::to_string(roughnessNr++);
+				break;
+			case str2int("aoMap"):
+				number = std::to_string(aoNr++);
+				break;
 		}
 
 		shader->SetUniformi(name + number, index);
 		glBindTexture(GL_TEXTURE_2D, it.GetTexture());
 
 		++index;
-	}	
+	}
 }
 
 /***********************************************************************************/

@@ -4,7 +4,7 @@
 
 class Texture {
 public:
-	Texture(unsigned char* data, const std::size_t width, const std::size_t height, const std::size_t components, const std::size_t ID);
+	Texture(unsigned char* data, const size_t width, const size_t height, const size_t components, const size_t ID);
 	virtual ~Texture() { delete[] m_data; }
 
 	Texture(Texture& other);
@@ -19,8 +19,8 @@ public:
 	auto data() const { return m_data; }
 
 private:
-	const std::size_t m_texID;
-	const std::size_t m_width, m_height, m_components;
+	const size_t m_texID;
+	const size_t m_width, m_height, m_components;
 	unsigned char* m_data;
 };
 

@@ -6,8 +6,8 @@ GLVertexArray::GLVertexArray() {
 }
 
 /***********************************************************************************/
-void GLVertexArray::AttachBuffer(const BufferType type, const std::size_t size, const DrawMode mode, const void* data) {
-	
+void GLVertexArray::AttachBuffer(const BufferType type, const size_t size, const DrawMode mode, const void* data) {
+
 	GLuint buffer;
 	glGenBuffers(1, &buffer);
 

@@ -15,9 +15,6 @@
     <Filter Include="Interfaces">
       <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Atmosphere">
-      <UniqueIdentifier>{13dfee4c-ddee-488a-b549-e9b2b68355e9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mesh.cpp">
@@ -195,6 +192,9 @@
     </ClInclude>
     <ClInclude Include="AABB.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GLContext.h">
+      <Filter>GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

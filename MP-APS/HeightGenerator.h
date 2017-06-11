@@ -4,7 +4,7 @@
 
 class HeightGenerator {
 public:
-	HeightGenerator(const int gridX, const int gridZ, const std::size_t vertexCount, const std::size_t seed) noexcept;
+	HeightGenerator(const int gridX, const int gridZ, const size_t vertexCount, const size_t seed) noexcept;
 
 	float GenerateHeight(const int x, const int z) const;
 
@@ -24,6 +24,5 @@ private:
 	float getInterpolatedNoise(const float x, const float z) const;
 
 	const float m_amplitude, m_roughness;
-	const std::size_t m_octaves, m_xOffset, m_zOffset, m_seed;
+	const size_t m_octaves, m_xOffset, m_zOffset, m_seed;
 };
-

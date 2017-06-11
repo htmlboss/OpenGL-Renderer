@@ -1,5 +1,5 @@
 #ifdef _DEBUG
-	// CRT Memory Leak detection
+// CRT Memory Leak detection
 	#define _CRTDBG_MAP_ALLOC  
 	#include <stdlib.h>  
 	#include <crtdbg.h>

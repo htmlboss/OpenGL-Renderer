@@ -10,7 +10,7 @@ class BoundingSphere;
 class BoundingVolume {
 public:
 
-	BoundingVolume() noexcept {}
+	BoundingVolume() noexcept = default;
 	virtual ~BoundingVolume() = default;
 
 	enum class TestResult {
@@ -20,7 +20,5 @@ public:
 	};
 
 	virtual TestResult TestIntersection(const glm::vec3& point) const = 0;
-	virtual TestResult TestIntersection(const std::shared_ptr<const BoundingBox> box) const = 0;
 	virtual TestResult TestIntersection(const std::shared_ptr<const BoundingSphere> sphere) const = 0;
 };
-

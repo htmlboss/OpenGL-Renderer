@@ -14,7 +14,7 @@ class Mesh {
 public:
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
-	
+
 	void SetInstancing(const std::initializer_list<glm::vec3>& args);
 	void Draw(GLShaderProgram* shader);
 	void DrawInstanced(GLShaderProgram* shader);
@@ -32,4 +32,3 @@ private:
 	std::vector<GLTexture> m_textures;
 	std::vector<glm::vec3> m_instanceOffsets;
 };
-

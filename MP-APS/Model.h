@@ -12,7 +12,7 @@ class Model {
 public:
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
-	explicit Model(const Mesh& mesh) noexcept;
+	Model(const std::string_view Name, const Mesh& mesh) noexcept;
 
 	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
 
@@ -21,7 +21,12 @@ public:
 
 	// Transformations
 	void Scale(const glm::vec3& scale) noexcept;
-	void Rotate(const float radians, const glm::vec3& axis) noexcept { m_radians = radians; m_axis = axis; }
+
+	void Rotate(const float radians, const glm::vec3& axis) noexcept {
+		m_radians = radians;
+		m_axis = axis;
+	}
+
 	void Translate(const glm::vec3& pos) noexcept;
 	// Build model matrix from stored transformation data
 	glm::mat4 GetModelMatrix() const noexcept;
@@ -48,4 +53,4 @@ private:
 
 };
 
-using ModelPtr = std::unique_ptr<Model>;
+using ModelPtr = std::shared_ptr<Model>;
