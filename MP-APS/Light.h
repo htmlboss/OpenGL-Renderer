@@ -1,13 +1,19 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
-#include <optional>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 struct Light {
+
+	Light() = default;
+
 	// Directional light
 	Light(const glm::vec3& color, const glm::vec3& direction) : Color(color),
 	                                                            Direction(direction) {
+		const auto lightView = glm::lookAt(direction, glm::vec3(0.0f), {0.0f, 1.0f, 0.0f});
+		const auto projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 1000.0f);
+		
+		m_lightSpaceMatrix = projection * lightView;
 	}
 
 	// Point light
@@ -18,16 +24,17 @@ struct Light {
 	                                                                                                                            Quadratic(quadratic) {
 	}
 
-	// Spot light
-	Light() {
-	}
+	// Spot light}
 
-	~Light() = default;
+	auto GetLightSpaceMatrix() const noexcept { return m_lightSpaceMatrix; }
 
 	glm::vec3 Color;
 
-	std::optional<glm::vec3> Position;
-	std::optional<glm::vec3> Direction;
-	std::optional<float> cutOff;
-	std::optional<float> Constant, Linear, Quadratic;
+	glm::vec3 Position;
+	glm::vec3 Direction;
+	float cutOff;
+	float Constant, Linear, Quadratic;
+
+private:
+	glm::mat4x4 m_lightSpaceMatrix;
 };

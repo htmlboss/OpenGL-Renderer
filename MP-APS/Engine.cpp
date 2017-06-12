@@ -3,11 +3,14 @@
 
 #include <iostream>
 
+#include <concrtrm.h>
+
 /***********************************************************************************/
 Engine::Engine(const size_t width, const size_t height, const bool fullscreen) : m_engineState(engineState::LOADING),
 																				 m_mainWindow(width, height, "MP-APS", fullscreen),
 																				 m_renderer(width, height),
 																				 m_scene(width, height) {
+	std::cout << "Available processor cores: " << Concurrency::GetProcessorCount() << '\n';
 	m_renderer.InitView(m_scene.GetCamera());
 	m_scene.Init();
 }
@@ -22,7 +25,7 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		m_renderer.Render(m_scene.GetCamera(), m_scene.GetTerrain(), m_scene.GetRenderList());
+		m_renderer.Render(m_scene.GetCamera(), m_scene.GetRenderData());
 
 		m_mainWindow.SwapBuffers();
 	}

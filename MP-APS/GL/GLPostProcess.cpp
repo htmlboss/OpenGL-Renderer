@@ -1,11 +1,11 @@
 #include "GLPostProcess.h"
 #include <glad/glad.h>
 
-
+/***********************************************************************************/
 GLPostProcess::GLPostProcess(const size_t width, const size_t height) : IRenderComponent("GLPostProcess", width, height),
-                                                                        m_postProcessShader("Post Process Shader", {GLShader("shaders/postprocessvs.glsl", GLShader::ShaderType::VertexShader),
-	                                                                                            GLShader("shaders/postprocessps.glsl", GLShader::ShaderType::PixelShader)}),
-                                                                        m_hdrFBO("HDR FBO", width, height) {
+																		m_postProcessShader("Post Process Shader", {GLShader("shaders/postprocessvs.glsl", GLShader::ShaderType::VertexShader),
+																								GLShader("shaders/postprocessps.glsl", GLShader::ShaderType::PixelShader)}),
+																		m_hdrFBO("HDR FBO", width, height) {
 
 	m_postProcessShader.AddUniforms({"hdrBuffer", "saturationFactor", "vibranceCoefficient", "vibranceAmount"});
 
@@ -51,7 +51,9 @@ void GLPostProcess::Resize(const size_t width, const size_t height) {
 }
 
 /***********************************************************************************/
-void GLPostProcess::Bind() { m_hdrFBO.Bind(); }
+void GLPostProcess::Bind() {
+	m_hdrFBO.Bind();
+}
 
 /***********************************************************************************/
 void GLPostProcess::Update() {

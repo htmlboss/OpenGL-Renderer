@@ -5,10 +5,10 @@
 #include "GBuffer.h"
 #include "../Skybox.h"
 #include "GLPostProcess.h"
-#include "../Model.h"
 
 class Camera;
 class Terrain;
+struct RenderData;
 
 
 class GLRenderer : public IRenderer {
@@ -22,7 +22,7 @@ public:
 
 	void GetDepthBuffer() const;
 
-	void Render(const Camera& camera, Terrain& terrain, const std::vector<ModelPtr>& renderList);
+	void Render(const Camera& camera, const RenderData& renderData);
 
 	// Deferred
 	void DoGeometryPass() override;
@@ -30,6 +30,7 @@ public:
 
 private:
 	void renderQuad() const;
+	void createShadowDepthMap(const size_t shadowResolution);
 	
 	GLContext m_context;
 
@@ -38,14 +39,17 @@ private:
 	GLuint m_uboMatrices;
 	glm::mat4 m_projMatrix;
 
+	GLFramebuffer m_depthMapFBO;
+	GLuint m_depthMap;
+	GLPostProcess m_postProcess;
 	std::unique_ptr<GBuffer> m_gBuffer;
 
 	Skybox m_skybox;
-	std::unique_ptr<GLPostProcess> m_postProcess;
 
 	GLShaderProgram m_forwardShader;
 	GLShaderProgram m_skyboxShader;
 	GLShaderProgram m_terrainShader;
+	GLShaderProgram m_depthShader;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

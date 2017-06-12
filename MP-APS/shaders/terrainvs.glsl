@@ -12,15 +12,18 @@ layout (std140, binding = 0) uniform Matrices {
   mat4 view;
 };
 uniform mat4 modelMatrix;
+uniform mat4 lightSpaceMatrix;
 
 out vec2 TexCoords;
 out vec3 FragPos;
+out vec4 LightSpaceFragPos;
 out vec3 Normal;
 
 void main() {
+  
 	TexCoords = texCoords;
-    FragPos = vec3(modelMatrix * vec4(position + offset, 1.0f));
-    Normal = mat3(modelMatrix) * normal;
-
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+  FragPos = vec3(modelMatrix * vec4(position + offset, 1.0));
+  Normal = mat3(modelMatrix) * normal;
+  LightSpaceFragPos = lightSpaceMatrix * vec4(FragPos, 1.0);
+  gl_Position = projection * view * vec4(FragPos, 1.0);
 }

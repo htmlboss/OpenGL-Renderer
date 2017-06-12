@@ -3,17 +3,22 @@
 #include "../Input.h"
 #include "../Camera.h"
 #include "../Terrain.h"
+#include "../Scene.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 /***********************************************************************************/
-GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m_context(), m_skybox("skybox/cloudtop/"),
+GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m_context(), m_depthMapFBO("Depth Map FBO", width, height),
+																							m_postProcess(width, height),
+																							m_skybox("skybox/cloudtop/"),
 																							m_skyboxShader("Skybox Shader", {	GLShader("shaders/skyboxvs.glsl", GLShader::ShaderType::VertexShader),
 																																GLShader("shaders/skyboxps.glsl", GLShader::ShaderType::PixelShader) }),
 																							m_forwardShader("Forward Shader", { GLShader("shaders/forwardvs.glsl", GLShader::ShaderType::VertexShader),
 																																GLShader("shaders/forwardps.glsl", GLShader::ShaderType::PixelShader) }), 
 																							m_terrainShader("Terrain Shader", { GLShader("shaders/terrainvs.glsl", GLShader::ShaderType::VertexShader),
-																																GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader) }) 
+																																GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader) }),
+																							m_depthShader("Depth Shader", {	GLShader("shaders/depthvs.glsl", GLShader::ShaderType::VertexShader), 
+																															GLShader("shaders/depthps.glsl", GLShader::ShaderType::PixelShader)})
 																{
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -23,11 +28,13 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 	glDepthFunc(GL_LESS);
 
 	//m_gBuffer = std::make_unique<GBuffer>(width, height);
-	m_postProcess = std::make_unique<GLPostProcess>(width, height);
-	
-	m_skyboxShader.AddUniforms({"projection", "view", "skybox"});
-	m_forwardShader.AddUniforms({"modelMatrix"});
-	m_terrainShader.AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", "viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
+	m_skyboxShader.AddUniforms({	"projection", "view", "skybox"});
+	m_forwardShader.AddUniforms({	"modelMatrix"});
+	m_terrainShader.AddUniforms({	"modelMatrix", "lightSpaceMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", 
+									"viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
+	m_depthShader.AddUniforms({		"modelMatrix", "lightSpaceMatrix"});
+
+	createShadowDepthMap(1024);
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
@@ -67,27 +74,33 @@ void GLRenderer::Shutdown() const {
 }
 
 /***********************************************************************************/
-void GLRenderer::GetDepthBuffer() const { m_gBuffer->BlitDepthBuffer(); }
+void GLRenderer::GetDepthBuffer() const {
+	m_gBuffer->BlitDepthBuffer();
+}
 
 /***********************************************************************************/
-void GLRenderer::Render(const Camera& camera, Terrain& terrain, const std::vector<ModelPtr>& renderList) {
+void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	const auto viewMatrix = camera.GetViewMatrix();
 
-	m_postProcess->Bind();
+	m_postProcess.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
 	// Draw terrain
-	terrain.Draw(m_terrainShader, camera.GetPosition());
+	renderData.terrain.Draw(m_terrainShader, camera.GetPosition());
 
+	// Draw models
 	m_forwardShader.Bind();
-	for (const auto& model : renderList) {
+	for (const auto& model : renderData.renderList) {
 		m_forwardShader.SetUniform("modelMatrix", model->GetModelMatrix());
 		model->Draw(&m_forwardShader);
 	}
 
+	// Draw skybox
 	m_skybox.Draw(m_skyboxShader, viewMatrix, m_projMatrix);
-	m_postProcess->Update();
+	
+	// Do post-processing
+	m_postProcess.Update();
 	renderQuad();
 
 }
@@ -96,6 +109,28 @@ void GLRenderer::Render(const Camera& camera, Terrain& terrain, const std::vecto
 void GLRenderer::renderQuad() const {
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+/***********************************************************************************/
+void GLRenderer::createShadowDepthMap(const size_t shadowResolution) {
+#ifdef _DEBUG
+	assert(shadowResolution % 2 == 0);
+#endif
+	if (m_depthMap) {
+		glDeleteTextures(1, &m_depthMap);
+	}
+	glGenTextures(1, &m_depthMap);
+	glBindTexture(GL_TEXTURE_2D, m_depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowResolution, shadowResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	m_depthMapFBO.Bind();
+	m_depthMapFBO.AttachTexture(m_depthMap, GLFramebuffer::AttachmentType::DEPTH);
+	m_depthMapFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_depthMapFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
 }
 
 /***********************************************************************************/
@@ -117,7 +152,10 @@ void GLRenderer::Update(const double deltaTime, const Camera& camera) {
 		InitView(camera);
 		glViewport(0, 0, m_width, m_height);
 		//m_gBuffer->Resize(m_width, m_height);
-		m_postProcess->Resize(m_width, m_height);
+		m_postProcess.Resize(m_width, m_height);
+
+		m_depthMapFBO.Reset(m_width, m_height);
+		createShadowDepthMap(1024);
 	}
 
 	// Update view matrix inside UBO

@@ -52,6 +52,18 @@ void GLFramebuffer::Blit(const BufferBitMasks bufferBit, const GLint targetID) c
 }
 
 /***********************************************************************************/
+void GLFramebuffer::DrawBuffer(const GLBuffer buffer) const {
+	glDrawBuffer(static_cast<int>(buffer));
+	checkErrors();
+}
+
+/***********************************************************************************/
+void GLFramebuffer::ReadBuffer(const GLBuffer buffer) const {
+	glReadBuffer(static_cast<int>(buffer));
+	checkErrors();
+}
+
+/***********************************************************************************/
 void GLFramebuffer::Resize(const size_t width, const size_t height) {
 	m_width = width;
 	m_height = height;
