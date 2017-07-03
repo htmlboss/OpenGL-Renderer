@@ -35,9 +35,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SkySphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="3rdParty\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -118,9 +115,6 @@
     <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SkySphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Interfaces\IWindow.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
@@ -160,9 +154,6 @@
     <ClInclude Include="GL\GBuffer.h">
       <Filter>GL</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -195,6 +186,12 @@
     </ClInclude>
     <ClInclude Include="GL\GLContext.h">
       <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

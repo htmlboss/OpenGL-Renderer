@@ -1,5 +1,5 @@
 #include "GLPostProcess.h"
-#include <glad/glad.h>
+#include "GLShader.h"
 
 /***********************************************************************************/
 GLPostProcess::GLPostProcess(const size_t width, const size_t height) : IRenderComponent("GLPostProcess", width, height),

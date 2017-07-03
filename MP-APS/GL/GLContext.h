@@ -14,5 +14,7 @@ public:
 
 	static auto GetGLVersion() { return glGetString(GL_VERSION); }
 	static auto GetGLSLVersion() { return glGetString(GL_SHADING_LANGUAGE_VERSION); }
+	static auto GetGLVendor() { return glGetString(GL_VENDOR); }
+	static auto GetGLRenderer() { return glGetString(GL_RENDERER); }
 };
 

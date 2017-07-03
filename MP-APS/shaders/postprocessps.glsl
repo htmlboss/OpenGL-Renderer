@@ -29,12 +29,11 @@ vec3 vibrance(const vec3 rgb, const float amount) {
 }
 
 void main() {             
-    const float gamma = 2.2f;
-
     const vec3 sourceColor = texture(hdrBuffer, TexCoords).rgb;
 
     // reinhard tone mapping
-    vec3 result = sourceColor / (sourceColor + vec3(1.0f));     
+    vec3 result = sourceColor / (sourceColor + vec3(1.0f));
+    const float gamma = 2.2f;
     result = pow(result, vec3(1.0f / gamma));
 
     color = vec4(vibrance(result, vibranceAmount), 1.0f);

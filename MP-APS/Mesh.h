@@ -10,25 +10,30 @@
 #include <vector>
 
 /***********************************************************************************/
+struct GLRenderData {
+	explicit GLRenderData() noexcept {}
+	explicit GLRenderData(const std::vector<GLuint>& indices) : VAO(), Indices(indices) {}
+
+	GLVertexArray VAO;
+	std::vector<GLuint> Indices;
+};
+
+/***********************************************************************************/
 class Mesh {
 public:
+	explicit Mesh() noexcept {}
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
 
-	void SetInstancing(const std::initializer_list<glm::vec3>& args);
-	void Draw(GLShaderProgram* shader);
-	void DrawInstanced(GLShaderProgram* shader);
+	void BindTextures(GLShaderProgram* shader);
+
+	auto GetRenderData() const noexcept { return m_renderData; }
 
 private:
-	void bindTextures(GLShaderProgram* shader);
 	void setupMesh();
 
-	bool m_uniformsAdded;
-
-	GLVertexArray m_vao;
+	GLRenderData m_renderData;
 
 	std::vector<Vertex> m_vertices;
-	std::vector<GLuint> m_indices;
 	std::vector<GLTexture> m_textures;
-	std::vector<glm::vec3> m_instanceOffsets;
 };

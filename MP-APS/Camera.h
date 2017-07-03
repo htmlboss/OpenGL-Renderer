@@ -10,7 +10,7 @@ public:
 	void Update(const double deltaTime) noexcept;
 
 	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
-	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 1.0f, 1000.0f); }
+	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 5.0f, 1000.0f); }
 	auto GetPosition() const noexcept { return m_position; }
 
 private:

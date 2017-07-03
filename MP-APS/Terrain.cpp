@@ -5,12 +5,13 @@
 #include <iostream>
 
 /***********************************************************************************/
-Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ, const std::size_t seed) noexcept : m_seed(seed) {
+Terrain::Terrain(const std::size_t gridX, const std::size_t gridZ, const std::size_t seed) noexcept : Model(), m_seed(seed) {
 	std::cout << "Generating terrain.\n";
 
-	m_terrainModel = std::make_shared<Model>("Terrain Model", generateTerrain(gridX, gridZ));
-	m_terrainModel->Translate(glm::vec3(gridX * SIZE, 0.0f, gridZ * SIZE));
-	m_terrainModel->Scale(glm::vec3(1.0f));
+	m_meshes.emplace_back(generateTerrain(gridX, gridZ));
+
+	Translate(glm::vec3(gridX * SIZE, 0.0f, gridZ * SIZE));
+	Scale(glm::vec3(1.0f));
 }
 
 /***********************************************************************************/

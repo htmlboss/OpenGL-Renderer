@@ -7,31 +7,27 @@
 #include "AABB.hpp"
 
 #include <string_view>
+#include <memory>
 
 class Model {
 public:
+	explicit Model() noexcept {}
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
 	Model(const std::string_view Name, const Mesh& mesh) noexcept;
-
-	void SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets);
-
-	void Draw(GLShaderProgram* shader);
-	void DrawInstanced(GLShaderProgram* shader);
+	virtual ~Model() {}
 
 	// Transformations
 	void Scale(const glm::vec3& scale) noexcept;
-
-	void Rotate(const float radians, const glm::vec3& axis) noexcept {
-		m_radians = radians;
-		m_axis = axis;
-	}
-
+	void Rotate(const float radians, const glm::vec3& axis) noexcept;
 	void Translate(const glm::vec3& pos) noexcept;
-	// Build model matrix from stored transformation data
 	glm::mat4 GetModelMatrix() const noexcept;
 
+	auto GetMeshes() const noexcept { return m_meshes; }
 	auto GetBoundingBox() const noexcept { return m_aabb; }
+
+protected:
+	std::vector<Mesh> m_meshes;
 
 private:
 	bool loadModel(const std::string_view Path, const bool flipWindingOrder);
@@ -44,13 +40,10 @@ private:
 
 	AABB m_aabb;
 
-	std::vector<Mesh> m_meshes;
 	std::vector<GLTexture> m_loadedTextures;
 
 	const std::string m_name;
 	std::string m_path;
-
-
 };
 
 using ModelPtr = std::shared_ptr<Model>;

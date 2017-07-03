@@ -5,32 +5,37 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <ppl.h>
 
 /***********************************************************************************/
-Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) { if (!loadModel(Path, flipWindingOrder)) { std::cerr << "Failed to load: " << Name << '\n'; } }
-
-/***********************************************************************************/
-Model::Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept { m_meshes.emplace_back(vertices, indices, textures); }
-
-/***********************************************************************************/
-Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Name) { m_meshes.push_back(std::move(mesh)); }
-
-/***********************************************************************************/
-void Model::SetInstancing(const std::initializer_list<glm::vec3>& instanceOffsets) {
-	// Pass list to each mesh
-	for (auto& mesh : m_meshes) { mesh.SetInstancing(instanceOffsets); }
+Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
+	
+	if (!loadModel(Path, flipWindingOrder)) {
+		std::cerr << "Failed to load: " << Name << '\n';
+	}
+	m_loadedTextures.clear();
 }
 
 /***********************************************************************************/
-void Model::Draw(GLShaderProgram* shader) { for (auto& mesh : m_meshes) { mesh.Draw(shader); } }
+Model::Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept { 
+	m_meshes.emplace_back(vertices, indices, textures); 
+}
 
 /***********************************************************************************/
-void Model::DrawInstanced(GLShaderProgram* shader) { for (auto& mesh : m_meshes) { mesh.DrawInstanced(shader); } }
+Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Name) {
+	m_meshes.push_back(std::move(mesh));
+}
 
 /***********************************************************************************/
 void Model::Scale(const glm::vec3& scale) noexcept {
 	m_scale = scale;
 	m_aabb.scale(scale, glm::vec3(0.0f));
+}
+
+/***********************************************************************************/
+void Model::Rotate(const float radians, const glm::vec3& axis) noexcept {
+	m_radians = radians;
+	m_axis = axis;
 }
 
 /***********************************************************************************/
@@ -103,13 +108,16 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 void Model::processNode(aiNode* node, const aiScene* scene) {
 
 	// Process all node meshes
-	for (size_t i = 0; i < node->mNumMeshes; ++i) {
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&] (const auto idx)
+	{
+		auto* mesh = scene->mMeshes[node->mMeshes[idx]];
 		m_meshes.push_back(processMesh(mesh, scene));
-	}
+	});
 
 	// Process their children
-	for (size_t i = 0; i < node->mNumChildren; ++i) { processNode(node->mChildren[i], scene); }
+	for (auto i = 0; i < node->mNumChildren; ++i) {
+		processNode(node->mChildren[i], scene);
+	}
 }
 
 /***********************************************************************************/
@@ -164,8 +172,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		vertices.push_back(vertex);
 	}
 
-	//m_aabb.minimum = min;
-	//m_aabb.maximum = max;
 	m_aabb.extend(min);
 	m_aabb.extend(max);
 
@@ -174,7 +180,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	for (size_t i = 0; i < mesh->mNumFaces; ++i) {
 		const auto face = mesh->mFaces[i];
 
-		for (size_t j = 0; j < face.mNumIndices; ++j) { indices.emplace_back(face.mIndices[j]); }
+		for (size_t j = 0; j < face.mNumIndices; ++j) {
+			indices.emplace_back(face.mIndices[j]);
+		}
 	}
 
 	// Process material
@@ -182,20 +190,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		auto* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		// PBR textures
-		const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "albedoMap");
+		const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
 
-		const auto normalMaps = loadMatTextures(material, aiTextureType_NORMALS, "normalMap");
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-		const auto metallicMaps = loadMatTextures(material, aiTextureType_SPECULAR, "metallicMap");
-		textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
-
-		const auto roughnessMaps = loadMatTextures(material, aiTextureType_SHININESS, "roughnessMap");
-		textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
-
-		const auto aoMaps = loadMatTextures(material, aiTextureType_AMBIENT, "aoMap");
-		textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
+		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 	return Mesh(vertices, indices, textures);
 }

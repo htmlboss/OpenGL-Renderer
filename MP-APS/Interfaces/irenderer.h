@@ -6,17 +6,15 @@
 
 class IRenderer {
 public:
-	IRenderer() noexcept {
-	};
-	virtual ~IRenderer() = default;
+	IRenderer() noexcept {}
 
-	// Deferred Stuff
-	virtual void DoGeometryPass() = 0;
-	virtual void DoDeferredLighting() const = 0;
+	virtual ~IRenderer() = default;
 
 protected:
 
-	const std::array<Vertex, 4> m_screenQuadVertices{
+	const std::size_t MAX_NUM_LIGHTS = 1024;
+
+	const std::array<Vertex, 4> m_screenQuadVertices {
 		// Positions			// GLTexture Coords
 		Vertex({-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}),
 		Vertex({-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}),
@@ -24,7 +22,7 @@ protected:
 		Vertex({1.0f, -1.0f, 0.0f}, {1.0f, 0.0f})
 	};
 
-	const std::array<float, 108> m_cubeVertices{
+	const std::array<float, 108> m_cubeVertices {
 		// Back face
 		-0.5f, -0.5f, -0.5f, // Bottom-left
 		0.5f, 0.5f, -0.5f, // top-right

@@ -11,7 +11,6 @@
 ![Current Build](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/01.png "Current Build")
 
 ## Features
-* Instancing.
 * Skybox.
 * Assimp model loading.
 * Procedural terrain (first iteration).

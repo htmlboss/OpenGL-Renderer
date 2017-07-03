@@ -2,35 +2,45 @@
 #include "../Interfaces/IRenderer.h"
 #include "GLContext.h"
 
-#include "GBuffer.h"
 #include "../Skybox.h"
 #include "GLPostProcess.h"
 
+/***********************************************************************************/
+// Forward Declarations
 class Camera;
 class Terrain;
 struct RenderData;
 
+/***********************************************************************************/
+struct VisibleLightIndex {
+	int Index;
+};
 
+/***********************************************************************************/
 class GLRenderer : public IRenderer {
 
 public:
 	GLRenderer(const size_t width, const size_t height);
 
 	void InitView(const Camera& camera);
-	void Update(const double deltaTime, const Camera& camera);
+	void Update(const Camera& camera);
 	void Shutdown() const;
-
-	void GetDepthBuffer() const;
 
 	void Render(const Camera& camera, const RenderData& renderData);
 
-	// Deferred
-	void DoGeometryPass() override;
-	void DoDeferredLighting() const override;
-
 private:
+	void renderTerrain(const RenderData& renderData, const glm::vec3& cameraPos, const bool shadowPass);
+	void renderModels(GLShaderProgram& shader, const RenderData& renderData, const bool shadowPass) const;
 	void renderQuad() const;
-	void createShadowDepthMap(const size_t shadowResolution);
+
+	// Configure NDC screenquad
+	void setupScreenquad();
+	// Generate storage buffers for Forward+ rendering
+	void setupLightBuffers();
+	// Allocate space for lights
+	void setupLightStorageBuffer();
+	// Configure Depth FBO
+	void setupDepthBuffer() const;
 	
 	GLContext m_context;
 
@@ -39,17 +49,22 @@ private:
 	GLuint m_uboMatrices;
 	glm::mat4 m_projMatrix;
 
-	GLFramebuffer m_depthMapFBO;
-	GLuint m_depthMap;
+	// Storage buffers for lights and visiable light indices
+	GLuint m_lightBuffer, m_visibleLightIndicesBuffer;
+	// Workgroup dimensions for compute shader
+	GLuint m_workGroupsX, m_workGroupsY;
+
 	GLPostProcess m_postProcess;
-	std::unique_ptr<GBuffer> m_gBuffer;
+	GLFramebuffer m_depthFBO;
 
 	Skybox m_skybox;
 
+	// Shaders
 	GLShaderProgram m_forwardShader;
 	GLShaderProgram m_skyboxShader;
 	GLShaderProgram m_terrainShader;
 	GLShaderProgram m_depthShader;
+	GLShaderProgram m_depthDebugShader;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

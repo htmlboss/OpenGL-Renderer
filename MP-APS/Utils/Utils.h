@@ -4,11 +4,22 @@
 #pragma once
 
 #include <cmath>
+#include <future>
 #include <random>
+#include <glm/vec3.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 
 namespace Utils {
 
@@ -60,6 +71,14 @@ constexpr auto randomFloat(const T low, const T high) {
 	static const std::uniform_real_distribution<T> dist(low, std::nextafter(high, std::numeric_limits<T>::max()));
 
 	return dist(mt);
+}
+
+/*
+ * Wrapper to launch a function with std::launch::async, and returns a future.
+ */
+template<typename Func, typename... Params>
+inline auto asyncFunc(Func&& f, Params&&... params) {
+	return std::async(std::launch::async, std::forward<Func>(f), std::forward<Params>(params)...);
 }
 
 } // namespace Utils
