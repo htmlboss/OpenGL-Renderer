@@ -1,0 +1,14 @@
+// -*- c++ -*-
+// Converts the Crytek Sponza to a convenient scale for G3D
+ArticulatedModel::Specification {
+    filename = "sponza.zip/sponza.obj";
+    preprocess = (
+        scale(0.005);
+    );
+
+    /* Avoid the potentially-slow welding step */
+    cleanGeometrySettings = CleanGeometrySettings {
+        forceVertexMerging = false;
+        allowVertexMerging = false;
+    };
+}

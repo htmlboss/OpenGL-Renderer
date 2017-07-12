@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MP-APS", "ShaderViewer.vcxproj", "{79953202-FB57-485E-89E1-3E6E37692583}"
+	ProjectSection(ProjectDependencies) = postProject
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33} = {042EA566-F7DF-4CCA-A070-90B4C1BB1A33}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcxproj", "{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		OpenGL_Debug|x64 = OpenGL_Debug|x64
+		OpenGL_Debug|x86 = OpenGL_Debug|x86
+		OpenGL_Release|x64 = OpenGL_Release|x64
+		OpenGL_Release|x86 = OpenGL_Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x64.ActiveCfg = Debug|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x64.Build.0 = Debug|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x86.ActiveCfg = Debug|Win32
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x86.Build.0 = Debug|Win32
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Release|x64.ActiveCfg = Release|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Release|x64.Build.0 = Release|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Release|x86.ActiveCfg = Release|Win32
+		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Release|x86.Build.0 = Release|Win32
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Debug|x64.ActiveCfg = Debug|x64
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Debug|x64.Build.0 = Debug|x64
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Debug|x86.ActiveCfg = Debug|Win32
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Debug|x86.Build.0 = Debug|Win32
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Release|x64.ActiveCfg = Release|x64
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Release|x64.Build.0 = Release|x64
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Release|x86.ActiveCfg = Release|Win32
+		{042EA566-F7DF-4CCA-A070-90B4C1BB1A33}.OpenGL_Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
