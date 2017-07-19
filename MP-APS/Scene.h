@@ -3,8 +3,8 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Terrain.h"
-#include "PointLight.h"
-#include "DirectionalLight.h"
+#include "Lights/PointLight.h"
+#include "Lights/DirectionalLight.h"
 
 /***********************************************************************************/
 // Data that is sent to the Renderer.

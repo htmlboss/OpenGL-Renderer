@@ -6,14 +6,14 @@ Texture::Texture(unsigned char* data, const size_t width, const size_t height, c
 	m_width(width),
 	m_height(height),
 	m_components(components),
-	m_data(data) { data = nullptr; }
+	m_data(std::move(data)) { data = nullptr; }
 
 /***********************************************************************************/
 Texture::Texture(Texture& other) : m_texID(other.m_texID),
 								   m_width(other.m_width),
 								   m_height(other.m_height),
 								   m_components(other.m_components),
-								   m_data(other.m_data) { other.m_data = nullptr; }
+								   m_data(std::move(other.m_data)) { other.m_data = nullptr; }
 
 /*
 /***********************************************************************************

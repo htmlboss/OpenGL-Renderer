@@ -64,6 +64,11 @@ void GLShaderProgram::SetUniformf(const std::string_view uniformName, const GLfl
 }
 
 /***********************************************************************************/
+void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::ivec2& value) const {
+	glUniform2iv(m_uniforms.at(uniformName.data()), 1, &value[0]);
+}
+
+/***********************************************************************************/
 void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::vec3& value) const {
 	glUniform3f(m_uniforms.at(uniformName.data()), value.x, value.y, value.z);
 }

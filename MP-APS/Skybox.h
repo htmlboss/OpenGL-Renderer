@@ -14,7 +14,7 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	}
 
-	void Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) const;
+	void Draw(GLShaderProgram& shader) const;
 
 private:
 	std::array<std::string, 6> m_faces; // A skybox only ever has 6 faces, so an array is fine (and safer perhaps)

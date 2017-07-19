@@ -4,15 +4,15 @@
 #include <array>
 
 class GLShader {
-public:
 
+public:
 	enum class ShaderType {
-		PixelShader = GL_FRAGMENT_SHADER,
-		VertexShader = GL_VERTEX_SHADER,
-		GeometryShader = GL_GEOMETRY_SHADER,
-		ComputeShader = GL_COMPUTE_SHADER,
-		TessCtrlShader = GL_TESS_CONTROL_SHADER,
-		TessEvalShader = GL_TESS_EVALUATION_SHADER
+		Pixel = GL_FRAGMENT_SHADER,
+		Vertex = GL_VERTEX_SHADER,
+		Geometry = GL_GEOMETRY_SHADER,
+		Compute = GL_COMPUTE_SHADER,
+		TessControl = GL_TESS_CONTROL_SHADER,
+		TessEval = GL_TESS_EVALUATION_SHADER
 	};
 
 	GLShader(const std::string_view path, const ShaderType type);

@@ -43,22 +43,12 @@ Skybox::Skybox(const std::string_view TextureDirectory) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	// Anisotropic filtering
-	GLfloat aniso = 0.0f;
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 }
 
 /***********************************************************************************/
-void Skybox::Draw(GLShaderProgram& shader, const glm::mat4& CameraMatrix, const glm::mat4& ProjectionMat) const {
+void Skybox::Draw(GLShaderProgram& shader) const {
 	glDepthFunc(GL_LEQUAL); // Change depth function so depth test passes when values are equal to depth buffer's content
 	shader.Bind();
-
-	// Transformations
-	const auto view = glm::mat4(glm::mat3(CameraMatrix)); // Remove any translation component of the view matrix
-	shader.SetUniform("view", view);
-	shader.SetUniform("projection", ProjectionMat);
 
 	// Skybox Cube
 	glBindVertexArray(m_vao);

@@ -3,12 +3,12 @@
 
 /***********************************************************************************/
 GLPostProcess::GLPostProcess(const size_t width, const size_t height) : IRenderComponent("GLPostProcess", width, height),
-																		m_postProcessShader("Post Process Shader", {GLShader("shaders/postprocessvs.glsl", GLShader::ShaderType::VertexShader),
-																								GLShader("shaders/postprocessps.glsl", GLShader::ShaderType::PixelShader)}),
+																		m_postProcessShader("Post Process Shader", {GLShader("Shaders/postprocessvs.glsl", GLShader::ShaderType::Vertex),
+																													GLShader("Shaders/postprocessps.glsl", GLShader::ShaderType::Pixel)}),
 																		m_hdrFBO("HDR FBO", width, height) {
 
+	m_postProcessShader.Bind();
 	m_postProcessShader.AddUniforms({"hdrBuffer", "saturationFactor", "vibranceCoefficient", "vibranceAmount"});
-
 
 	m_hdrFBO.Bind();
 	GLuint rboDepth;

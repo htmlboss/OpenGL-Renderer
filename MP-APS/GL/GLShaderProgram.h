@@ -19,6 +19,7 @@ public:
 
 	void SetUniformi(const std::string_view uniformName, const GLint value) const;
 	void SetUniformf(const std::string_view uniformName, const GLfloat value) const;
+	void SetUniform(const std::string_view uniformName, const glm::ivec2& value) const;
 	void SetUniform(const std::string_view uniformName, const glm::vec3& value) const;
 	void SetUniform(const std::string_view uniformName, const glm::vec4& value) const;
 	void SetUniform(const std::string_view uniformName, const glm::mat3x3& value) const;

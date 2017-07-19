@@ -12,7 +12,7 @@ public:
 
 protected:
 
-	const std::size_t MAX_NUM_LIGHTS = 1024;
+	const std::size_t MAX_NUM_LIGHTS = 128;
 
 	const std::array<Vertex, 4> m_screenQuadVertices {
 		// Positions			// GLTexture Coords

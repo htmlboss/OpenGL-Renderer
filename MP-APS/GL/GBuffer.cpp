@@ -9,10 +9,10 @@
 /***********************************************************************************/
 GBuffer::GBuffer(const size_t width, const size_t height) : IRenderComponent("GLBuffer", width, height),
 															m_gBufferFB("GBuffer FBO", width, height),
-															m_geometryPassShader("Geometry Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"), GLShader::ShaderType::VertexShader),
-																					 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::PixelShader)}),
-															m_lightingPassShader("Lighting Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"), GLShader::ShaderType::VertexShader),
-																					 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::PixelShader)}) {
+															m_geometryPassShader("Geometry Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassvs.glsl"), GLShader::ShaderType::Vertex),
+																					 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/geometrypassps.glsl"), GLShader::ShaderType::Pixel)}),
+															m_lightingPassShader("Lighting Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassvs.glsl"), GLShader::ShaderType::Vertex),
+																					 GLShader(ResourceManager::GetInstance().LoadTextFile("shaders/lightingpassps.glsl"), GLShader::ShaderType::Pixel)}) {
 
 	m_geometryPassShader.Bind();
 	m_geometryPassShader.AddUniforms({"model", "normalMatrix", "texture_diffuse1", "texture_specular1"});

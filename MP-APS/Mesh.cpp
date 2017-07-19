@@ -23,7 +23,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 void Mesh::BindTextures(GLShaderProgram* shader) {
 	using namespace Utils;
 
-	GLuint albedoNr = 1, specularNr = 1;
+	GLuint albedoNr = 1, specularNr = 1, normalNr = 1;
 
 	GLuint index = 0;
 
@@ -41,6 +41,9 @@ void Mesh::BindTextures(GLShaderProgram* shader) {
 				break;
 			case str2int("texture_specular"):
 				number = std::to_string(specularNr++);
+				break;
+			case str2int("texture_normal"):
+				number = std::to_string(normalNr++);
 				break;
 		}
 

@@ -31,7 +31,7 @@ void Scene::Init() {
 
 	auto model = ResourceManager::GetInstance().GetModel("Sponza", "models/crytek-sponza/sponza.obj");
 	model->Translate(glm::vec3(0.0f));
-	model->Scale(glm::vec3(0.25f));
+	model->Scale(glm::vec3(0.05f));
 	m_sceneModels.push_back(model);
 
 	// Sun parameters

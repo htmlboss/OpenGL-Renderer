@@ -108,7 +108,7 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 void Model::processNode(aiNode* node, const aiScene* scene) {
 
 	// Process all node meshes
-	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&] (const auto idx)
+	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&](const auto idx)
 	{
 		auto* mesh = scene->mMeshes[node->mMeshes[idx]];
 		m_meshes.push_back(processMesh(mesh, scene));
@@ -195,6 +195,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 	return Mesh(vertices, indices, textures);
 }

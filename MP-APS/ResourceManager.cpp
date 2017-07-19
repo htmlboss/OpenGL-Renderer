@@ -16,7 +16,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 	in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 	if (!in) {
-		std::cerr << "Failed to open: " + *path.data() << " " << errno << '\n';
+		std::cerr << "File loading error: " + *path.data() << " " << errno << '\n';
 		return std::string("Bad string!");
 	}
 
@@ -34,8 +34,8 @@ TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorM
 		auto data = stbi_load(path.data(), &x, &y, &comp, STBI_rgb);
 
 		if (data == nullptr) {
-			std::cerr << "stb_image error (" << path.data() << "): " << stbi_failure_reason() << '\n';
-			throw std::runtime_error("");
+			std::cerr << "stb_image error (" << path << "): " << stbi_failure_reason() << '\n';
+			throw std::runtime_error(stbi_failure_reason());
 		}
 		++m_currentTexID;
 		// Add and return new loaded texture.
@@ -50,7 +50,9 @@ ModelPtr ResourceManager::GetModel(const std::string_view name, const std::strin
 
 	const auto val = m_loadedModels.find(path.data());
 
-	if (val == m_loadedModels.end()) { return m_loadedModels.emplace(name.data(), std::make_shared<Model>(path, name)).first->second; }
+	if (val == m_loadedModels.end()) {
+		return m_loadedModels.emplace(name.data(), std::make_shared<Model>(path, name)).first->second;
+	}
 
 	return val->second;
 }

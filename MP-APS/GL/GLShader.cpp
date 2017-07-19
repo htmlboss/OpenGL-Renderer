@@ -6,10 +6,14 @@
 /***********************************************************************************/
 GLShader::GLShader(const std::string_view path, const ShaderType type) {
 
-	m_shaderID = glCreateShader(static_cast<decltype(0x8B30)>(type));
+	m_shaderID = glCreateShader(static_cast<int>(type));
 
-	try { compile(ResourceManager::GetInstance().LoadTextFile(path).c_str()); }
-	catch (const std::runtime_error& err) { std::cerr << "\nShader Error: " << path << ":\n" << err.what() << '\n'; }
+	try {
+		compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "\nShader Error: " << path << ":\n" << err.what() << '\n';
+	}
 }
 
 /***********************************************************************************/

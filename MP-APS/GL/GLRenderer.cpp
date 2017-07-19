@@ -6,27 +6,28 @@
 #include "../Scene.h"
 
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <random>
+#include <iostream>
 
 /***********************************************************************************/
 GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m_context(), m_width(width),
 																							m_height(height),
-																							m_workGroupsX((width + width % 16) / 16),
-																							m_workGroupsY((height + height % 16) / 16),
+																							m_workGroupsX((width + width % 8) / 8),
+																							m_workGroupsY((height + height % 8) / 8),
 																							m_postProcess(width, height),
 																							m_depthFBO("Depth FBO", width, height),
 																							m_skybox("skybox/cloudtop/"),
-																							m_skyboxShader("Skybox Shader", {	GLShader("shaders/skyboxvs.glsl", GLShader::ShaderType::VertexShader),
-																																GLShader("shaders/skyboxps.glsl", GLShader::ShaderType::PixelShader) }),
-																							m_forwardShader("Forward Shader", { GLShader("shaders/forwardvs.glsl", GLShader::ShaderType::VertexShader),
-																																GLShader("shaders/forwardps.glsl", GLShader::ShaderType::PixelShader) }), 
-																							m_terrainShader("Terrain Shader", { GLShader("shaders/terrainvs.glsl", GLShader::ShaderType::VertexShader),
-																																GLShader("shaders/terrainps.glsl", GLShader::ShaderType::PixelShader) }),
-																							m_depthShader("Depth Shader", {	GLShader("shaders/depthvs.glsl", GLShader::ShaderType::VertexShader),
-																															GLShader("shaders/depthps.glsl", GLShader::ShaderType::PixelShader)}),
-																							m_depthDebugShader("Debug Depth Shader", {	GLShader("shaders/debugdepthvs.glsl", GLShader::ShaderType::VertexShader),
-																																		GLShader("shaders/debugdepthps.glsl", GLShader::ShaderType::PixelShader)})
+																							m_skyboxShader("Skybox Shader", {	GLShader("Shaders/skyboxvs.glsl", GLShader::ShaderType::Vertex),
+																																GLShader("Shaders/skyboxps.glsl", GLShader::ShaderType::Pixel) }),
+																							m_terrainShader("Terrain Shader", { GLShader("Shaders/terrainvs.glsl", GLShader::ShaderType::Vertex),
+																																GLShader("Shaders/terrainps.glsl", GLShader::ShaderType::Pixel) }),
+																							m_depthShader("Depth Shader", {	GLShader("Shaders/depthvs.glsl", GLShader::ShaderType::Vertex),
+																															GLShader("Shaders/depthps.glsl", GLShader::ShaderType::Pixel)}),
+																							m_depthDebugShader("Debug Depth Shader", {	GLShader("Shaders/debugdepthvs.glsl", GLShader::ShaderType::Vertex),
+																																		GLShader("Shaders/debugdepthps.glsl", GLShader::ShaderType::Pixel)}),
+																							m_lightCullingShader("Light Culling Compute Shader", { GLShader("Shaders/lightcullingcs.glsl", GLShader::ShaderType::Compute)}),
+																							m_lightAccumShader("Light Accumulation Shader", {	GLShader("Shaders/lightaccumulationvs.glsl", GLShader::ShaderType::Vertex),
+																																				GLShader("Shaders/lightaccumulationps.glsl", GLShader::ShaderType::Pixel) })
 																							{
 	std::cout << "OpenGL Version: " << m_context.GetGLVersion() << '\n';
 	std::cout << "GLSL Version: " << m_context.GetGLSLVersion() << '\n';
@@ -43,16 +44,24 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_skyboxShader.AddUniforms({	"projection", "view", "skybox"});
-	m_forwardShader.AddUniforms({	"modelMatrix", "texture_diffuse1", "texture_specular1", "viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
+	m_skyboxShader.AddUniforms({	"skybox"});
 	m_terrainShader.AddUniforms({	"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", 
 									"viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
 	m_depthShader.AddUniforms({"modelMatrix"});
-	m_depthDebugShader.AddUniforms({"modelMatrix", "near", "far"});
+	m_lightAccumShader.AddUniforms({"modelMatrix", "viewPosition", "texture_diffuse1", "texture_specular1", "texture_normal1", "numberOfTilesX"});
 	
 	m_depthDebugShader.Bind();
+	m_depthDebugShader.AddUniforms({"modelMatrix", "near", "far"});
 	m_depthDebugShader.SetUniformf("near", 5.0f);
 	m_depthDebugShader.SetUniformf("far", 1000.0f);
+
+	m_lightCullingShader.Bind();
+	m_lightCullingShader.AddUniforms({ "depthMap", "view", "projection", "screenSize", "lightCount" });
+	m_lightCullingShader.SetUniformi("lightCount", MAX_NUM_LIGHTS);
+	m_lightCullingShader.SetUniform("screenSize", glm::ivec2(m_width, m_height));
+
+	m_lightAccumShader.Bind();
+	m_lightAccumShader.SetUniformi("numberOfTilesX", m_workGroupsX);
 
 	setupLightBuffers();
 	setupScreenquad();
@@ -71,18 +80,17 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 void GLRenderer::Shutdown() const {
 
 	m_skyboxShader.DeleteProgram();
-	m_forwardShader.DeleteProgram();
 	m_terrainShader.DeleteProgram();
 	m_depthShader.DeleteProgram();
 	m_depthDebugShader.DeleteProgram();
+	m_lightCullingShader.DeleteProgram();
+	m_lightAccumShader.DeleteProgram();
 }
 
 /***********************************************************************************/
 void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	const auto viewMatrix = camera.GetViewMatrix();
 
-	//m_postProcess.Bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
 	/*
@@ -95,15 +103,46 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	m_forwardShader.SetUniform("light.diffuse", renderData.Sun.Color);
 	m_forwardShader.SetUniform("light.specular", glm::vec3(1.0f));
 	*/
-	renderModels(m_depthDebugShader, renderData, true);
+	
+	// Step 1: Render the depth of the scene to a depth map
+	m_depthShader.Bind();
+	
+	m_depthFBO.Bind();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	renderModels(m_depthShader, renderData, true);
+	m_depthFBO.Unbind();
+
+	// Step 2: Perform light culling on point lights in the scene
+	m_lightCullingShader.Bind();
+	m_lightCullingShader.SetUniform("projection", m_projMatrix);
+	m_lightCullingShader.SetUniform("view", viewMatrix);
+
+	glActiveTexture(GL_TEXTURE5);
+	m_lightCullingShader.SetUniformi("depthMap", 5);
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+
+	// Bind shader storage buffer objects for the light and indice buffers
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_lightBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_visibleLightIndicesBuffer);
+
+	// Execute compute shader
+	glDispatchCompute(m_workGroupsX, m_workGroupsY, 1);
+
+	m_postProcess.Bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_lightAccumShader.Bind();
+	m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
+	renderModels(m_lightAccumShader, renderData, false);
 
 	// Draw skybox
-	//m_skybox.Draw(m_skyboxShader, viewMatrix, m_projMatrix);
+	m_skybox.Draw(m_skyboxShader);
 	
 	// Do post-processing
-	//m_postProcess.Update();
+	m_postProcess.Update();
 
 	renderQuad();
+
 }
 
 /***********************************************************************************/
@@ -114,7 +153,7 @@ void GLRenderer::InitView(const Camera& camera) {
 }
 
 /***********************************************************************************/
-void GLRenderer::Update(const Camera& camera) {
+void GLRenderer::Update(const Camera& camera, const double delta) {
 
 	// Window size changed.
 	if (Input::GetInstance().ShouldResize()) {
@@ -132,6 +171,8 @@ void GLRenderer::Update(const Camera& camera) {
 	const auto view = camera.GetViewMatrix();
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+
+	UpdateLights(delta);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -212,6 +253,8 @@ void GLRenderer::setupLightBuffers() {
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_NUM_LIGHTS, nullptr, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	setupLightStorageBuffer();
 }
 
 /***********************************************************************************/
@@ -222,10 +265,18 @@ void GLRenderer::setupLightStorageBuffer() {
 	}
 
 	std::random_device rd;
-	const std::mt19937_64 gen(rd());
+	std::mt19937_64 gen(rd());
 	std::uniform_real_distribution<> dist(0.0f, 1.0f);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
+	auto* pointLights = (PointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	
+	for (auto i = 0; i < MAX_NUM_LIGHTS; i++) {
+		auto& light = pointLights[i];
+		light.Position = glm::vec4(RandomPosition(dist, gen), 1.0f);
+		light.Color = glm::vec4(1.0f + dist(gen), 1.0f + dist(gen), 1.0f + dist(gen), 1.0f);
+		light.RadiusAndPadding = glm::vec4(glm::vec3(0.0f), 30.0f);
+	}
 
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -233,12 +284,14 @@ void GLRenderer::setupLightStorageBuffer() {
 }
 
 /***********************************************************************************/
-void GLRenderer::setupDepthBuffer() const {
+void GLRenderer::setupDepthBuffer() {
 	m_depthFBO.Bind();
 
-	GLuint depthTex;
-	glGenTextures(1, &depthTex);
-	glBindTexture(GL_TEXTURE_2D, depthTex);
+	if (m_depthTexture) {
+		glDeleteTextures(1, &m_depthTexture);
+	}
+	glGenTextures(1, &m_depthTexture);
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -247,9 +300,38 @@ void GLRenderer::setupDepthBuffer() const {
 	const GLfloat borderColor[] { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	m_depthFBO.AttachTexture(depthTex, GLFramebuffer::AttachmentType::DEPTH);
+	m_depthFBO.AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
 	m_depthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
 	m_depthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
 	
 	m_depthFBO.Unbind();
+}
+
+/***********************************************************************************/
+glm::vec3 GLRenderer::RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen) {
+	glm::vec3 position = glm::vec3(0.0);
+	for (int i = 0; i < 3; i++) {
+		float min = LIGHT_MIN_BOUNDS[i];
+		float max = LIGHT_MAX_BOUNDS[i];
+		position[i] = (GLfloat)dis(gen) * (max - min) + min;
+	}
+
+	return position;
+}
+
+/***********************************************************************************/
+void GLRenderer::UpdateLights(const double dt) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
+	PointLight *pointLights = (PointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+	for (int i = 0; i < MAX_NUM_LIGHTS; i++) {
+		PointLight &light = pointLights[i];
+		float min = LIGHT_MIN_BOUNDS[1];
+		float max = LIGHT_MAX_BOUNDS[1];
+
+		light.Position.y = fmod((light.Position.y + (-4.5f * dt) - min + max), max) + min;
+	}
+
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
