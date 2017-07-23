@@ -5,17 +5,21 @@
 
 #include "Mesh.h"
 #include "AABB.hpp"
+#include "Material.h"
 
 #include <string_view>
 #include <memory>
 
 class Model {
 public:
-	explicit Model() noexcept {}
+	explicit Model() noexcept : m_radians(0.0f) {}
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
 	Model(const std::string_view Name, const Mesh& mesh) noexcept;
 	virtual ~Model() {}
+
+	void AssignMaterial(const Material& material);
+	auto GetMaterial() const noexcept { return m_material; }
 
 	// Transformations
 	void Scale(const glm::vec3& scale) noexcept;
@@ -35,10 +39,11 @@ private:
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<GLTexture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName);
 
+	Material m_material;
 	glm::vec3 m_scale, m_position, m_axis;
 	float m_radians;
 
-	AABB m_aabb;
+	AABB m_aabb; // Model bounding box
 
 	std::vector<GLTexture> m_loadedTextures;
 

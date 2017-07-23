@@ -54,12 +54,12 @@ void GLShaderProgram::DeleteProgram() const {
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniformi(const std::string_view uniformName, const GLint value) const {
+void GLShaderProgram::SetUniformi(const std::string_view uniformName, const int value) const {
 	glUniform1i(m_uniforms.at(uniformName.data()), value);
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniformf(const std::string_view uniformName, const GLfloat value) const {
+void GLShaderProgram::SetUniformf(const std::string_view uniformName, const float value) const {
 	glUniform1f(m_uniforms.at(uniformName.data()), value);
 }
 

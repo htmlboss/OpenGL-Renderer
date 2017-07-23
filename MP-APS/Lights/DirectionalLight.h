@@ -3,7 +3,6 @@
 #include <glm/vec4.hpp>
 
 struct DirectionalLight {
-	
 	DirectionalLight() noexcept {}
 
 	DirectionalLight(const glm::vec3& direction, const glm::vec3& color) :	Direction(direction, 1.0f),

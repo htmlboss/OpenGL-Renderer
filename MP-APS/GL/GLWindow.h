@@ -3,7 +3,6 @@
 #include "../Interfaces/IWindow.h"
 
 #include <string_view>
-#include <functional>
 
 struct GLFWwindow;
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "Vertex.h"
 #include "GL/GLTexture.h"
 #include "GL/GLShaderProgram.h"
@@ -11,7 +9,7 @@
 
 /***********************************************************************************/
 struct GLRenderData {
-	explicit GLRenderData() noexcept {}
+	explicit GLRenderData() {}
 	explicit GLRenderData(const std::vector<GLuint>& indices) : VAO(), Indices(indices) {}
 
 	GLVertexArray VAO;
@@ -21,7 +19,7 @@ struct GLRenderData {
 /***********************************************************************************/
 class Mesh {
 public:
-	explicit Mesh() noexcept {}
+	explicit Mesh() {}
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
 

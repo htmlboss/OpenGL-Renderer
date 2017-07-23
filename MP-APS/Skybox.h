@@ -1,9 +1,10 @@
 #pragma once
 
-#include <glm/gtc/type_ptr.hpp>
+#include <glad/glad.h>
+#include "GL/GLShaderProgram.h"
+
 #include <array>
 
-#include "GL/GLShaderProgram.h"
 
 class Skybox {
 public:

@@ -77,6 +77,7 @@ private:
 	GLShaderProgram m_depthDebugShader;
 	GLShaderProgram m_lightCullingShader;
 	GLShaderProgram m_lightAccumShader;
+	GLShaderProgram m_PBRShader;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;

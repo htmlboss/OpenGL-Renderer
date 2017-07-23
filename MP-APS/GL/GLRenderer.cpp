@@ -27,7 +27,9 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 																																		GLShader("Shaders/debugdepthps.glsl", GLShader::ShaderType::Pixel)}),
 																							m_lightCullingShader("Light Culling Compute Shader", { GLShader("Shaders/lightcullingcs.glsl", GLShader::ShaderType::Compute)}),
 																							m_lightAccumShader("Light Accumulation Shader", {	GLShader("Shaders/lightaccumulationvs.glsl", GLShader::ShaderType::Vertex),
-																																				GLShader("Shaders/lightaccumulationps.glsl", GLShader::ShaderType::Pixel) })
+																																				GLShader("Shaders/lightaccumulationps.glsl", GLShader::ShaderType::Pixel) }),
+																							m_PBRShader("PBR Shader", { GLShader("Shaders/PBRvs.glsl", GLShader::ShaderType::Vertex),
+																														GLShader("Shaders/PBRps.glsl", GLShader::ShaderType::Pixel) })
 																							{
 	std::cout << "OpenGL Version: " << m_context.GetGLVersion() << '\n';
 	std::cout << "GLSL Version: " << m_context.GetGLSLVersion() << '\n';
@@ -62,6 +64,8 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 
 	m_lightAccumShader.Bind();
 	m_lightAccumShader.SetUniformi("numberOfTilesX", m_workGroupsX);
+
+	m_PBRShader.AddUniforms({"modelMatrix", "albedo", "metallic", "ao", "roughness", "sunDirection", "sunColor", "viewPos"});
 
 	setupLightBuffers();
 	setupScreenquad();
@@ -131,9 +135,13 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	m_postProcess.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_lightAccumShader.Bind();
-	m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
-	renderModels(m_lightAccumShader, renderData, false);
+	//m_lightAccumShader.Bind();
+	//m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
+	m_PBRShader.Bind();
+	m_PBRShader.SetUniform("viewPos", camera.GetPosition());
+	m_PBRShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
+	m_PBRShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
+	renderModels(m_PBRShader, renderData, false);
 
 	// Draw skybox
 	m_skybox.Draw(m_skyboxShader);
@@ -209,7 +217,11 @@ void GLRenderer::renderModels(GLShaderProgram& shader, const RenderData& renderD
 			const auto data = mesh.GetRenderData();
 
 			if (!depthPass) {
-				mesh.BindTextures(&shader);
+				shader.SetUniform("albedo", model->GetMaterial().Albedo);
+				shader.SetUniformf("metallic", model->GetMaterial().Metallic);
+				shader.SetUniformf("ao", model->GetMaterial().AO);
+				shader.SetUniformf("roughness", model->GetMaterial().Roughness);
+
 			}
 			data.VAO.Bind();
 			glDrawElements(GL_TRIANGLES, data.Indices.size(), GL_UNSIGNED_INT, nullptr);

@@ -2,7 +2,6 @@
 #include "Utils/Utils.h"
 
 #include <string>
-#include <stddef.h>
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_renderData(indices), m_vertices(vertices) {

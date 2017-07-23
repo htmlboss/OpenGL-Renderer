@@ -27,6 +27,11 @@ Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Na
 }
 
 /***********************************************************************************/
+void Model::AssignMaterial(const Material& material) {
+	m_material = material;
+}
+
+/***********************************************************************************/
 void Model::Scale(const glm::vec3& scale) noexcept {
 	m_scale = scale;
 	m_aabb.scale(scale, glm::vec3(0.0f));

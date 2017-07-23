@@ -15,6 +15,7 @@
 # Visual Studio Junk
 *.pdb
 *.tlog
+ipch/
 
 # Build results
 [Dd]ebug/

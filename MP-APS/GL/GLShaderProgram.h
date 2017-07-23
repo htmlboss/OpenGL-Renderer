@@ -1,5 +1,4 @@
 #pragma once
-#include <glad/glad.h>
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,8 +16,8 @@ public:
 	void Bind() const;
 	void DeleteProgram() const;
 
-	void SetUniformi(const std::string_view uniformName, const GLint value) const;
-	void SetUniformf(const std::string_view uniformName, const GLfloat value) const;
+	void SetUniformi(const std::string_view uniformName, const int value) const;
+	void SetUniformf(const std::string_view uniformName, const float value) const;
 	void SetUniform(const std::string_view uniformName, const glm::ivec2& value) const;
 	void SetUniform(const std::string_view uniformName, const glm::vec3& value) const;
 	void SetUniform(const std::string_view uniformName, const glm::vec4& value) const;
@@ -28,12 +27,12 @@ public:
 private:
 	void linkAndValidate();
 
-	std::unordered_map<std::string_view, GLint> m_uniforms;
+	std::unordered_map<std::string_view, int> m_uniforms;
 
-	GLuint m_programID;
+	unsigned int m_programID;
 	const std::string m_programName;
 
 	//  To check for compile-time errors
-	GLint m_success;
-	std::array<GLchar, 1024> m_infoLog;
+	int m_success;
+	std::array<char, 1024> m_infoLog;
 };
