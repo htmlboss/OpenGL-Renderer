@@ -28,6 +28,11 @@ GLShaderProgram::GLShaderProgram(const std::string_view programName, std::initia
 }
 
 /***********************************************************************************/
+GLShaderProgram::~GLShaderProgram() {
+	DeleteProgram();
+}
+
+/***********************************************************************************/
 void GLShaderProgram::Bind() const {
 	glUseProgram(m_programID);
 }
@@ -54,38 +59,52 @@ void GLShaderProgram::DeleteProgram() const {
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniformi(const std::string_view uniformName, const int value) const {
+GLShaderProgram& GLShaderProgram::SetUniformi(const std::string_view uniformName, const int value) {
 	glUniform1i(m_uniforms.at(uniformName.data()), value);
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniformf(const std::string_view uniformName, const float value) const {
+GLShaderProgram& GLShaderProgram::SetUniformf(const std::string_view uniformName, const float value) {
 	glUniform1f(m_uniforms.at(uniformName.data()), value);
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::ivec2& value) const {
+GLShaderProgram& GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::ivec2& value) {
 	glUniform2iv(m_uniforms.at(uniformName.data()), 1, &value[0]);
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::vec3& value) const {
+GLShaderProgram& GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::vec3& value) {
 	glUniform3f(m_uniforms.at(uniformName.data()), value.x, value.y, value.z);
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::vec4& value) const {
+GLShaderProgram& GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::vec4& value) {
 	glUniform4f(m_uniforms.at(uniformName.data()), value.x, value.y, value.z, value.w);
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::mat3x3& value) const {
+GLShaderProgram& GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::mat3x3& value) {
 	glUniformMatrix3fv(m_uniforms.at(uniformName.data()), 1, GL_FALSE, value_ptr(value));
+
+	return *this;
 }
 
 /***********************************************************************************/
-void GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::mat4x4& value) const {
+GLShaderProgram& GLShaderProgram::SetUniform(const std::string_view uniformName, const glm::mat4x4& value) {
 	glUniformMatrix4fv(m_uniforms.at(uniformName.data()), 1, GL_FALSE, value_ptr(value));
+
+	return *this;
 }
 
 /***********************************************************************************/

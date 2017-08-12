@@ -4,6 +4,7 @@
 #include "../Input.h"
 #include "../Camera.h"
 #include "../Scene.h"
+#include "../ResourceManager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <random>
@@ -16,9 +17,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 																							m_workGroupsY((height + height % 8) / 8),
 																							m_postProcess(width, height),
 																							m_depthFBO("Depth FBO", width, height),
-																							m_skybox("skybox/cloudtop/"),
-																							m_skyboxShader("Skybox Shader", {	GLShader("Shaders/skyboxvs.glsl", GLShader::ShaderType::Vertex),
-																																GLShader("Shaders/skyboxps.glsl", GLShader::ShaderType::Pixel) }),
+																							m_skybox("Data/hdri/barcelona.hdr", 1024),
 																							m_terrainShader("Terrain Shader", { GLShader("Shaders/terrainvs.glsl", GLShader::ShaderType::Vertex),
 																																GLShader("Shaders/terrainps.glsl", GLShader::ShaderType::Pixel) }),
 																							m_depthShader("Depth Shader", {	GLShader("Shaders/depthvs.glsl", GLShader::ShaderType::Vertex),
@@ -34,7 +33,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 	std::cout << "OpenGL Version: " << m_context.GetGLVersion() << '\n';
 	std::cout << "GLSL Version: " << m_context.GetGLSLVersion() << '\n';
 	std::cout << "OpenGL Vendor: " << m_context.GetGLVendor() << '\n';
-	std::cout << "OpenGL Renderer: " << m_context.GetGLRenderer() << std::endl << std::endl;
+	std::cout << "OpenGL Renderer: " << m_context.GetGLRenderer() << std::endl;
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -42,20 +41,18 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_FRAMEBUFFER_SRGB);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_skyboxShader.AddUniforms({	"skybox"});
-	m_terrainShader.AddUniforms({	"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", 
+	m_terrainShader.AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", 
 									"viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
 	m_depthShader.AddUniforms({"modelMatrix"});
 	m_lightAccumShader.AddUniforms({"modelMatrix", "viewPosition", "texture_diffuse1", "texture_specular1", "texture_normal1", "numberOfTilesX"});
 	
 	m_depthDebugShader.Bind();
 	m_depthDebugShader.AddUniforms({"modelMatrix", "near", "far"});
-	m_depthDebugShader.SetUniformf("near", 5.0f);
-	m_depthDebugShader.SetUniformf("far", 1000.0f);
+	m_depthDebugShader.SetUniformf("near", 5.0f).SetUniformf("far", 1000.0f);
 
 	m_lightCullingShader.Bind();
 	m_lightCullingShader.AddUniforms({ "depthMap", "view", "projection", "screenSize", "lightCount" });
@@ -67,15 +64,15 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 
 	m_PBRShader.AddUniforms({"modelMatrix", "albedo", "metallic", "ao", "roughness", "sunDirection", "sunColor", "viewPos"});
 
-	setupLightBuffers();
-	setupScreenquad();
-	setupDepthBuffer();
-
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+	setupLightBuffers();
+	setupScreenquad();
+	setupDepthBuffer();
 
 	glViewport(0, 0, width, height);
 }
@@ -83,7 +80,6 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 /***********************************************************************************/
 void GLRenderer::Shutdown() const {
 
-	m_skyboxShader.DeleteProgram();
 	m_terrainShader.DeleteProgram();
 	m_depthShader.DeleteProgram();
 	m_depthDebugShader.DeleteProgram();
@@ -144,7 +140,7 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	renderModels(m_PBRShader, renderData, false);
 
 	// Draw skybox
-	m_skybox.Draw(m_skyboxShader);
+	m_skybox.Draw();
 	
 	// Do post-processing
 	m_postProcess.Update();
@@ -321,10 +317,10 @@ void GLRenderer::setupDepthBuffer() {
 
 /***********************************************************************************/
 glm::vec3 GLRenderer::RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen) {
-	glm::vec3 position = glm::vec3(0.0);
-	for (int i = 0; i < 3; i++) {
-		float min = LIGHT_MIN_BOUNDS[i];
-		float max = LIGHT_MAX_BOUNDS[i];
+	auto position = glm::vec3(0.0);
+	for (auto i = 0; i < 3; i++) {
+		const auto min = LIGHT_MIN_BOUNDS[i];
+		const auto max = LIGHT_MAX_BOUNDS[i];
 		position[i] = (GLfloat)dis(gen) * (max - min) + min;
 	}
 

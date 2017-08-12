@@ -32,6 +32,7 @@ public:
 private:
 	void renderTerrain(const RenderData& renderData, const glm::vec3& cameraPos, const bool shadowPass);
 	void renderModels(GLShaderProgram& shader, const RenderData& renderData, const bool shadowPass) const;
+	// Render NDC screenquad
 	void renderQuad() const;
 
 	// Configure NDC screenquad
@@ -68,10 +69,10 @@ private:
 	GLuint m_depthTexture;
 	GLFramebuffer m_depthFBO;
 
+	// Environment map
 	Skybox m_skybox;
 
 	// Shaders
-	GLShaderProgram m_skyboxShader;
 	GLShaderProgram m_terrainShader;
 	GLShaderProgram m_depthShader;
 	GLShaderProgram m_depthDebugShader;

@@ -6,7 +6,7 @@
 #include <memory>
 
 // Helper class to encapsulate common FBO stuff and clean up repeated code.
-class GLFramebuffer : IRenderComponent {
+class GLFramebuffer : public IRenderComponent {
 public:
 	GLFramebuffer(const std::string_view name, const size_t width, const size_t height);
 

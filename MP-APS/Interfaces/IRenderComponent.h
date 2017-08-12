@@ -13,6 +13,8 @@ public:
 
 	virtual void Resize(const size_t width, const size_t height) = 0;
 
+	auto GetName() const noexcept { return m_name; }
+
 protected:
 	const std::string m_name;
 	size_t m_width, m_height;
