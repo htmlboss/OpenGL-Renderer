@@ -66,12 +66,14 @@ ViewFrustum::ViewFrustum(const glm::mat4& v, const glm::mat4& p) {
 }
 
 /***********************************************************************************/
-BoundingVolume::TestResult ViewFrustum::TestIntersection(const glm::vec3& point) const { return TestResult::INTERSECT; }
+BoundingVolume::TestResult ViewFrustum::TestIntersection(const glm::vec3& point) const {
+	return TestResult::INTERSECT;
+}
 
 /***********************************************************************************/
 BoundingVolume::TestResult ViewFrustum::TestIntersection(const AABB& aabb) const {
 
-	const glm::vec3 b[]{aabb.getMin(), aabb.getMax()};
+	const glm::vec3 b[] {aabb.getMin(), aabb.getMax()};
 
 	auto result = TestResult::INSIDE;
 
@@ -91,4 +93,6 @@ BoundingVolume::TestResult ViewFrustum::TestIntersection(const AABB& aabb) const
 }
 
 /***********************************************************************************/
-BoundingVolume::TestResult ViewFrustum::TestIntersection(const std::shared_ptr<const BoundingSphere> sphere) const { return TestResult::INTERSECT; }
+BoundingVolume::TestResult ViewFrustum::TestIntersection(const std::shared_ptr<const BoundingSphere> sphere) const {
+	return TestResult::INTERSECT;
+}

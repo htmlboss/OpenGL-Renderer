@@ -5,7 +5,6 @@
 	#include <crtdbg.h>
 #endif
 #include "Engine.h"
-#include <iostream>
 
 /***********************************************************************************/
 int main() {
@@ -16,15 +15,7 @@ int main() {
 
 	Engine engine("Data/config.xml");
 
-	try {
-		engine.Execute();
-	} 
-	catch(const std::runtime_error& e) {
-		std::cerr << e.what();
-	} 
-	catch(...) {
-		std::cerr << "Unhandled exception!" << std::endl;
-	}
+	engine.Execute();
 
 	return 0;
 }

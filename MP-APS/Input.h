@@ -46,14 +46,14 @@ public:
 
 	// Generic Input Callbacks
 	// Mouse moved
-	std::function<void(double, double)> mouseMoved = [this](auto xPos, auto yPos) {
+	std::function<void(double, double)> mouseMoved = [&](auto xPos, auto yPos) {
 		this->m_mouseMoved = true;
 		this->m_xPos = xPos;
 		this->m_yPos = yPos;
 	};
 
 	// Key Pressed
-	std::function<void(int, int, int, int)> keyPressed = [this](auto key, auto scancode, auto action, auto mode) {
+	std::function<void(int, int, int, int)> keyPressed = [&](auto key, auto scancode, auto action, auto mode) {
 		if (key >= 0 && key < 1024) {
 			switch (action) {
 				// Pressed
@@ -69,7 +69,7 @@ public:
 	};
 
 	// Window size changed
-	std::function<void(int, int)> windowResized = [this](auto width, auto height) {
+	std::function<void(int, int)> windowResized = [&](auto width, auto height) {
 		this->m_shouldResize = true;
 		this->m_width = width;
 		this->m_height = height;

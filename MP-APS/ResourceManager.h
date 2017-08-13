@@ -30,8 +30,8 @@ public:
 	std::string LoadTextFile(const std::string_view path);
 
 	// Loads an HDR image and generates an OpenGL floating-point texture.
-	unsigned int LoadHDRI(const std::string_view path, const std::size_t resolution);
-	TexturePtr GetTexture(const std::string_view path, const ColorMode mode);
+	unsigned int LoadHDRI(const std::string_view path, const std::size_t resolution) const;
+	TexturePtr GetTexture(const std::string_view path, const ColorMode mode = ColorMode::RGB);
 	ModelPtr GetModel(const std::string_view name, const std::string_view path);
 
 	auto GetNumLoadedImages() const noexcept { return m_loadedTextures.size(); }

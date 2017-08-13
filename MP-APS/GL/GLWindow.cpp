@@ -22,10 +22,7 @@ void GLWindow::Init(const size_t width, const size_t height, const pugi::xml_nod
 
 	std::cout << "GLFW Version: " << glfwGetVersionString() << '\n';
 
-	glfwSetErrorCallback([](int errorCode, const char* message) {
-						std::cerr << message;
-						throw std::runtime_error(message);
-					});
+	glfwSetErrorCallback([](const auto errorCode, const auto* message) {std::cerr << message << std::endl; });
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, windowNode.attribute("major").as_int());
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, windowNode.attribute("minor").as_int());
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

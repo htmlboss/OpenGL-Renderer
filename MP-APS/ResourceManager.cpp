@@ -20,14 +20,14 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 
 	if (!in) {
 		std::cerr << "Resource Manager: File loading error: " + *path.data() << " " << errno << '\n';
-		return std::string("Resource Manager: Bad string!");
+		return std::string();
 	}
 
 	return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
 }
 
 /***********************************************************************************/
-unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::size_t resolution) {
+unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::size_t resolution) const {
 	stbi_set_flip_vertically_on_load(true);
 	
 	int width, height, nrComp;
@@ -37,7 +37,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::s
 
 	if (!data) {
 		std::cerr << "Resource Manager: Failed to load HDRI." << std::endl;
-		//throw std::runtime_error(stbi_failure_reason());
+		return 0;
 	}
 
 	unsigned int hdrTexture;
@@ -65,11 +65,11 @@ TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorM
 	if (val == m_loadedTextures.end()) {
 		// Image has not been loaded.
 		int x, y, comp;
-		auto data = stbi_load(path.data(), &x, &y, &comp, STBI_rgb);
+		auto data = stbi_load(path.data(), &x, &y, &comp, static_cast<int>(mode));
 
 		if (data == nullptr) {
 			std::cerr << "Resource Manager: stb_image error (" << path << "): " << stbi_failure_reason() << '\n';
-			throw std::runtime_error(stbi_failure_reason());
+			return nullptr;
 		}
 		++m_currentTexID;
 		// Add and return new loaded texture.

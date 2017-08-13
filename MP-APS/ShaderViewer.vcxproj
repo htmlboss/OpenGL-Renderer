@@ -211,7 +211,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mtd.lib;winmm.lib;freetype265d.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mtd.lib;winmm.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DX11_DEBUG|x64'">
@@ -369,7 +369,6 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Interfaces\IRenderComponent.h" />
     <ClInclude Include="Interfaces\irenderer.h" />
-    <ClInclude Include="Interfaces\IWindow.h" />
     <ClInclude Include="Lights\DirectionalLight.h" />
     <ClInclude Include="Lights\PointLight.h" />
     <ClInclude Include="Material.h" />

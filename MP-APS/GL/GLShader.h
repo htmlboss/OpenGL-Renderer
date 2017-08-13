@@ -1,5 +1,5 @@
 #pragma once
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 #include <array>
 
@@ -17,17 +17,9 @@ public:
 
 	GLShader(const std::string_view path, const ShaderType type);
 
-	void AttachShader(const GLuint Program) const {
-		glAttachShader(Program, m_shaderID);
-	}
-
-	void DetachShader(const GLuint Program) const {
-		glDetachShader(Program, m_shaderID);
-	}
-
-	void DeleteShader() const {
-		glDeleteShader(m_shaderID);
-	}
+	void AttachShader(const GLuint Program) const;
+	void DetachShader(const GLuint Program) const;
+	void DeleteShader() const;
 
 private:
 	void compile(const GLchar* shaderCode);

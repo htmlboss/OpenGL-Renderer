@@ -7,13 +7,23 @@
 GLShader::GLShader(const std::string_view path, const ShaderType type) {
 
 	m_shaderID = glCreateShader(static_cast<int>(type));
+	
+	compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
+}
 
-	try {
-		compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
-	}
-	catch (const std::runtime_error& err) {
-		std::cerr << "\nShader Error: " << path << ":\n" << err.what() << '\n';
-	}
+/***********************************************************************************/
+void GLShader::AttachShader(const GLuint Program) const {
+	glAttachShader(Program, m_shaderID);
+}
+
+/***********************************************************************************/
+void GLShader::DetachShader(const GLuint Program) const {
+	glDetachShader(Program, m_shaderID);
+}
+
+/***********************************************************************************/
+void GLShader::DeleteShader() const {
+	glDeleteShader(m_shaderID);
 }
 
 /***********************************************************************************/
@@ -25,6 +35,6 @@ void GLShader::compile(const GLchar* shaderCode) {
 	glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &m_success);
 	if (!m_success) {
 		glGetShaderInfoLog(m_shaderID, m_infoLog.size(), nullptr, m_infoLog.data());
-		throw std::runtime_error(m_infoLog.data());
+		std::cerr << "Shader Error: " << m_infoLog.data() << std::endl;
 	}
 }
