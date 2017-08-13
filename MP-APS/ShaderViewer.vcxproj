@@ -132,8 +132,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
-    <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
+    <LibraryPath>$(SolutionDir)3rdParty\pugixml\lib\Debug\;$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
@@ -142,7 +142,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DX11_DEBUG|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -157,13 +157,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\pugixml\lib\Release\;$(LibraryPath)</LibraryPath>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DX11_Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Release\;$(LibraryPath)</LibraryPath>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
   </PropertyGroup>
@@ -201,13 +201,17 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions) /EHsc</AdditionalOptions>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mtd.lib;winmm.lib;freetype265d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mtd.lib;winmm.lib;freetype265d.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DX11_DEBUG|x64'">
@@ -218,8 +222,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions) /EHsc</AdditionalOptions>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -276,13 +284,18 @@
       <StringPooling>true</StringPooling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;winmm.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DX11_Release|x64'">
@@ -296,6 +309,11 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions) /EHsc</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

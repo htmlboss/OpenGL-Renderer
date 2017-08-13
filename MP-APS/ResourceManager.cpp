@@ -11,6 +11,9 @@
 
 /***********************************************************************************/
 std::string ResourceManager::LoadTextFile(const std::string_view path) {
+#ifdef _DEBUG
+	std::cout << "Resource Manager: Loading text file: " << path << '\n';
+#endif
 
 	std::ifstream in(path.data(), std::ios::in);
 	in.exceptions(std::ifstream::failbit | std::ifstream::badbit);

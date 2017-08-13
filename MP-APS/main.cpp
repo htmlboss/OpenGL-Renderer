@@ -5,6 +5,7 @@
 	#include <crtdbg.h>
 #endif
 #include "Engine.h"
+#include <iostream>
 
 /***********************************************************************************/
 int main() {
@@ -13,9 +14,17 @@ int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	Engine engine(1280, 720);
+	Engine engine("Data/config.xml");
 
-	engine.Execute();
+	try {
+		engine.Execute();
+	} 
+	catch(const std::runtime_error& e) {
+		std::cerr << e.what();
+	} 
+	catch(...) {
+		std::cerr << "Unhandled exception!" << std::endl;
+	}
 
 	return 0;
 }
