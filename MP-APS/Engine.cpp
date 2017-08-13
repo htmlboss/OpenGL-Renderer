@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Input.h"
+#include "ResourceManager.h"
 
 #include <pugixml.hpp>
 #include <concrtrm.h>
@@ -10,13 +11,12 @@
 Engine::Engine(const std::string_view configPath) : m_engineState(engineState::LOADING),
 													m_mainWindow() {
 
-	std::cout << "Available processor cores: " << Concurrency::GetProcessorCount() << '\n';
-	
+	std::cout << "Engine starting up...\n";
 	std::cout << "Loading Engine config file...\n";
+	std::cout << "Available processor cores: " << Concurrency::GetProcessorCount() << '\n';
 
 	pugi::xml_document doc;
-	const auto result = doc.load_file(configPath.data());
-
+	const auto result = doc.load_string(ResourceManager::GetInstance().LoadTextFile(configPath).data());
 	std::cout << "Engine config load result: " << result.description() << std::endl;
 
 	// Global Engine parameters.
@@ -25,12 +25,7 @@ Engine::Engine(const std::string_view configPath) : m_engineState(engineState::L
 	m_height = engine.attribute("height").as_ullong();
 
 	// Window parameters
-	const auto window = doc.child("Engine").child("Window");
-	m_mainWindow.Init(	m_width,
-						m_height,
-						window.attribute("title").as_string(),
-						window.attribute("fullscreen").as_bool()
-					);
+	m_mainWindow.Init(m_width, m_height, engine.child("Window"));
 
 	// Renderer parameters
 	m_renderer = std::make_unique<GLRenderer>(m_width, m_height);
@@ -47,8 +42,9 @@ void Engine::Execute() {
 
 	m_engineState = engineState::READY;
 	std::cout << "\nEngine initialization complete!\n";
-	std::cout << "**************************************************\n\n";
+	std::cout << "**************************************************\n" << std::endl;
 
+	// Main loop
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 

@@ -17,8 +17,6 @@ public:
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 
-	~Engine() = default;
-
 	// Runs game loop
 	void Execute();
 

@@ -1,21 +1,24 @@
 #include "GLWindow.h"
-
 #include "../Input.h"
 
 #include <GLFW/glfw3.h>
+#include <pugixml.hpp>
+
 #include <iostream>
 
 /***********************************************************************************/
-void GLWindow::Init(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen) {
-	
-	std::cout << "**************************************************" << '\n';
+void GLWindow::Init(const size_t width, const size_t height, const pugi::xml_node& windowNode) {
+
+	std::cout << "Creating GLFW window...\n";
 #define genericInputCallback(functionName)\
 	[](GLFWwindow* window, auto... args) {\
 		const auto ptr = static_cast<Input*>(glfwGetWindowUserPointer(window));\
 		if (ptr->functionName) { ptr->functionName(args...); }\
 	}
 
-	if (!glfwInit()) { throw std::runtime_error("Failed to start GLFW."); }
+	if (!glfwInit()) {
+		throw std::runtime_error("Failed to start GLFW.");
+	}
 
 	std::cout << "GLFW Version: " << glfwGetVersionString() << '\n';
 
@@ -23,14 +26,21 @@ void GLWindow::Init(const size_t width, const size_t height, const std::string_v
 						std::cerr << message;
 						throw std::runtime_error(message);
 					});
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, windowNode.attribute("major").as_int());
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, windowNode.attribute("minor").as_int());
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-	if (fullscreen) { m_window = glfwCreateWindow(width, height, windowName.data(), glfwGetPrimaryMonitor(), nullptr); }
-	else { m_window = glfwCreateWindow(width, height, windowName.data(), nullptr, nullptr); }
-	if (!m_window) { throw std::runtime_error("Failed to create GLFW window."); }
+	if (windowNode.attribute("fullscreen").as_bool()) {
+		m_window = glfwCreateWindow(width, height, windowNode.attribute("title").as_string(), glfwGetPrimaryMonitor(), nullptr);
+	}
+	else {
+		m_window = glfwCreateWindow(width, height, windowNode.attribute("title").as_string(), nullptr, nullptr);
+	}
+
+	if (!m_window) {
+		throw std::runtime_error("Failed to create GLFW window.");
+	}
 	glfwMakeContextCurrent(m_window);
 	glfwFocusWindow(m_window);
 	glfwSetWindowSizeCallback(m_window, genericInputCallback(Input::GetInstance().windowResized));
@@ -45,13 +55,14 @@ void GLWindow::Init(const size_t width, const size_t height, const std::string_v
 }
 
 /***********************************************************************************/
-void GLWindow::PollEvents() const { glfwPollEvents(); }
+void GLWindow::SetWindowPos(const size_t x, const size_t y) const {
+	glfwSetWindowPos(m_window, x, y);
+}
 
 /***********************************************************************************/
-void GLWindow::SetWindowPos(const size_t x, const size_t y) const { glfwSetWindowPos(m_window, x, y); }
-
-/***********************************************************************************/
-void GLWindow::SwapBuffers() const { glfwSwapBuffers(m_window); }
+void GLWindow::SwapBuffers() const {
+	glfwSwapBuffers(m_window);
+}
 
 /***********************************************************************************/
 void GLWindow::DestroyWindow() const {
@@ -60,20 +71,28 @@ void GLWindow::DestroyWindow() const {
 }
 
 /***********************************************************************************/
-void GLWindow::EnableCursor() const { glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+void GLWindow::EnableCursor() const {
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
 
 /***********************************************************************************/
-void GLWindow::DisableCursor() const { glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+void GLWindow::DisableCursor() const {
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
 
 /***********************************************************************************/
-void GLWindow::EnableVSync() const { glfwSwapInterval(1); }
+void GLWindow::EnableVSync() const {
+	glfwSwapInterval(1);
+}
 
 /***********************************************************************************/
-void GLWindow::DisableVSync() const { glfwSwapInterval(0); }
+void GLWindow::DisableVSync() const {
+	glfwSwapInterval(0);
+}
 
 /***********************************************************************************/
 void GLWindow::Update() {
-	PollEvents();
+	glfwPollEvents();
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {
 		m_shouldWindowClose = true;

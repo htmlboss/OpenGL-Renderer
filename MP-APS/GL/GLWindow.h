@@ -1,9 +1,14 @@
 #pragma once
 
-#include <string_view>
+/***********************************************************************************/
+// Forward Declarations
+namespace pugi {
+	class xml_node;
+}
 
 struct GLFWwindow;
 
+/***********************************************************************************/
 class GLWindow {
 public:
 	GLWindow() = default;
@@ -11,9 +16,8 @@ public:
 	GLWindow(const GLWindow&) = delete;
 	GLWindow& operator=(const GLWindow&) = delete;
 
-	void Init(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen = false);
+	void Init(const size_t width, const size_t height, const pugi::xml_node& windowNode);
 
-	void PollEvents() const;
 	void SetWindowPos(const size_t x, const size_t y) const;
 	void SwapBuffers() const;
 	void DestroyWindow() const;
@@ -29,6 +33,7 @@ public:
 	bool IsFocused() const noexcept { return m_focused; }
 
 private:
+	
 	GLFWwindow* m_window = nullptr;
 
 	bool m_shouldWindowClose;
