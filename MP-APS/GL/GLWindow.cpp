@@ -6,8 +6,8 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLWindow::GLWindow(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen) : IWindow(width, height),
-																														m_window(nullptr) {
+void GLWindow::Init(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen) {
+	
 	std::cout << "**************************************************" << '\n';
 #define genericInputCallback(functionName)\
 	[](GLFWwindow* window, auto... args) {\
@@ -41,7 +41,7 @@ GLWindow::GLWindow(const size_t width, const size_t height, const std::string_vi
 	const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	glfwSetWindowPos(m_window, (mode->width / 2) - width / 2, (mode->height / 2) - height / 2);
 
-	this->DisableCursor();
+	DisableCursor();
 }
 
 /***********************************************************************************/
@@ -72,7 +72,7 @@ void GLWindow::EnableVSync() const { glfwSwapInterval(1); }
 void GLWindow::DisableVSync() const { glfwSwapInterval(0); }
 
 /***********************************************************************************/
-void GLWindow::Update() const {
+void GLWindow::Update() {
 	PollEvents();
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {

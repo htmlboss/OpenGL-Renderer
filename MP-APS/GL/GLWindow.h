@@ -1,23 +1,22 @@
 #pragma once
 
-#include "../Interfaces/IWindow.h"
-
 #include <string_view>
 
 struct GLFWwindow;
 
-class GLWindow : IWindow {
+class GLWindow {
 public:
-	GLWindow(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen = false);
-	~GLWindow() = default;
+	GLWindow() = default;
 
 	GLWindow(const GLWindow&) = delete;
 	GLWindow& operator=(const GLWindow&) = delete;
 
-	void PollEvents() const override;
-	void SetWindowPos(const size_t x, const size_t y) const override;
-	void SwapBuffers() const override;
-	void DestroyWindow() const override;
+	void Init(const size_t width, const size_t height, const std::string_view windowName, const bool fullscreen = false);
+
+	void PollEvents() const;
+	void SetWindowPos(const size_t x, const size_t y) const;
+	void SwapBuffers() const;
+	void DestroyWindow() const;
 
 	void EnableCursor() const;
 	void DisableCursor() const;
@@ -25,12 +24,13 @@ public:
 	void EnableVSync() const;
 	void DisableVSync() const;
 
-	void Update() const;
+	void Update();
 	bool ShouldClose() const noexcept { return m_shouldWindowClose; }
 	bool IsFocused() const noexcept { return m_focused; }
 
 private:
-	GLFWwindow* m_window;
+	GLFWwindow* m_window = nullptr;
 
+	bool m_shouldWindowClose;
 	bool m_focused = true;
 };

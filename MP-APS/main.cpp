@@ -13,7 +13,7 @@ int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	Engine engine(1280, 720);
+	Engine engine("Data/config.xml");
 
 	engine.Execute();
 
