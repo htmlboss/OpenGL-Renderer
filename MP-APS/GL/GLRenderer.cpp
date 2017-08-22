@@ -6,34 +6,39 @@
 #include "../Scene.h"
 #include "../ResourceManager.h"
 
+#include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <random>
 #include <iostream>
 
 /***********************************************************************************/
-GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m_context(), m_width(width),
-																							m_height(height),
-																							m_workGroupsX((width + width % 8) / 8),
-																							m_workGroupsY((height + height % 8) / 8),
-																							m_postProcess(width, height),
-																							m_depthFBO("Depth FBO", width, height),
-																							m_skybox("Data/hdri/barcelona.hdr", 1024),
-																							m_terrainShader("Terrain Shader", { GLShader("Shaders/terrainvs.glsl", GLShader::ShaderType::Vertex),
-																																GLShader("Shaders/terrainps.glsl", GLShader::ShaderType::Pixel) }),
-																							m_depthShader("Depth Shader", {	GLShader("Shaders/depthvs.glsl", GLShader::ShaderType::Vertex),
-																															GLShader("Shaders/depthps.glsl", GLShader::ShaderType::Pixel)}),
-																							m_depthDebugShader("Debug Depth Shader", {	GLShader("Shaders/debugdepthvs.glsl", GLShader::ShaderType::Vertex),
-																																		GLShader("Shaders/debugdepthps.glsl", GLShader::ShaderType::Pixel)}),
-																							m_lightCullingShader("Light Culling Compute Shader", { GLShader("Shaders/lightcullingcs.glsl", GLShader::ShaderType::Compute)}),
-																							m_lightAccumShader("Light Accumulation Shader", {	GLShader("Shaders/lightaccumulationvs.glsl", GLShader::ShaderType::Vertex),
-																																				GLShader("Shaders/lightaccumulationps.glsl", GLShader::ShaderType::Pixel) }),
-																							m_PBRShader("PBR Shader", { GLShader("Shaders/PBRvs.glsl", GLShader::ShaderType::Vertex),
-																														GLShader("Shaders/PBRps.glsl", GLShader::ShaderType::Pixel) })
-																							{
+GLRenderer::GLRenderer(const size_t width, const size_t height, const pugi::xml_node& rendererNode) : IRenderer(), 
+																									m_context(), 
+																									m_width(width),
+																									m_height(height),
+																									m_workGroupsX((width + width % 8) / 8),
+																									m_workGroupsY((height + height % 8) / 8),
+																									m_postProcess(width, height),
+																									m_depthFBO("Depth FBO", width, height),
+																									m_skybox("Data/hdri/barcelona.hdr", 1024) {
 	std::cout << "OpenGL Version: " << m_context.GetGLVersion() << '\n';
 	std::cout << "GLSL Version: " << m_context.GetGLSLVersion() << '\n';
 	std::cout << "OpenGL Vendor: " << m_context.GetGLVendor() << '\n';
 	std::cout << "OpenGL Renderer: " << m_context.GetGLRenderer() << std::endl;
+
+	// Compile all shader programs
+	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
+		
+		// Get all shader files that make up the program
+		std::vector<GLShader> shaders;
+		for (auto shader = program.child("Shader"); shader; shader = shader.next_sibling("Shader")) {
+			shaders.emplace_back(shader.attribute("path").as_string(), shader.attribute("type").as_string());
+		}
+
+		// Compile and cache shader program
+		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
+	}
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -44,25 +49,6 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	m_terrainShader.AddUniforms({"modelMatrix", "texture_diffuse1", "texture_diffuse2", "texture_diffuse3", "texture_diffuse4", "texture_diffuse5", 
-									"viewPos", "light.direction", "light.ambient", "light.diffuse", "light.specular"});
-	m_depthShader.AddUniforms({"modelMatrix"});
-	m_lightAccumShader.AddUniforms({"modelMatrix", "viewPosition", "texture_diffuse1", "texture_specular1", "texture_normal1", "numberOfTilesX"});
-	
-	m_depthDebugShader.Bind();
-	m_depthDebugShader.AddUniforms({"modelMatrix", "near", "far"});
-	m_depthDebugShader.SetUniformf("near", 5.0f).SetUniformf("far", 1000.0f);
-
-	m_lightCullingShader.Bind();
-	m_lightCullingShader.AddUniforms({ "depthMap", "view", "projection", "screenSize", "lightCount" });
-	m_lightCullingShader.SetUniformi("lightCount", MAX_NUM_LIGHTS);
-	m_lightCullingShader.SetUniform("screenSize", glm::ivec2(m_width, m_height));
-
-	m_lightAccumShader.Bind();
-	m_lightAccumShader.SetUniformi("numberOfTilesX", m_workGroupsX);
-
-	m_PBRShader.AddUniforms({"modelMatrix", "albedo", "metallic", "ao", "roughness", "sunDirection", "sunColor", "viewPos"});
 
 	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
 	glGenBuffers(1, &m_uboMatrices);
@@ -79,12 +65,9 @@ GLRenderer::GLRenderer(const size_t width, const size_t height) : IRenderer(), m
 
 /***********************************************************************************/
 void GLRenderer::Shutdown() const {
-
-	m_terrainShader.DeleteProgram();
-	m_depthShader.DeleteProgram();
-	m_depthDebugShader.DeleteProgram();
-	m_lightCullingShader.DeleteProgram();
-	m_lightAccumShader.DeleteProgram();
+	for (const auto& shader : m_shaderCache) {
+		shader.second.DeleteProgram();
+	}
 }
 
 /***********************************************************************************/
@@ -92,6 +75,11 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	const auto viewMatrix = camera.GetViewMatrix();
 
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+
+	// Get the shaders we need
+	static auto& depthShader = m_shaderCache.at("DepthPassShader");
+	static auto& lightCullShader = m_shaderCache.at("LightCullShader");
+	static auto& pbrShader = m_shaderCache.at("PBRShader");
 
 	/*
 	renderTerrain(renderData, camera.GetPosition(), false);
@@ -105,23 +93,23 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	*/
 	
 	// Step 1: Render the depth of the scene to a depth map
-	m_depthShader.Bind();
+	depthShader.Bind();
 	
 	m_depthFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderModels(m_depthShader, renderData, true);
+	renderModels(depthShader, renderData, true);
 	m_depthFBO.Unbind();
 
 	// Step 2: Perform light culling on point lights in the scene
-	m_lightCullingShader.Bind();
-	m_lightCullingShader.SetUniform("projection", m_projMatrix);
-	m_lightCullingShader.SetUniform("view", viewMatrix);
+	lightCullShader.Bind();
+	lightCullShader.SetUniform("projection", m_projMatrix);
+	lightCullShader.SetUniform("view", viewMatrix);
 
 	glActiveTexture(GL_TEXTURE5);
-	m_lightCullingShader.SetUniformi("depthMap", 5);
+	lightCullShader.SetUniformi("depthMap", 5);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 
-	// Bind shader storage buffer objects for the light and indice buffers
+	// Bind shader storage buffer objects for the light and index buffers
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_lightBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_visibleLightIndicesBuffer);
 
@@ -133,11 +121,11 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 
 	//m_lightAccumShader.Bind();
 	//m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
-	m_PBRShader.Bind();
-	m_PBRShader.SetUniform("viewPos", camera.GetPosition());
-	m_PBRShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
-	m_PBRShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
-	renderModels(m_PBRShader, renderData, false);
+	pbrShader.Bind();
+	pbrShader.SetUniform("viewPos", camera.GetPosition());
+	pbrShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
+	pbrShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
+	renderModels(pbrShader, renderData, false);
 
 	// Draw skybox
 	m_skybox.Draw();
@@ -184,17 +172,19 @@ void GLRenderer::Update(const Camera& camera, const double delta) {
 /***********************************************************************************/
 void GLRenderer::renderTerrain(const RenderData& renderData, const glm::vec3& cameraPos, const bool depthPass) {
 
-	m_terrainShader.Bind();
+	static auto terrainShader = m_shaderCache.at("TerrainShader");
+
+	terrainShader.Bind();
 
 	if (!depthPass) {
-		m_terrainShader.SetUniform("modelMatrix", renderData.terrain.GetModelMatrix());
-		m_terrainShader.SetUniform("light.direction", renderData.Sun.Direction);
-		m_terrainShader.SetUniform("light.ambient", { 0.1f, 0.1f, 0.1f });
-		m_terrainShader.SetUniform("light.diffuse", renderData.Sun.Color);
-		m_terrainShader.SetUniform("light.specular", glm::vec3(1.0f));
-		m_terrainShader.SetUniform("viewPos", cameraPos);
+		terrainShader.SetUniform("modelMatrix", renderData.terrain.GetModelMatrix());
+		terrainShader.SetUniform("light.direction", renderData.Sun.Direction);
+		terrainShader.SetUniform("light.ambient", { 0.1f, 0.1f, 0.1f });
+		terrainShader.SetUniform("light.diffuse", renderData.Sun.Color);
+		terrainShader.SetUniform("light.specular", glm::vec3(1.0f));
+		terrainShader.SetUniform("viewPos", cameraPos);
 
-		renderData.terrain.GetMeshes()[0].BindTextures(&m_terrainShader);
+		renderData.terrain.GetMeshes()[0].BindTextures(&terrainShader);
 	}
 
 	const auto data = renderData.terrain.GetMeshes()[0].GetRenderData();

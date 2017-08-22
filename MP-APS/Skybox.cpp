@@ -6,8 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 /***********************************************************************************/
-Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m_skyboxShader("Skybox Shader", {GLShader("Shaders/skyboxvs.glsl", GLShader::ShaderType::Vertex),
-																												GLShader("Shaders/skyboxps.glsl", GLShader::ShaderType::Pixel) }) {
+Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m_skyboxShader("Skybox Shader", {GLShader("Data/Shaders/skyboxvs.glsl", GL_VERTEX_SHADER),
+																												GLShader("Data/Shaders/skyboxps.glsl", GL_FRAGMENT_SHADER) }) {
 
 	const float vertices[108]{
 		// positions          
@@ -103,8 +103,8 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	};
 
 	// Convert HDR equirectangular environment map to cubemap
-	auto convertToCubemapShader = GLShaderProgram("Equirectangular to cubemap shader", {GLShader("Shaders/cubemapconvertervs.glsl", GLShader::ShaderType::Vertex),
-																						GLShader("Shaders/cubemapconverterps.glsl", GLShader::ShaderType::Pixel) });
+	auto convertToCubemapShader = GLShaderProgram("Equirectangular to cubemap shader", {GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
+																						GLShader("Data/Shaders/cubemapconverterps.glsl", GL_FRAGMENT_SHADER) });
 	convertToCubemapShader.Bind();
 	convertToCubemapShader.AddUniforms({ "projection", "view", "equirectangularMap" });
 	convertToCubemapShader.SetUniformi("equirectangularMap", 0).SetUniform("projection", captureProjection);

@@ -4,9 +4,29 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLShader::GLShader(const std::string_view path, const ShaderType type) {
+const std::unordered_map<std::string_view, int> GLShader::m_shaderTypes
+{
+	{"vertex", GL_VERTEX_SHADER },
+	{"pixel", GL_FRAGMENT_SHADER },
+	{"fragment", GL_FRAGMENT_SHADER },
+	{"geometry", GL_GEOMETRY_SHADER },
+	{"compute", GL_COMPUTE_SHADER },
+	{"tessctrl", GL_TESS_CONTROL_SHADER },
+	{"tesseval", GL_TESS_EVALUATION_SHADER }
+};
 
-	m_shaderID = glCreateShader(static_cast<int>(type));
+/***********************************************************************************/
+GLShader::GLShader(const std::string_view path, const int type) {
+
+	m_shaderID = glCreateShader(type);
+
+	compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
+}
+
+/***********************************************************************************/
+GLShader::GLShader(const std::string_view path, const std::string_view type) {
+
+	m_shaderID = glCreateShader(m_shaderTypes.at(type));
 	
 	compile(ResourceManager::GetInstance().LoadTextFile(path).c_str());
 }

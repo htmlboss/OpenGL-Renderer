@@ -2,20 +2,13 @@
 #include <glad/glad.h>
 
 #include <array>
+#include <unordered_map>
 
 class GLShader {
 
 public:
-	enum class ShaderType {
-		Pixel = GL_FRAGMENT_SHADER,
-		Vertex = GL_VERTEX_SHADER,
-		Geometry = GL_GEOMETRY_SHADER,
-		Compute = GL_COMPUTE_SHADER,
-		TessControl = GL_TESS_CONTROL_SHADER,
-		TessEval = GL_TESS_EVALUATION_SHADER
-	};
-
-	GLShader(const std::string_view path, const ShaderType type);
+	GLShader(const std::string_view path, const int type);
+	GLShader(const std::string_view path, const std::string_view type);
 
 	void AttachShader(const GLuint Program) const;
 	void DetachShader(const GLuint Program) const;
@@ -27,4 +20,6 @@ private:
 	GLuint m_shaderID;
 	GLint m_success;
 	std::array<GLchar, 1024> m_infoLog;
+
+	static const std::unordered_map<std::string_view, int> m_shaderTypes;
 };

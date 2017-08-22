@@ -2,4 +2,26 @@
 
 <Engine width="1280" height="720">
     <Window title="MP-APS" fullscreen="false" major="4" minor="4" />
+    
+    <Renderer>
+    	<Program name="PBRShader">
+    		<Shader path="Data/Shaders/PBRvs.glsl" type="vertex" />
+    		<Shader path="Data/Shaders/PBRps.glsl" type="fragment" />
+    	</Program>
+    	<Program name="TerrainShader">
+    		<Shader path="Data/Shaders/terrainvs.glsl" type="vertex" />
+    		<Shader path="Data/Shaders/terrainps.glsl" type="fragment" />
+    	</Program>
+    	<Program name="DepthPassShader">
+    		<Shader path="Data/Shaders/depthvs.glsl" type="vertex" />
+    		<Shader path="Data/Shaders/depthps.glsl" type="fragment" />
+    	</Program>
+    	<Program name="LightCullShader">
+    		<Shader path="Data/Shaders/lightcullingcs.glsl" type="compute" />
+    	</Program>
+    	<Program name="LightAccumulationShader">
+    		<Shader path="Data/Shaders/lightaccumulationvs.glsl" type="vertex" />
+    		<Shader path="Data/Shaders/lightaccumulationps.glsl" type="fragment" />
+    	</Program>
+    </Renderer>
 </Engine>

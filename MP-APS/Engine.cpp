@@ -28,7 +28,7 @@ Engine::Engine(const std::string_view configPath) : m_engineState(engineState::L
 	m_mainWindow.Init(m_width, m_height, engine.child("Window"));
 
 	// Renderer parameters
-	m_renderer = std::make_unique<GLRenderer>(m_width, m_height);
+	m_renderer = std::make_unique<GLRenderer>(m_width, m_height, engine.child("Renderer"));
 	
 	// Scene parameters
 	m_scene = std::make_unique<Scene>(m_width, m_height);

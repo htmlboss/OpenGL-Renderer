@@ -3,8 +3,8 @@
 
 /***********************************************************************************/
 GLPostProcess::GLPostProcess(const size_t width, const size_t height) : IRenderComponent("GLPostProcess", width, height),
-																		m_postProcessShader("Post Process Shader", {GLShader("Shaders/postprocessvs.glsl", GLShader::ShaderType::Vertex),
-																													GLShader("Shaders/postprocessps.glsl", GLShader::ShaderType::Pixel)}),
+																		m_postProcessShader("Post Process Shader", {GLShader("Data/Shaders/postprocessvs.glsl", GL_VERTEX_SHADER),
+																													GLShader("Data/Shaders/postprocessps.glsl", GL_FRAGMENT_SHADER)}),
 																		m_hdrFBO("HDR FBO", width, height) {
 
 	m_postProcessShader.Bind();
@@ -70,4 +70,6 @@ void GLPostProcess::Update() {
 void GLPostProcess::Shutdown() const { m_postProcessShader.DeleteProgram(); }
 
 /***********************************************************************************/
-void GLPostProcess::Blit() { m_hdrFBO.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0); }
+void GLPostProcess::Blit() {
+	m_hdrFBO.Blit(GLFramebuffer::BufferBitMasks::DEPTH, 0);
+}

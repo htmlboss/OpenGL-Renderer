@@ -9,27 +9,32 @@
 class GLShader;
 
 class GLShaderProgram {
+
 public:
 	GLShaderProgram(const std::string_view programName, const std::initializer_list<GLShader> shaders);
+	GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders);
 	~GLShaderProgram();
 
-	void AddUniforms(const std::initializer_list<std::string_view> uniforms);
+	void AddUniforms(const std::initializer_list<std::string> uniforms);
 	void Bind() const;
 	void DeleteProgram() const;
 
-	GLShaderProgram& SetUniformi(const std::string_view uniformName, const int value);
-	GLShaderProgram& SetUniformf(const std::string_view uniformName, const float value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::ivec2& value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::vec2& value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::vec3& value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::vec4& value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::mat3x3& value);
-	GLShaderProgram& SetUniform(const std::string_view uniformName, const glm::mat4x4& value);
+	GLShaderProgram& SetUniformi(const std::string& uniformName, const int value);
+	GLShaderProgram& SetUniformf(const std::string& uniformName, const float value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::ivec2& value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::vec2& value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::vec3& value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::vec4& value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::mat3x3& value);
+	GLShaderProgram& SetUniform(const std::string& uniformName, const glm::mat4x4& value);
+
+	auto GetProgramName() const noexcept { return m_programName; }
 
 private:
-	void linkAndValidate();
+	bool linkAndValidate();
+	void getUniforms(const std::string_view programName);
 
-	std::unordered_map<std::string_view, int> m_uniforms;
+	std::unordered_map<std::string, int> m_uniforms;
 
 	unsigned int m_programID;
 	const std::string m_programName;

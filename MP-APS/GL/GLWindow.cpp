@@ -10,6 +10,7 @@
 void GLWindow::Init(const size_t width, const size_t height, const pugi::xml_node& windowNode) {
 
 	std::cout << "Creating GLFW window...\n";
+
 #define genericInputCallback(functionName)\
 	[](GLFWwindow* window, auto... args) {\
 		const auto ptr = static_cast<Input*>(glfwGetWindowUserPointer(window));\

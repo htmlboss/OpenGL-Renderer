@@ -5,12 +5,18 @@
 #include "GLPostProcess.h"
 
 #include <random>
+#include <unordered_map>
 
 /***********************************************************************************/
 // Forward Declarations
 class Camera;
 class Terrain;
 struct RenderData;
+
+namespace pugi {
+	class xml_node;
+}
+
 
 /***********************************************************************************/
 struct VisibleLightIndex {
@@ -21,7 +27,7 @@ struct VisibleLightIndex {
 class GLRenderer : public IRenderer {
 
 public:
-	GLRenderer(const size_t width, const size_t height);
+	GLRenderer(const size_t width, const size_t height, const pugi::xml_node& rendererNode);
 
 	void InitView(const Camera& camera);
 	void Update(const Camera& camera, const double delta);
@@ -58,7 +64,7 @@ private:
 	// Projection matrix
 	glm::mat4 m_projMatrix;
 
-	// Storage buffers for lights and visiable light indices
+	// Storage buffers for lights and visible light indices
 	GLuint m_lightBuffer, m_visibleLightIndicesBuffer;
 	// Workgroup dimensions for compute shader
 	GLuint m_workGroupsX, m_workGroupsY;
@@ -72,13 +78,8 @@ private:
 	// Environment map
 	Skybox m_skybox;
 
-	// Shaders
-	GLShaderProgram m_terrainShader;
-	GLShaderProgram m_depthShader;
-	GLShaderProgram m_depthDebugShader;
-	GLShaderProgram m_lightCullingShader;
-	GLShaderProgram m_lightAccumShader;
-	GLShaderProgram m_PBRShader;
+	// Compiled shader cache
+	std::unordered_map<std::string, GLShaderProgram> m_shaderCache;
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;
