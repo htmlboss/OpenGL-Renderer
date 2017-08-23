@@ -74,9 +74,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GL\GLPostProcess.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
     <ClCompile Include="GL\GLVertexArray.cpp">
       <Filter>GL</Filter>
     </ClCompile>
@@ -156,9 +153,6 @@
     </ClInclude>
     <ClInclude Include="Interfaces\IRenderComponent.h">
       <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GLPostProcess.h">
-      <Filter>GL</Filter>
     </ClInclude>
     <ClInclude Include="GL\GLVertexArray.h">
       <Filter>GL</Filter>

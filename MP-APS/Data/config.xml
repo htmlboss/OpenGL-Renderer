@@ -23,5 +23,9 @@
     		<Shader path="Data/Shaders/lightaccumulationvs.glsl" type="vertex" />
     		<Shader path="Data/Shaders/lightaccumulationps.glsl" type="fragment" />
     	</Program>
+        <Program name="PostProcessShader">
+            <Shader path="Data/Shaders/postprocessvs.glsl" type="vertex" />
+            <Shader path="Data/Shaders/postprocessps.glsl" type="fragment" />
+        </Program>
     </Renderer>
 </Engine>

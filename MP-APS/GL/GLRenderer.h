@@ -2,7 +2,7 @@
 #include "../Interfaces/IRenderer.h"
 #include "GLContext.h"
 #include "../Skybox.h"
-#include "GLPostProcess.h"
+#include "GLFramebuffer.h"
 
 #include <random>
 #include <unordered_map>
@@ -16,7 +16,6 @@ struct RenderData;
 namespace pugi {
 	class xml_node;
 }
-
 
 /***********************************************************************************/
 struct VisibleLightIndex {
@@ -49,6 +48,8 @@ private:
 	void setupLightStorageBuffer();
 	// Configure Depth FBO
 	void setupDepthBuffer();
+	// Configure HDR FBO
+	void setupHDRBuffer();
 	
 	glm::vec3 RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen);
 	void UpdateLights(const double dt);
@@ -69,8 +70,6 @@ private:
 	// Workgroup dimensions for compute shader
 	GLuint m_workGroupsX, m_workGroupsY;
 
-	GLPostProcess m_postProcess;
-
 	// Depth pass
 	GLuint m_depthTexture;
 	GLFramebuffer m_depthFBO;
@@ -83,6 +82,19 @@ private:
 
 	// Screen-quad
 	GLuint m_quadVAO, m_quadVBO;
+
+	// Post-Processing
+	// HDR
+	GLuint m_hdrColorBufferTexture;
+	GLFramebuffer m_hdrFBO;
+
+	// Saturation
+	float m_saturation = 1.1f;
+
+	// Vibrance
+	float m_vibrance = 0.3f;
+	const glm::vec4 m_coefficient{ 0.299f, 0.587f, 0.114f, 0.0f };
+
 
 	const glm::vec3 LIGHT_MIN_BOUNDS = glm::vec3(-135.0f, -20.0f, -60.0f);
 	const glm::vec3 LIGHT_MAX_BOUNDS = glm::vec3(135.0f, 170.0f, 60.0f);
