@@ -7,28 +7,30 @@
 [![forthebadge](http://forthebadge.com/images/badges/designed-in-ms-paint.svg)](http://forthebadge.com)
 [![forthebadge](http://forthebadge.com/images/badges/powered-by-water.svg)](http://forthebadge.com)
 
+
 ## Screenshots
-![Current Build](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/01.png "Current Build")
+CPU-based terrain generation using Perlin noise:
+![Terrain](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/01.png "Terrain")
 
 ## Features
 * Assimp model loading.
-* Procedural terrain (first iteration).
+* CPU-based procedural terrain (first iteration).
 * Post processing (HDR, saturation, vibrance).
 * Frustum culling (AABB only).
 * Forward/Forward+ rendering.
 * HDR cubemaps.
+* XML engine configuration.
 
 ## WIP
 * PBR.
-* Data-driven pipeline (XML parsing).
 
 ## Coming "Soon"
+* Defining a scene with XML.
 * Post processing (bloom, lens flares).
 * GPU terrain generation.
 * Extended frustum culling:
     * Sphere and point testing.
     * AABB hierarchy.
-    * Terrain AABB.
 
 ## Third Party Code
 * Assimp.
@@ -36,8 +38,9 @@
 * GLAD.
 * GLFW.
 * stb_image.
+* pugixml.
 * GLM AABB wrapper: ([https://github.com/iauns/cpm-glm-aabb](https://github.com/iauns/cpm-glm-aabb)).
 
 ## Research Used
 *  _Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix_ ([http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf](http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf)). Gribb, Hartman (2001).
-* _Forward+: Bringing Deferred Lighting to the Next Leve_ ([https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf](https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf)). Harada, McKee, Yang (2012).
+* _Forward+: Bringing Deferred Lighting to the Next Level_ ([https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf](https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf)). Harada, McKee, Yang (2012).
