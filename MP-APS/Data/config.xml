@@ -6,6 +6,7 @@
     <Renderer>
     	<Program name="PBRShader">
     		<Shader path="Data/Shaders/PBRvs.glsl" type="vertex" />
+            <Shader path="Data/Shaders/wireframegs.glsl" type="geometry" />
     		<Shader path="Data/Shaders/PBRps.glsl" type="fragment" />
     	</Program>
     	<Program name="TerrainShader">

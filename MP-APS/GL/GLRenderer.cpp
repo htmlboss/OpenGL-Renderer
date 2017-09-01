@@ -127,6 +127,7 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	pbrShader.SetUniform("viewPos", camera.GetPosition());
 	pbrShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
 	pbrShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
+	pbrShader.SetUniformi("wireframe", true);
 	renderModels(pbrShader, renderData, false);
 
 	// Draw skybox

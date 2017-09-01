@@ -1,8 +1,11 @@
 #version 440 core
 
-in vec2 TexCoords;
-in vec3 FragPos;
-in vec3 Normal;
+in FragData {
+    vec2 TexCoords;
+    vec3 FragPos;
+    vec3 Normal;
+    noperspective vec3 wireframeDist;
+} fragData;
 
 // material parameters
 uniform vec3  albedo;
@@ -15,6 +18,8 @@ uniform vec3 sunDirection;
 uniform vec3 sunColor;
 
 uniform vec3 viewPos;
+
+uniform bool wireframe = false;
 
 out vec4 FragColor;
 
@@ -92,8 +97,8 @@ vec3 directionalReflectance(const vec3 N, const vec3 V, const vec3 F0) {
 }
 // ----------------------------------------------------------------------------
 void main() {		
-    const vec3 N = normalize(Normal);
-    const vec3 V = normalize(viewPos - FragPos);
+    const vec3 N = normalize(fragData.Normal);
+    const vec3 V = normalize(viewPos - fragData.FragPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -111,7 +116,14 @@ void main() {
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    color = pow(color, vec3(1.0/2.2));
+
+    // Wireframe
+    const vec3 d = fwidth(fragData.wireframeDist);
+    const vec3 a3 = smoothstep(vec3(0.0), d * 1.5, fragData.wireframeDist);
+    const float edgeFactor = min(min(a3.x, a3.y), a3.z);
+
+    color = wireframe ? mix(vec3(1.0), color.rgb, edgeFactor) : color;
 
     FragColor = vec4(color, 1.0);
 }

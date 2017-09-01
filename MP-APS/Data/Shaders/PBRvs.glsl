@@ -10,14 +10,16 @@ layout (std140, binding = 0) uniform Matrices {
 };
 uniform mat4 modelMatrix;
 
-out vec2 TexCoords;
-out vec3 FragPos;
-out vec3 Normal;
+out VertexData {
+	out vec2 TexCoords;
+	out vec3 FragPos;
+	out vec3 Normal;
+} vertexData;
 
 void main() {
-    TexCoords = texCoords;
-    FragPos = vec3(modelMatrix * vec4(position, 1.0));
-    Normal = mat3(modelMatrix) * normal;
+    vertexData.TexCoords = texCoords;
+    vertexData.FragPos = vec3(modelMatrix * vec4(position, 1.0));
+    vertexData.Normal = mat3(modelMatrix) * normal;
 
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    gl_Position = projection * view * vec4(vertexData.FragPos, 1.0);
 }

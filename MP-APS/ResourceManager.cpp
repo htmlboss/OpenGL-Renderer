@@ -52,7 +52,9 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 
 	stbi_image_free(data);
 
+#ifdef _DEBUG
 	std::cout << "Resource Manager: Loaded HDR: " << path << std::endl;
+#endif
 
 	return hdrTexture;
 }
