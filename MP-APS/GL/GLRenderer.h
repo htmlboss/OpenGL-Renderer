@@ -35,7 +35,6 @@ public:
 	void Render(const Camera& camera, const RenderData& renderData);
 
 private:
-	void renderTerrain(const RenderData& renderData, const glm::vec3& cameraPos, const bool shadowPass);
 	void renderModels(GLShaderProgram& shader, const RenderData& renderData, const bool shadowPass) const;
 	// Render NDC screenquad
 	void renderQuad() const;

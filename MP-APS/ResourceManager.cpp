@@ -27,7 +27,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 }
 
 /***********************************************************************************/
-unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::size_t resolution) const {
+unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 	stbi_set_flip_vertically_on_load(true);
 	
 	int width, height, nrComp;
@@ -52,7 +52,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::s
 
 	stbi_image_free(data);
 
-	std::cout << "Resource Manager: Loaded HDR: " << path << '\n';
+	std::cout << "Resource Manager: Loaded HDR: " << path << std::endl;
 
 	return hdrTexture;
 }
@@ -60,20 +60,20 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path, const std::s
 /***********************************************************************************/
 TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorMode mode) {
 
-	const auto val = m_loadedTextures.find(path.data());
+	const auto val = m_textureCache.find(path.data());
 
-	if (val == m_loadedTextures.end()) {
+	if (val == m_textureCache.end()) {
 		// Image has not been loaded.
 		int x, y, comp;
 		auto data = stbi_load(path.data(), &x, &y, &comp, static_cast<int>(mode));
 
 		if (data == nullptr) {
-			std::cerr << "Resource Manager: stb_image error (" << path << "): " << stbi_failure_reason() << '\n';
+			std::cerr << "Resource Manager: stb_image error (" << path << "): " << stbi_failure_reason() << std::endl;
 			return nullptr;
 		}
 		++m_currentTexID;
 		// Add and return new loaded texture.
-		return m_loadedTextures.emplace(path.data(), std::make_shared<Texture>(data, x, y, comp, m_currentTexID)).first->second;
+		return m_textureCache.try_emplace(path.data(), std::make_shared<Texture>(data, x, y, comp, m_currentTexID)).first->second;
 	}
 
 	return val->second;
@@ -82,10 +82,26 @@ TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorM
 /***********************************************************************************/
 ModelPtr ResourceManager::GetModel(const std::string_view name, const std::string_view path) {
 
-	const auto val = m_loadedModels.find(path.data());
+	const auto val = m_modelCache.find(path.data());
 
-	if (val == m_loadedModels.end()) {
-		return m_loadedModels.emplace(name.data(), std::make_shared<Model>(path, name)).first->second;
+	if (val == m_modelCache.end()) {
+		// Load model, cache it, and return a shared_ptr to it.
+		return m_modelCache.try_emplace(name.data(), std::make_shared<Model>(path, name)).first->second;
+	}
+
+	return val->second;
+}
+
+/***********************************************************************************/
+MaterialPtr ResourceManager::GetMaterial(const std::string_view name) {
+	const auto val = m_materialCache.find(name.data());
+
+	if (val == m_materialCache.end()) {
+		// Create empty material and return shared_ptr
+#ifdef _DEBUG
+		std::cout << "Failed to find material: " << name << std::endl;
+#endif
+		return m_materialCache.try_emplace(name.data(), std::make_shared<Material>()).first->second;
 	}
 
 	return val->second;

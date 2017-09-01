@@ -16,7 +16,7 @@ GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::
 	}
 
 	if (linkAndValidate()) {
-		getUniforms(programName);
+		getUniforms();
 	}
 
 	// Cleanup
@@ -27,7 +27,7 @@ GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::
 }
 
 /***********************************************************************************/
-GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders) {
+GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders) : m_programName(programName) {
 	m_programID = glCreateProgram();
 
 	for (const auto& shader : shaders) {
@@ -35,7 +35,7 @@ GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::
 	}
 
 	if (linkAndValidate()) {
-		getUniforms(programName);
+		getUniforms();
 	}
 
 	// Cleanup
@@ -53,19 +53,6 @@ GLShaderProgram::~GLShaderProgram() {
 /***********************************************************************************/
 void GLShaderProgram::Bind() const {
 	glUseProgram(m_programID);
-}
-
-/***********************************************************************************/
-void GLShaderProgram::AddUniforms(const std::initializer_list<std::string> uniforms) { 
-	
-	for (const auto& uniform : uniforms) {
-		const auto uniformLoc = glGetUniformLocation(m_programID, uniform.data());
-
-		if (uniformLoc == -1) {
-			std::cerr << "Shader Program Error: " << uniform.data() << " uniform not found in shader: " << m_programName.c_str() << std::endl;
-		}
-		m_uniforms.try_emplace(uniform, uniformLoc);
-	}
 }
 
 /***********************************************************************************/
@@ -154,7 +141,7 @@ bool GLShaderProgram::linkAndValidate() {
 }
 
 /***********************************************************************************/
-void GLShaderProgram::getUniforms(const std::string_view programName) {
+void GLShaderProgram::getUniforms() {
 	
 	auto total = -1;
 	glGetProgramiv(m_programID, GL_ACTIVE_UNIFORMS, &total);

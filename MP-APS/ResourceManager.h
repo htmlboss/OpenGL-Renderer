@@ -30,16 +30,19 @@ public:
 	std::string LoadTextFile(const std::string_view path);
 
 	// Loads an HDR image and generates an OpenGL floating-point texture.
-	unsigned int LoadHDRI(const std::string_view path, const std::size_t resolution) const;
+	unsigned int LoadHDRI(const std::string_view path) const;
 	TexturePtr GetTexture(const std::string_view path, const ColorMode mode = ColorMode::RGB);
 	ModelPtr GetModel(const std::string_view name, const std::string_view path);
+	MaterialPtr GetMaterial(const std::string_view name);
 
-	auto GetNumLoadedImages() const noexcept { return m_loadedTextures.size(); }
-	auto GetNumLoadedModels() const noexcept { return m_loadedModels.size(); }
+	auto GetNumLoadedImages() const noexcept { return m_textureCache.size(); }
+	auto GetNumLoadedModels() const noexcept { return m_modelCache.size(); }
+	auto GetNumLoadedMaterials() const noexcept { return m_materialCache.size(); }
 
 private:
 	size_t m_currentTexID = 0;
 
-	std::unordered_map<std::string, TexturePtr> m_loadedTextures;
-	std::unordered_map<std::string, ModelPtr> m_loadedModels;
+	std::unordered_map<std::string, TexturePtr> m_textureCache;
+	std::unordered_map<std::string, ModelPtr> m_modelCache;
+	std::unordered_map<std::string, MaterialPtr> m_materialCache;
 };

@@ -13,12 +13,6 @@ GBuffer::GBuffer(const size_t width, const size_t height) : IRenderComponent("GL
 																					 GLShader(ResourceManager::GetInstance().LoadTextFile("Data/Shaders/geometrypassps.glsl"), GL_FRAGMENT_SHADER)}),
 															m_lightingPassShader("Lighting Pass Shader", {GLShader(ResourceManager::GetInstance().LoadTextFile("Data/Shaders/lightingpassvs.glsl"), GL_VERTEX_SHADER),
 																					 GLShader(ResourceManager::GetInstance().LoadTextFile("Data/Shaders/lightingpassps.glsl"), GL_FRAGMENT_SHADER)}) {
-
-	m_geometryPassShader.Bind();
-	m_geometryPassShader.AddUniforms({"model", "normalMatrix", "texture_diffuse1", "texture_specular1"});
-
-	m_lightingPassShader.Bind();
-	m_lightingPassShader.AddUniforms({"viewPos", "gPosition", "gNormal", "gAlbedoSpec"});
 	// Set samplers
 	m_lightingPassShader.SetUniformi("gPosition", 0);
 	m_lightingPassShader.SetUniformi("gNormal", 1);

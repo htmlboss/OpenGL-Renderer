@@ -15,7 +15,6 @@ public:
 	GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders);
 	~GLShaderProgram();
 
-	void AddUniforms(const std::initializer_list<std::string> uniforms);
 	void Bind() const;
 	void DeleteProgram() const;
 
@@ -32,7 +31,7 @@ public:
 
 private:
 	bool linkAndValidate();
-	void getUniforms(const std::string_view programName);
+	void getUniforms();
 
 	std::unordered_map<std::string, int> m_uniforms;
 

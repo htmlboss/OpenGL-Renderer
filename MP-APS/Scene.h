@@ -2,19 +2,16 @@
 
 #include "Camera.h"
 #include "Model.h"
-#include "Terrain.h"
 #include "Lights/PointLight.h"
 #include "Lights/DirectionalLight.h"
 
 /***********************************************************************************/
 // Data that is sent to the Renderer.
 struct RenderData {
-	RenderData(const size_t terrainPosX, const size_t terrainPosZ) : terrain(terrainPosX, terrainPosZ, 10) {}
 
 	DirectionalLight Sun;
 	std::vector<PointLight> lights;
 	std::vector<ModelPtr> renderList;
-	Terrain terrain;
 };
 
 /***********************************************************************************/

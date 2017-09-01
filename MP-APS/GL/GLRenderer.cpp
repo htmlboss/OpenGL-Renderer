@@ -40,7 +40,7 @@ GLRenderer::GLRenderer(const size_t width, const size_t height, const pugi::xml_
 		// Compile and cache shader program
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
-	std::cout << "Configuring OpenGL" << std::endl;
+	std::cout << "Configuring OpenGL..." << std::endl;
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -86,8 +86,6 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	static auto& postProcessShader = m_shaderCache.at("PostProcessShader");
 
 	/*
-	renderTerrain(renderData, camera.GetPosition(), false);
-
 	m_forwardShader.Bind();
 	m_forwardShader.SetUniform("viewPos", camera.GetPosition());
 	m_forwardShader.SetUniform("light.direction", renderData.Sun.Direction);
@@ -175,29 +173,6 @@ void GLRenderer::Update(const Camera& camera, const double delta) {
 	UpdateLights(delta);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-/***********************************************************************************/
-void GLRenderer::renderTerrain(const RenderData& renderData, const glm::vec3& cameraPos, const bool depthPass) {
-
-	static auto terrainShader = m_shaderCache.at("TerrainShader");
-
-	terrainShader.Bind();
-
-	if (!depthPass) {
-		terrainShader.SetUniform("modelMatrix", renderData.terrain.GetModelMatrix());
-		terrainShader.SetUniform("light.direction", renderData.Sun.Direction);
-		terrainShader.SetUniform("light.ambient", { 0.1f, 0.1f, 0.1f });
-		terrainShader.SetUniform("light.diffuse", renderData.Sun.Color);
-		terrainShader.SetUniform("light.specular", glm::vec3(1.0f));
-		terrainShader.SetUniform("viewPos", cameraPos);
-
-		renderData.terrain.GetMeshes()[0].BindTextures(&terrainShader);
-	}
-
-	const auto data = renderData.terrain.GetMeshes()[0].GetRenderData();
-	data.VAO.Bind();
-	glDrawElements(GL_TRIANGLES, data.Indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 /***********************************************************************************/

@@ -8,8 +8,7 @@
 #include <ppl.h>
 
 /***********************************************************************************/
-Scene::Scene(const size_t width, const size_t height) :	m_renderData(0, 0),
-														m_width(width), 
+Scene::Scene(const size_t width, const size_t height) :	m_width(width), 
 														m_height(height) {
 }
 
