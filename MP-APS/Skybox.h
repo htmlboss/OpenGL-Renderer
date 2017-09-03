@@ -1,15 +1,18 @@
 #pragma once
 #include "GL/GLShaderProgram.h"
 
-
 class Skybox {
 public:
 	explicit Skybox(const std::string_view hdrPath, const std::size_t resolution = 512);
 
 	void Draw();
 
+	auto GetIrradianceMap() const noexcept { return m_irradianceMap; }
+
 private:
-	unsigned int m_vao, m_vbo, m_envMap, m_envMapFBO;
+	void renderCube();
+
+	unsigned int m_vao, m_vbo, m_envMap, m_envMapFBO, m_irradianceMap;
 	
 	GLShaderProgram m_skyboxShader;
 

@@ -13,17 +13,21 @@ uniform float metallic;
 uniform float roughness;
 uniform float ao;
 
+// IBL
+uniform samplerCube irradianceMap;
+
 // lights
 uniform vec3 sunDirection;
 uniform vec3 sunColor;
 
 uniform vec3 viewPos;
 
-uniform bool wireframe = false;
+uniform bool wireframe;
 
 out vec4 FragColor;
 
 const float PI = 3.14159265359;
+
 // ----------------------------------------------------------------------------
 float DistributionGGX(const vec3 N, const vec3 H, const float roughness) {
     float a = roughness*roughness;
@@ -37,6 +41,7 @@ float DistributionGGX(const vec3 N, const vec3 H, const float roughness) {
 
     return nom / denom;
 }
+
 // ----------------------------------------------------------------------------
 float GeometrySchlickGGX(const float NdotV, const float roughness) {
     float r = (roughness + 1.0);
@@ -47,6 +52,7 @@ float GeometrySchlickGGX(const float NdotV, const float roughness) {
 
     return nom / denom;
 }
+
 // ----------------------------------------------------------------------------
 float GeometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughness) {
     const float NdotV = max(dot(N, V), 0.0);
@@ -56,22 +62,19 @@ float GeometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughn
 
     return ggx1 * ggx2;
 }
+
 // ----------------------------------------------------------------------------
 vec3 fresnelSchlick(const float cosTheta, const vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
-// ----------------------------------------------------------------------------
-vec3 directionalReflectance(const vec3 N, const vec3 V, const vec3 F0) {
-    // calculate per-light radiance
-    const vec3 L = -sunDirection;
-    const vec3 H = normalize(V + L);
-    const vec3 radiance = sunColor;
 
-    // Cook-Torrance BRDF
+// ----------------------------------------------------------------------------
+vec3 calcBRDF(const vec3 N, const vec3 H, const vec3 L, const vec3 V, const vec3 F0) {
+    // Cook-Torrance BRDF   
     const float NDF = DistributionGGX(N, H, roughness);   
     const float G   = GeometrySmith(N, V, L, roughness);      
     const vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-           
+
     const vec3 nominator    = NDF * G * F; 
     const float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
     const vec3 specular = nominator / denominator;
@@ -92,9 +95,30 @@ vec3 directionalReflectance(const vec3 N, const vec3 V, const vec3 F0) {
 
     // add to outgoing radiance Lo
     // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-    return (kD * albedo / PI + specular) * radiance * NdotL;
-    
+    return (kD * albedo / PI + specular) * NdotL;
 }
+
+// ----------------------------------------------------------------------------
+vec3 pointRadiance(const vec3 lightPosition, const vec3 lightColor, const vec3 V, const vec3 N, const vec3 F0) {
+    const vec3 L = normalize(lightPosition - fragData.FragPos);
+    const vec3 H = normalize(V + L);
+
+    const float distance = length(lightPosition - fragData.FragPos);
+    const float attenuation = 1.0 / (distance * distance); // Inverse-square fall-off
+    const vec3 radiance = lightColor * attenuation;
+
+    return calcBRDF(N, H, L, V, F0) * radiance;
+}
+
+// ----------------------------------------------------------------------------
+vec3 directionalRadiance(const vec3 N, const vec3 V, const vec3 F0) {
+    const vec3 L = -sunDirection;
+    const vec3 H = normalize(V + L);
+    const vec3 radiance = sunColor;
+
+    return calcBRDF(N, H, L, V, F0) * radiance;
+}
+
 // ----------------------------------------------------------------------------
 void main() {		
     const vec3 N = normalize(fragData.Normal);
@@ -105,12 +129,16 @@ void main() {
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
-    // Calculate reflectance for each light
-    vec3 Lo = directionalReflectance(N, V, F0);
+    // Calculate reflectance for the lights
+    vec3 Lo = directionalRadiance(N, V, F0); // Sun
 
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-    const vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;     
+    const vec3 irradiance = texture(irradianceMap, N).rgb;
+    const vec3 diffuse = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
+
     vec3 color = ambient + Lo;
 
     // HDR tonemapping

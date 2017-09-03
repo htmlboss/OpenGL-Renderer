@@ -123,11 +123,16 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 
 	//m_lightAccumShader.Bind();
 	//m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
+
+	// Bind pre-computed IBL data
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetIrradianceMap());
+
 	pbrShader.Bind();
+	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", false);
 	pbrShader.SetUniform("viewPos", camera.GetPosition());
 	pbrShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
 	pbrShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
-	pbrShader.SetUniformi("wireframe", true);
 	renderModels(pbrShader, renderData, false);
 
 	// Draw skybox

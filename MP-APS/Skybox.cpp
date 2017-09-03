@@ -118,19 +118,15 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_envMap, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// rendercube
-		glBindVertexArray(m_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		renderCube();
 	}
 
 	glDeleteTextures(1, &hdrTexture);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Precompute irradiance cubemap.
-	unsigned int irradianceMap;
-	glGenTextures(1, &irradianceMap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+	glGenTextures(1, &m_irradianceMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
 	for (auto i = 0; i < 6; ++i) {
 		// Convoluting a cubemap purposefully scrubs out the fine details so we only need a low-res image (default 32)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution / 16, resolution / 16, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -141,16 +137,47 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	auto irradianceShader = GLShaderProgram("Irradiance Shader", {	GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
+																	GLShader("Data/Shaders/irradianceConvolutionps.glsl", GL_FRAGMENT_SHADER) });
+	glBindFramebuffer(GL_FRAMEBUFFER, m_envMapFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution / 16, resolution / 16);
+
+	// solve diffuse integral by convolution to create an irradiance (cube)map.
+	irradianceShader.Bind();
+	irradianceShader.SetUniformi("environmentMap", 0).SetUniform("projection", captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_envMap);
+
+	glViewport(0, 0, resolution / 16, resolution / 16);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_envMapFBO);
+	for (unsigned int i = 0; i < 6; ++i) {
+		irradianceShader.SetUniform("view", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_irradianceMap, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		renderCube();
+
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 /***********************************************************************************/
 void Skybox::Draw() {
 	m_skyboxShader.Bind();
 
-	// Skybox Cube
-	glBindVertexArray(m_vao);
 	glActiveTexture(GL_TEXTURE0);
 	m_skyboxShader.SetUniformi("environmentMap", 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_envMap);
+
+	// Skybox Cube
+	renderCube();
+}
+
+/***********************************************************************************/
+void Skybox::renderCube() {
+	glBindVertexArray(m_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 }
