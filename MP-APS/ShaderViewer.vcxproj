@@ -332,7 +332,6 @@
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="GL\GBuffer.cpp" />
     <ClCompile Include="GL\GLFramebuffer.cpp" />
     <ClCompile Include="GL\GLRenderer.cpp" />
     <ClCompile Include="GL\GLShader.cpp" />
@@ -358,8 +357,6 @@
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="GL\GBuffer.h" />
-    <ClInclude Include="GL\GLContext.h" />
     <ClInclude Include="GL\GLFramebuffer.h" />
     <ClInclude Include="GL\GLRenderer.h" />
     <ClInclude Include="GL\GLShader.h" />
@@ -370,7 +367,7 @@
     <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Interfaces\IRenderComponent.h" />
-    <ClInclude Include="Interfaces\irenderer.h" />
+    <ClInclude Include="Interfaces\ISystem.h" />
     <ClInclude Include="Lights\DirectionalLight.h" />
     <ClInclude Include="Lights\PointLight.h" />
     <ClInclude Include="Material.h" />

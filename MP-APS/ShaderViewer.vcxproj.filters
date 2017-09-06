@@ -29,9 +29,6 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="3rdParty\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,9 +56,6 @@
     <ClCompile Include="GL\GLShader.cpp">
       <Filter>GL</Filter>
     </ClCompile>
-    <ClCompile Include="GL\GBuffer.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,12 +80,12 @@
     <ClCompile Include="AABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
@@ -130,16 +124,10 @@
     <ClInclude Include="GL\GLShaderProgram.h">
       <Filter>GL</Filter>
     </ClInclude>
-    <ClInclude Include="Interfaces\irenderer.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GL\GLShader.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GBuffer.h">
       <Filter>GL</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
@@ -169,9 +157,6 @@
     <ClInclude Include="AABB.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GL\GLContext.h">
-      <Filter>GL</Filter>
-    </ClInclude>
     <ClInclude Include="Lights\DirectionalLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -179,6 +164,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interfaces\ISystem.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

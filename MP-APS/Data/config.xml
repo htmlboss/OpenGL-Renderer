@@ -1,9 +1,9 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 
-<Engine width="1280" height="720">
-    <Window title="MP-APS" fullscreen="false" major="4" minor="4" />
+<Engine>
+    <Window title="MP-APS" fullscreen="false" major="4" minor="4" width="1280" height="720"/>
     
-    <Renderer>
+    <Renderer width="1280" height="720">
     	<Program name="PBRShader">
     		<Shader path="Data/Shaders/PBRvs.glsl" type="vertex" />
             <Shader path="Data/Shaders/wireframegs.glsl" type="geometry" />

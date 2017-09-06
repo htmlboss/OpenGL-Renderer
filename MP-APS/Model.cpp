@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "GL/GLRenderer.h"
 
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <glm/gtc/matrix_transform.hpp>
 

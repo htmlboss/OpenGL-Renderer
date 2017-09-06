@@ -1,21 +1,20 @@
 #pragma once
-#include "../Interfaces/IRenderer.h"
-#include "GLContext.h"
+#include "../Interfaces/ISystem.h"
+
 #include "../Skybox.h"
+#include "../Vertex.h"
 #include "GLFramebuffer.h"
 
 #include <random>
+#include <array>
 #include <unordered_map>
+#include <memory>
+#include <vector>
 
 /***********************************************************************************/
 // Forward Declarations
-class Camera;
 class Terrain;
 struct RenderData;
-
-namespace pugi {
-	class xml_node;
-}
 
 /***********************************************************************************/
 struct VisibleLightIndex {
@@ -23,13 +22,17 @@ struct VisibleLightIndex {
 };
 
 /***********************************************************************************/
-class GLRenderer : public IRenderer {
+class GLRenderer : public ISystem {
 
 public:
-	GLRenderer(const size_t width, const size_t height, const pugi::xml_node& rendererNode);
+	GLRenderer();
+	GLRenderer(const GLRenderer&) = delete;
+	GLRenderer& operator=(const GLRenderer&) = delete;
+
+	void Init(const pugi::xml_node& rendererNode) override;
+	void Update(const Camera& camera, const double delta) override;
 
 	void InitView(const Camera& camera);
-	void Update(const Camera& camera, const double delta);
 	void Shutdown() const;
 
 	void Render(const Camera& camera, const RenderData& renderData);
@@ -53,11 +56,8 @@ private:
 	glm::vec3 RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen);
 	void UpdateLights(const double dt);
 
-	// OpenGL context.
-	GLContext m_context;
-
 	// Screen dimensions
-	size_t m_width, m_height;
+	std::size_t m_width, m_height;
 
 	GLuint m_uboMatrices;
 
@@ -71,10 +71,10 @@ private:
 
 	// Depth pass
 	GLuint m_depthTexture;
-	GLFramebuffer m_depthFBO;
+	std::unique_ptr<GLFramebuffer> m_depthFBO;
 
 	// Environment map
-	Skybox m_skybox;
+	std::unique_ptr<Skybox> m_skybox;
 
 	// Compiled shader cache
 	std::unordered_map<std::string, GLShaderProgram> m_shaderCache;
@@ -85,7 +85,7 @@ private:
 	// Post-Processing
 	// HDR
 	GLuint m_hdrColorBufferTexture;
-	GLFramebuffer m_hdrFBO;
+	std::unique_ptr<GLFramebuffer> m_hdrFBO;
 
 	// Saturation
 	float m_saturation = 1.1f;
@@ -93,6 +93,61 @@ private:
 	// Vibrance
 	float m_vibrance = 0.3f;
 	const glm::vec4 m_coefficient{ 0.299f, 0.587f, 0.114f, 0.0f };
+
+	const std::size_t MAX_NUM_LIGHTS = 128;
+
+	const std::array<Vertex, 4> m_screenQuadVertices{
+		// Positions				// GLTexture Coords
+		Vertex({ -1.0f, 1.0f, 0.0f },{ 0.0f, 1.0f }),
+		Vertex({ -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f }),
+		Vertex({ 1.0f, 1.0f, 0.0f },{ 1.0f, 1.0f }),
+		Vertex({ 1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f })
+	};
+
+	const std::array<float, 108> m_cubeVertices{
+		// Back face
+		-0.5f, -0.5f, -0.5f, // Bottom-left
+		0.5f, 0.5f, -0.5f, // top-right
+		0.5f, -0.5f, -0.5f, // bottom-right         
+		0.5f, 0.5f, -0.5f, // top-right
+		-0.5f, -0.5f, -0.5f, // bottom-left
+		-0.5f, 0.5f, -0.5f, // top-left
+		// Front face
+		-0.5f, -0.5f, 0.5f, // bottom-left
+		0.5f, -0.5f, 0.5f, // bottom-right
+		0.5f, 0.5f, 0.5f, // top-right
+		0.5f, 0.5f, 0.5f, // top-right
+		-0.5f, 0.5f, 0.5f, // top-left
+		-0.5f, -0.5f, 0.5f, // bottom-left
+		// Left face
+		-0.5f, 0.5f, 0.5f, // top-right
+		-0.5f, 0.5f, -0.5f, // top-left
+		-0.5f, -0.5f, -0.5f, // bottom-left
+		-0.5f, -0.5f, -0.5f, // bottom-left
+		-0.5f, -0.5f, 0.5f, // bottom-right
+		-0.5f, 0.5f, 0.5f, // top-right
+		// Right face
+		0.5f, 0.5f, 0.5f, // top-left
+		0.5f, -0.5f, -0.5f, // bottom-right
+		0.5f, 0.5f, -0.5f, // top-right         
+		0.5f, -0.5f, -0.5f, // bottom-right
+		0.5f, 0.5f, 0.5f, // top-left
+		0.5f, -0.5f, 0.5f, // bottom-left     
+		// Bottom face
+		-0.5f, -0.5f, -0.5f, // top-right
+		0.5f, -0.5f, -0.5f, // top-left
+		0.5f, -0.5f, 0.5f, // bottom-left
+		0.5f, -0.5f, 0.5f, // bottom-left
+		-0.5f, -0.5f, 0.5f, // bottom-right
+		-0.5f, -0.5f, -0.5f, // top-right
+		// Top face
+		-0.5f, 0.5f, -0.5f, // top-left
+		0.5f, 0.5f, 0.5f, // bottom-right
+		0.5f, 0.5f, -0.5f, // top-right     
+		0.5f, 0.5f, 0.5f, // bottom-right
+		-0.5f, 0.5f, -0.5f, // top-left
+		-0.5f, 0.5f, 0.5f // bottom-left        
+	};
 
 
 	const glm::vec3 LIGHT_MIN_BOUNDS = glm::vec3(-135.0f, -20.0f, -60.0f);

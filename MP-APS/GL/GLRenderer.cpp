@@ -2,35 +2,54 @@
 #include "GLShader.h"
 
 #include "../Input.h"
-#include "../Camera.h"
 #include "../Scene.h"
 #include "../ResourceManager.h"
 
 #include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <GLFW/glfw3.h>
 
 #include <random>
 #include <iostream>
 
 /***********************************************************************************/
-GLRenderer::GLRenderer(const size_t width, const size_t height, const pugi::xml_node& rendererNode) : IRenderer(), 
-																									m_context(), 
-																									m_width(width),
-																									m_height(height),
-																									m_workGroupsX((width + width % 8) / 8),
-																									m_workGroupsY((height + height % 8) / 8),
-																									m_depthFBO("Depth FBO", width, height),
-																									m_skybox("Data/hdri/barcelona.hdr", 1024),
-																									m_hdrFBO("HDR FBO", width, height) {
-	std::cout << "OpenGL Version: " << m_context.GetGLVersion() << '\n';
-	std::cout << "GLSL Version: " << m_context.GetGLSLVersion() << '\n';
-	std::cout << "OpenGL Vendor: " << m_context.GetGLVendor() << '\n';
-	std::cout << "OpenGL Renderer: " << m_context.GetGLRenderer() << '\n';
+GLRenderer::GLRenderer() :	m_width{0},
+							m_height{0},
+							m_workGroupsX{0},
+							m_workGroupsY{0} {
 
-	std::cout << "Compiling shaders...\n";
+}
+
+/***********************************************************************************/
+void GLRenderer::Init(const pugi::xml_node& rendererNode) {
+	
+	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+		throw std::runtime_error("Failed to start GLAD.\n");
+	}
+
+#ifdef _DEBUG
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
+	std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
+	std::cout << "OpenGL Vendor: " << glGetString(GL_VENDOR) << '\n';
+	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << '\n';
+#endif
+
+	const auto width = rendererNode.attribute("width").as_uint();
+	const auto height = rendererNode.attribute("height").as_uint();
+
+	m_width = width;
+	m_height = height;
+
+	m_workGroupsX = (width + width % 8) / 8;
+	m_workGroupsY = (height + height % 8) / 8;
+
+	m_depthFBO = std::make_unique<GLFramebuffer>("Depth FBO", width, height);
+	m_hdrFBO = std::make_unique<GLFramebuffer>("HDR FBO", width, height);
+	m_skybox = std::make_unique<Skybox>("Data/hdri/barcelona.hdr", 1024);
+
 	// Compile all shader programs
 	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
-		
+
 		// Get all shader files that make up the program
 		std::vector<GLShader> shaders;
 		for (auto shader = program.child("Shader"); shader; shader = shader.next_sibling("Shader")) {
@@ -40,7 +59,6 @@ GLRenderer::GLRenderer(const size_t width, const size_t height, const pugi::xml_
 		// Compile and cache shader program
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
-	std::cout << "Configuring OpenGL..." << std::endl;
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -97,10 +115,10 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	// Step 1: Render the depth of the scene to a depth map
 	depthShader.Bind();
 	
-	m_depthFBO.Bind();
+	m_depthFBO->Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderModels(depthShader, renderData, true);
-	m_depthFBO.Unbind();
+	m_depthFBO->Unbind();
 
 	// Step 2: Perform light culling on point lights in the scene
 	lightCullShader.Bind();
@@ -118,7 +136,7 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 	// Execute compute shader
 	glDispatchCompute(m_workGroupsX, m_workGroupsY, 1);
 
-	m_hdrFBO.Bind();
+	m_hdrFBO->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//m_lightAccumShader.Bind();
@@ -126,17 +144,17 @@ void GLRenderer::Render(const Camera& camera, const RenderData& renderData) {
 
 	// Bind pre-computed IBL data
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetIrradianceMap());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox->GetIrradianceMap());
 
 	pbrShader.Bind();
-	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", false);
+	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", true);
 	pbrShader.SetUniform("viewPos", camera.GetPosition());
 	pbrShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
 	pbrShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
 	renderModels(pbrShader, renderData, false);
 
 	// Draw skybox
-	m_skybox.Draw();
+	m_skybox->Draw();
 	
 	// Do post-processing
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -168,7 +186,7 @@ void GLRenderer::Update(const Camera& camera, const double delta) {
 		m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 		InitView(camera);
 		glViewport(0, 0, m_width, m_height);
-		m_depthFBO.Resize(m_width, m_height);
+		m_depthFBO->Resize(m_width, m_height);
 	}
 
 	// Update view matrix inside UBO
@@ -272,7 +290,7 @@ void GLRenderer::setupLightStorageBuffer() {
 
 /***********************************************************************************/
 void GLRenderer::setupDepthBuffer() {
-	m_depthFBO.Bind();
+	m_depthFBO->Bind();
 
 	if (m_depthTexture) {
 		glDeleteTextures(1, &m_depthTexture);
@@ -287,18 +305,18 @@ void GLRenderer::setupDepthBuffer() {
 	const GLfloat borderColor[] { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	m_depthFBO.AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
-	m_depthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
-	m_depthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_depthFBO->AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
+	m_depthFBO->DrawBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_depthFBO->ReadBuffer(GLFramebuffer::GLBuffer::NONE);
 	
-	m_depthFBO.Unbind();
+	m_depthFBO->Unbind();
 }
 
 /***********************************************************************************/
 void GLRenderer::setupHDRBuffer() {
 	
-	m_hdrFBO.Reset(m_width, m_height);
-	m_hdrFBO.Bind();
+	m_hdrFBO->Reset(m_width, m_height);
+	m_hdrFBO->Bind();
 	GLuint rboDepth;
 	glGenTextures(1, &m_hdrColorBufferTexture);
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
@@ -311,8 +329,8 @@ void GLRenderer::setupHDRBuffer() {
 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
 	// - Attach buffers
-	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
-	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
+	m_hdrFBO->AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
+	m_hdrFBO->AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
 }
 
 /***********************************************************************************/
