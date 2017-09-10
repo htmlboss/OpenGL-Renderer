@@ -1,22 +1,23 @@
 #pragma once
 
+#include "../Interfaces/ISystem.h"
+
+#include <cstddef>
+
 /***********************************************************************************/
 // Forward Declarations
-namespace pugi {
-	class xml_node;
-}
 
 struct GLFWwindow;
 
 /***********************************************************************************/
-class GLWindow {
+class GLWindow : public ISystem {
 public:
 	GLWindow() = default;
-
 	GLWindow(const GLWindow&) = delete;
 	GLWindow& operator=(const GLWindow&) = delete;
 
-	void Init(const size_t width, const size_t height, const pugi::xml_node& windowNode);
+	void Init(const pugi::xml_node& windowNode) override;
+	void Update(const double delta) override;
 
 	void SetWindowPos(const size_t x, const size_t y) const;
 	void SwapBuffers() const;
@@ -28,12 +29,11 @@ public:
 	void EnableVSync() const;
 	void DisableVSync() const;
 
-	void Update();
 	bool ShouldClose() const noexcept { return m_shouldWindowClose; }
 	bool IsFocused() const noexcept { return m_focused; }
 
 private:
-	
+
 	GLFWwindow* m_window = nullptr;
 
 	bool m_shouldWindowClose;

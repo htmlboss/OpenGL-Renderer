@@ -7,12 +7,10 @@
 #include <iostream>
 
 /***********************************************************************************/
-void GLWindow::Init(const size_t width, const size_t height, const pugi::xml_node& windowNode) {
-
-	std::cout << "Creating GLFW window...\n";
+void GLWindow::Init(const pugi::xml_node& windowNode) {
 
 #define genericInputCallback(functionName)\
-	[](GLFWwindow* window, auto... args) {\
+	[](GLFWwindow* window, const auto... args) {\
 		const auto ptr = static_cast<Input*>(glfwGetWindowUserPointer(window));\
 		if (ptr->functionName) { ptr->functionName(args...); }\
 	}
@@ -21,13 +19,18 @@ void GLWindow::Init(const size_t width, const size_t height, const pugi::xml_nod
 		throw std::runtime_error("Failed to start GLFW.");
 	}
 
+#ifdef _DEBUG
 	std::cout << "GLFW Version: " << glfwGetVersionString() << '\n';
+#endif
 
-	glfwSetErrorCallback([](const auto errorCode, const auto* message) {std::cerr << message << std::endl; });
+	glfwSetErrorCallback([](const auto errorCode, const auto* message) {std::cerr << "GLFW Error: " << errorCode << ". " << message << std::endl; });
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, windowNode.attribute("major").as_int());
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, windowNode.attribute("minor").as_int());
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+	const auto width = windowNode.attribute("width").as_uint();
+	const auto height = windowNode.attribute("height").as_uint();
 
 	if (windowNode.attribute("fullscreen").as_bool()) {
 		m_window = glfwCreateWindow(width, height, windowNode.attribute("title").as_string(), glfwGetPrimaryMonitor(), nullptr);
@@ -89,7 +92,7 @@ void GLWindow::DisableVSync() const {
 }
 
 /***********************************************************************************/
-void GLWindow::Update() {
+void GLWindow::Update(const double delta) {
 	glfwPollEvents();
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {

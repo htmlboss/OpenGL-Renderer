@@ -17,11 +17,10 @@ public:
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 
-	// Runs game loop
 	void Execute();
+	void Update();
 
 private:
-	void update();
 	void shutdown();
 
 	enum class engineState {
@@ -32,11 +31,9 @@ private:
 
 	engineState m_engineState;
 
-	std::size_t m_width, m_height;
-
 	Timer m_timer;
 
 	GLWindow m_mainWindow;
-	std::unique_ptr<GLRenderer> m_renderer;
+	GLRenderer m_renderer;
 	std::unique_ptr<Scene> m_scene;
 };
