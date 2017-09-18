@@ -20,10 +20,10 @@ void Scene::Init() {
 	model->Scale(glm::vec3(10.0f));
 	m_sceneModels.push_back(model);
 
-	model = ResourceManager::GetInstance().GetModel("Dragon", "models/dragon/dragon.obj");
-	model->Translate(glm::vec3(20.0f, -50.0f, 0.0f));
-	model->Scale(glm::vec3(2.0f));
-	m_sceneModels.push_back(model);
+	//model = ResourceManager::GetInstance().GetModel("Dragon", "models/dragon/dragon.obj");
+	//model->Translate(glm::vec3(20.0f, -50.0f, 0.0f));
+	//model->Scale(glm::vec3(2.0f));
+	//m_sceneModels.push_back(model);
 
 	// Sun parameters
 	m_renderData.Sun.Color = { 0.0f, 0.5f, 1.0f , 1.0f};

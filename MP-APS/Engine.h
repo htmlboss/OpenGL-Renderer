@@ -21,15 +21,7 @@ public:
 	void Update();
 
 private:
-	void shutdown();
-
-	enum class engineState {
-		LOADING,
-		READY,
-		PAUSED
-	};
-
-	engineState m_engineState;
+	void shutdown() const;
 
 	Timer m_timer;
 

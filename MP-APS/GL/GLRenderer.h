@@ -9,7 +9,6 @@
 #include <array>
 #include <unordered_map>
 #include <memory>
-#include <vector>
 
 /***********************************************************************************/
 // Forward Declarations
@@ -29,15 +28,17 @@ public:
 	GLRenderer(const GLRenderer&) = delete;
 	GLRenderer& operator=(const GLRenderer&) = delete;
 
-	void Init(const pugi::xml_node& rendererNode) override;
-	void Update(const Camera& camera, const double delta) override;
+	void OnInit(const pugi::xml_node& rendererNode) override;
+	void OnUpdate(const Camera& camera, const double delta) override;
 
 	void InitView(const Camera& camera);
-	void Shutdown() const;
+	void OnSucceed() const override;
 
 	void Render(const Camera& camera, const RenderData& renderData);
 
 private:
+	void OnAbort(const std::string_view error) override;
+
 	void renderModels(GLShaderProgram& shader, const RenderData& renderData, const bool shadowPass) const;
 	// Render NDC screenquad
 	void renderQuad() const;

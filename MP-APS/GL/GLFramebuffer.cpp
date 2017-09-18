@@ -52,6 +52,11 @@ void GLFramebuffer::Blit(const BufferBitMasks bufferBit, const GLint targetID) c
 }
 
 /***********************************************************************************/
+void GLFramebuffer::DrawBuffers(const unsigned int attachments[]) const {
+	glDrawBuffers(sizeof(attachments) / sizeof(attachments[0]), attachments);
+}
+
+/***********************************************************************************/
 void GLFramebuffer::DrawBuffer(const GLBuffer buffer) const {
 	glDrawBuffer(static_cast<int>(buffer));
 	checkErrors();

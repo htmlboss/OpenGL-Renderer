@@ -6,7 +6,6 @@
 #include <cmath>
 #include <future>
 #include <random>
-#include <glm/vec3.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

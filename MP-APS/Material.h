@@ -36,7 +36,7 @@ struct Material {
 	}
 
 	std::string Name;
-	glm::vec3 Albedo = {2.0f, 3.0f, 10.0f};
+	glm::vec3 Albedo = {2.0f, 30.0f, 10.0f};
 	float Metallic = 1.0f;
 	float AO = 1.0f;
 	float Roughness = 0.01f;

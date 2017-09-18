@@ -9,8 +9,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-Engine::Engine(const std::string_view configPath) : m_engineState(engineState::LOADING),
-													m_mainWindow{},
+Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 													m_renderer{} {
 
 	std::cout << "**************************************************\n";
@@ -28,11 +27,11 @@ Engine::Engine(const std::string_view configPath) : m_engineState(engineState::L
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing Window...\n";
-	m_mainWindow.Init(engineNode.child("Window"));
+	m_mainWindow.OnInit(engineNode.child("Window"));
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
-	m_renderer.Init(engineNode.child("Renderer"));
+	m_renderer.OnInit(engineNode.child("Renderer"));
 	
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing scene...\n";
@@ -45,7 +44,6 @@ Engine::Engine(const std::string_view configPath) : m_engineState(engineState::L
 /***********************************************************************************/
 void Engine::Execute() {
 
-	m_engineState = engineState::READY;
 	std::cout << "\n**************************************************\n";
 	std::cout << "Engine initialization complete!\n";
 	std::cout << "**************************************************\n" << std::endl;
@@ -64,16 +62,16 @@ void Engine::Execute() {
 
 /***********************************************************************************/
 void Engine::Update() {
-	Input::GetInstance().Update();
-	m_mainWindow.Update(0.0);
 	m_timer.Update(glfwGetTime());
+	Input::GetInstance().Update();
+	m_mainWindow.OnUpdate(0.0);
 
 	m_scene->Update(m_timer.GetDelta());
-	m_renderer.Update(m_scene->GetCamera(), m_timer.GetDelta());
+	m_renderer.OnUpdate(m_scene->GetCamera(), m_timer.GetDelta());
 }
 
 /***********************************************************************************/
-void Engine::shutdown() {
-	m_renderer.Shutdown();
-	m_mainWindow.DestroyWindow();
+void Engine::shutdown() const {
+	m_renderer.OnSucceed();
+	m_mainWindow.OnSucceed();
 }

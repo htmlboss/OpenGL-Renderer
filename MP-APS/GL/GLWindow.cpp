@@ -7,7 +7,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-void GLWindow::Init(const pugi::xml_node& windowNode) {
+void GLWindow::OnInit(const pugi::xml_node& windowNode) {
 
 #define genericInputCallback(functionName)\
 	[](GLFWwindow* window, const auto... args) {\
@@ -16,7 +16,7 @@ void GLWindow::Init(const pugi::xml_node& windowNode) {
 	}
 
 	if (!glfwInit()) {
-		throw std::runtime_error("Failed to start GLFW.");
+		OnAbort("Failed to start GLFW.");
 	}
 
 #ifdef _DEBUG
@@ -40,8 +40,9 @@ void GLWindow::Init(const pugi::xml_node& windowNode) {
 	}
 
 	if (!m_window) {
-		throw std::runtime_error("Failed to create GLFW window.");
+		OnAbort("Failed to create GLFW window.");
 	}
+
 	glfwMakeContextCurrent(m_window);
 	glfwFocusWindow(m_window);
 	glfwSetWindowSizeCallback(m_window, genericInputCallback(Input::GetInstance().windowResized));
@@ -53,6 +54,8 @@ void GLWindow::Init(const pugi::xml_node& windowNode) {
 	glfwSetWindowPos(m_window, (mode->width / 2) - width / 2, (mode->height / 2) - height / 2);
 
 	DisableCursor();
+
+	SetState(RUNNING);
 }
 
 /***********************************************************************************/
@@ -66,7 +69,7 @@ void GLWindow::SwapBuffers() const {
 }
 
 /***********************************************************************************/
-void GLWindow::DestroyWindow() const {
+void GLWindow::OnSucceed() const {
 	glfwDestroyWindow(m_window);
 	glfwTerminate();
 }
@@ -82,17 +85,19 @@ void GLWindow::DisableCursor() const {
 }
 
 /***********************************************************************************/
-void GLWindow::EnableVSync() const {
-	glfwSwapInterval(1);
+void GLWindow::SetVsync(const bool vsync) const {
+	glfwSwapInterval(static_cast<int>(vsync));
 }
 
 /***********************************************************************************/
-void GLWindow::DisableVSync() const {
-	glfwSwapInterval(0);
+void GLWindow::OnAbort(const std::string_view error) {
+	SetState(ABORTED);
+	glfwTerminate();
+	throw std::runtime_error(error.data());
 }
 
 /***********************************************************************************/
-void GLWindow::Update(const double delta) {
+void GLWindow::OnUpdate(const double delta) {
 	glfwPollEvents();
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {

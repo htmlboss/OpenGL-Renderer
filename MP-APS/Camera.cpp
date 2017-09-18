@@ -7,6 +7,7 @@
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) noexcept :
 	m_position(position),
 	m_front(glm::vec3(0.0f, 0.0f, -1.0f)),
+	m_up(up),
 	m_yaw(yaw),
 	m_pitch(pitch),
 	m_FOV(FOV),

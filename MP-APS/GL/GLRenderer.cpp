@@ -21,10 +21,10 @@ GLRenderer::GLRenderer() :	m_width{0},
 }
 
 /***********************************************************************************/
-void GLRenderer::Init(const pugi::xml_node& rendererNode) {
+void GLRenderer::OnInit(const pugi::xml_node& rendererNode) {
 	
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-		throw std::runtime_error("Failed to start GLAD.\n");
+		OnAbort("Failed to start GLAD.");
 	}
 
 #ifdef _DEBUG
@@ -82,10 +82,11 @@ void GLRenderer::Init(const pugi::xml_node& rendererNode) {
 	setupHDRBuffer();
 
 	glViewport(0, 0, width, height);
+	SetState(RUNNING);
 }
 
 /***********************************************************************************/
-void GLRenderer::Shutdown() const {
+void GLRenderer::OnSucceed() const {
 	for (const auto& shader : m_shaderCache) {
 		shader.second.DeleteProgram();
 	}
@@ -176,7 +177,7 @@ void GLRenderer::InitView(const Camera& camera) {
 }
 
 /***********************************************************************************/
-void GLRenderer::Update(const Camera& camera, const double delta) {
+void GLRenderer::OnUpdate(const Camera& camera, const double delta) {
 
 	// Window size changed.
 	if (Input::GetInstance().ShouldResize()) {
@@ -197,6 +198,12 @@ void GLRenderer::Update(const Camera& camera, const double delta) {
 	UpdateLights(delta);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/***********************************************************************************/
+void GLRenderer::OnAbort(const std::string_view error) {
+	SetState(ABORTED);
+	throw std::runtime_error(error.data());
 }
 
 /***********************************************************************************/

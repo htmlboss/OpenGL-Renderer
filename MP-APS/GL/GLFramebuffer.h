@@ -44,6 +44,7 @@ public:
 	void AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const;
 	void Bind() const;
 	void Blit(const BufferBitMasks bufferBit, const GLint targetID) const;
+	void DrawBuffers(const unsigned int attachments[]) const;
 	void DrawBuffer(const GLBuffer buffer) const;
 	void ReadBuffer(const GLBuffer buffer) const;
 	void Unbind() const;
