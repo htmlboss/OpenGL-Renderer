@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 /***********************************************************************************/
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float FOV) noexcept :
+Camera::Camera(const glm::vec3& position, const glm::vec3& up, const float yaw, const float pitch, const float FOV) noexcept :
 	m_position(position),
 	m_front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	m_up(up),
@@ -16,7 +16,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float F
 	m_prevY(0.0) { updateVectors(); }
 
 /***********************************************************************************/
-void Camera::Update(const double deltaTime) noexcept {
+void Camera::Update(const double deltaTime) {
 	// Update view from mouse movement
 	updateView();
 
@@ -56,7 +56,7 @@ void Camera::processKeyboard(const Direction direction, const double deltaTime) 
 }
 
 /***********************************************************************************/
-void Camera::updateView(const bool constrainPitch /*= true*/) noexcept {
+void Camera::updateView(const bool constrainPitch /*= true*/) {
 
 	// If the mouse position has changed, recalculate vectors
 	if (Input::GetInstance().MouseMoved()) {

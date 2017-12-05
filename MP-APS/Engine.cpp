@@ -1,4 +1,5 @@
 #include "Engine.h"
+
 #include "Input.h"
 #include "ResourceManager.h"
 
@@ -27,11 +28,11 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing Window...\n";
-	m_mainWindow.OnInit(engineNode.child("Window"));
+	m_mainWindow.Init(engineNode.child("Window"));
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
-	m_renderer.OnInit(engineNode.child("Renderer"));
+	m_renderer.Init(engineNode.child("Renderer"));
 	
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing scene...\n";
@@ -50,7 +51,7 @@ void Engine::Execute() {
 
 	// Main loop
 	while (!m_mainWindow.ShouldClose()) {
-		Update();
+		update();
 
 		m_renderer.Render(m_scene->GetCamera(), m_scene->GetRenderData());
 
@@ -61,17 +62,17 @@ void Engine::Execute() {
 }
 
 /***********************************************************************************/
-void Engine::Update() {
+void Engine::update() {
 	m_timer.Update(glfwGetTime());
 	Input::GetInstance().Update();
-	m_mainWindow.OnUpdate(0.0);
+	m_mainWindow.Update();
 
 	m_scene->Update(m_timer.GetDelta());
-	m_renderer.OnUpdate(m_scene->GetCamera(), m_timer.GetDelta());
+	m_renderer.Update(m_scene->GetCamera(), m_timer.GetDelta());
 }
 
 /***********************************************************************************/
 void Engine::shutdown() const {
-	m_renderer.OnSucceed();
-	m_mainWindow.OnSucceed();
+	m_renderer.Shutdown();
+	m_mainWindow.Shutdown();
 }

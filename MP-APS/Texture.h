@@ -8,8 +8,6 @@ public:
 	virtual ~Texture() { delete[] m_data; }
 
 	Texture(Texture& other);
-	Texture& operator=(const Texture& rhs);
-	Texture& operator=(Texture&& rhs);
 
 	bool operator==(const Texture& rhs) const { return this->m_texID == rhs.m_texID; }
 

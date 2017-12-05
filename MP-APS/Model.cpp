@@ -1,5 +1,5 @@
 #include "Model.h"
-#include "GL/GLRenderer.h"
+#include "Core/RenderSystem.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -30,6 +30,11 @@ Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Na
 /***********************************************************************************/
 void Model::AssignMaterial(const Material& material) {
 	m_material = material;
+}
+
+/***********************************************************************************/
+void Model::AttachMesh(const Mesh& mesh) noexcept {
+	m_meshes.push_back(mesh);
 }
 
 /***********************************************************************************/

@@ -15,7 +15,7 @@ Scene::Scene(const size_t width, const size_t height) :	m_width(width),
 /***********************************************************************************/
 void Scene::Init() {
 
-	auto model = ResourceManager::GetInstance().GetModel("Sphere", "models/sphere.obj");
+	auto model = ResourceManager::GetInstance().GetModel("Sphere", "Data/Models/sphere.obj");
 	model->Translate(glm::vec3(0.0f));
 	model->Scale(glm::vec3(10.0f));
 	m_sceneModels.push_back(model);

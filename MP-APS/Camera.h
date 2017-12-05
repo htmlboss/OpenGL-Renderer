@@ -5,9 +5,9 @@
 class Camera {
 
 public:
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f, float FOV = 90.0f) noexcept;
+	Camera(const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, const glm::vec3& up = { 0.0f, 1.0f, 0.0f }, const float yaw = -90.0f, const float pitch = 0.0f, const float FOV = 45.0f) noexcept;
 
-	void Update(const double deltaTime) noexcept;
+	void Update(const double deltaTime);
 
 	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
 	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 1.0f, 500.0f); }
@@ -23,10 +23,10 @@ private:
 		DOWN
 	};
 
-	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-	void updateView(const bool constrainPitch = true) noexcept;
+	// Processes input received from mouse.
+	void updateView(const bool constrainPitch = true);
 
-	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+	// Processes input received from keyboard.
 	void processKeyboard(const Direction direction, const double deltaTime) noexcept;
 
 	// Calculates the front vector from the Camera's (updated) Eular Angles

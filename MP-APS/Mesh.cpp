@@ -4,18 +4,18 @@
 #include <string>
 
 /***********************************************************************************/
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_renderData(indices), m_vertices(vertices) {
-	setupMesh();
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_indexCount{ indices.size() }, m_vao{} {
+	
+	setupMesh(vertices, indices);
 }
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) :
-	m_renderData(indices),
-	m_vertices(vertices),
+	m_vao{},
+	m_indexCount{indices.size()},
 	m_textures(textures) {
 
-	//Construct mesh
-	setupMesh();
+	setupMesh(vertices, indices);
 }
 
 /***********************************************************************************/
@@ -54,29 +54,24 @@ void Mesh::BindTextures(GLShaderProgram* shader) {
 }
 
 /***********************************************************************************/
-void Mesh::setupMesh() {
-
-	m_renderData.VAO.Bind();
+void Mesh::setupMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) {
+	m_vao.Bind();
 	// Attach VBO
-	m_renderData.VAO.AttachBuffer(GLVertexArray::BufferType::ARRAY, m_vertices.size() * sizeof(Vertex), GLVertexArray::DrawMode::STATIC, &m_vertices[0]);
+	m_vao.AttachBuffer(GLVertexArray::BufferType::ARRAY, vertices.size() * sizeof(Vertex), GLVertexArray::DrawMode::STATIC, &vertices[0]);
 	// Attach EBO
-	m_renderData.VAO.AttachBuffer(GLVertexArray::BufferType::ELEMENT, m_renderData.Indices.size() * sizeof(GLuint), GLVertexArray::DrawMode::STATIC, &m_renderData.Indices[0]);
+	m_vao.AttachBuffer(GLVertexArray::BufferType::ELEMENT, indices.size() * sizeof(GLuint), GLVertexArray::DrawMode::STATIC, &indices[0]);
 
 	// Vertex Attributes
 
 	const auto vertexSize = sizeof(Vertex);
 	// Position
-	m_renderData.VAO.EnableAttribute(0, 3, vertexSize, nullptr);
+	m_vao.EnableAttribute(0, 3, vertexSize, nullptr);
 	// Texture Coords
-	m_renderData.VAO.EnableAttribute(1, 2, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
+	m_vao.EnableAttribute(1, 2, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
 	// Normal
-	m_renderData.VAO.EnableAttribute(2, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Normal)));
+	m_vao.EnableAttribute(2, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Normal)));
 	// Tangent
-	m_renderData.VAO.EnableAttribute(3, 3, vertexSize, reinterpret_cast<GLvoid*>(offsetof(Vertex, Tangent)));
+	m_vao.EnableAttribute(3, 3, vertexSize, reinterpret_cast<GLvoid*>(offsetof(Vertex, Tangent)));
 	// Bitangent
-	m_renderData.VAO.EnableAttribute(4, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Bitangent)));
-
-
-	m_vertices.clear();
-	m_vertices.shrink_to_fit();
+	m_vao.EnableAttribute(4, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Bitangent)));
 }

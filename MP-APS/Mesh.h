@@ -1,37 +1,32 @@
 #pragma once
 
 #include "Vertex.h"
-#include "GL/GLTexture.h"
-#include "GL/GLShaderProgram.h"
-#include "GL/GLVertexArray.h"
+#include "Graphics/GLTexture.h"
+#include "Graphics/GLShaderProgram.h"
+#include "Graphics/GLVertexArray.h"
 
 #include <vector>
 
-/***********************************************************************************/
-struct GLRenderData {
-	explicit GLRenderData() {}
-	explicit GLRenderData(const std::vector<GLuint>& indices) : VAO(), Indices(indices) {}
-
-	GLVertexArray VAO;
-	std::vector<GLuint> Indices;
-};
-
+// TODO: Add function to reset mesh (clear OpenGL references etc)
 /***********************************************************************************/
 class Mesh {
 public:
-	explicit Mesh() {}
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures);
 
+	void Clear();
+
 	void BindTextures(GLShaderProgram* shader);
 
-	auto GetRenderData() const noexcept { return m_renderData; }
+	auto GetIndexCount() const noexcept { return m_indexCount; }
+	auto GetVAO() const noexcept { return m_vao; }
+	auto GetTriangleCount() const noexcept { return m_indexCount / 3; }
+	auto GetTextureCount() const noexcept { return m_textures.size(); }
 
 private:
-	void setupMesh();
+	void setupMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
+	std::size_t m_indexCount;
 
-	GLRenderData m_renderData;
-
-	std::vector<Vertex> m_vertices;
+	GLVertexArray m_vao;
 	std::vector<GLTexture> m_textures;
 };

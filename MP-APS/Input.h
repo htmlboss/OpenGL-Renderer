@@ -4,7 +4,7 @@
 #include <array>
 
 #ifdef _DEBUG
-#include <cassert>
+	#include <cassert>
 #endif
 
 class Input {
@@ -85,5 +85,5 @@ private:
 
 	// Resize
 	bool m_shouldResize = false;
-	size_t m_width, m_height;
+	std::size_t m_width, m_height;
 };

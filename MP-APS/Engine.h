@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Timer.h"
-#include "GL/GLWindow.h"
-#include "GL/GLRenderer.h"
+#include "Core/WindowSystem.h"
+#include "Core/RenderSystem.h"
 
 #include "Scene.h"
 
@@ -18,14 +18,15 @@ public:
 	Engine& operator=(const Engine&) = delete;
 
 	void Execute();
-	void Update();
 
 private:
+
+	void update();
 	void shutdown() const;
 
 	Timer m_timer;
 
-	GLWindow m_mainWindow;
-	GLRenderer m_renderer;
+	WindowSystem m_mainWindow;
+	RenderSystem m_renderer;
 	std::unique_ptr<Scene> m_scene;
 };

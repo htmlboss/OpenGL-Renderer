@@ -14,17 +14,3 @@ Texture::Texture(Texture& other) : m_texID(other.m_texID),
 								   m_height(other.m_height),
 								   m_components(other.m_components),
 								   m_data(std::move(other.m_data)) { other.m_data = nullptr; }
-
-/*
-/***********************************************************************************
-Texture& Texture::operator=(const Texture& rhs) {
-	m_data.reset(new unsigned char(*rhs.m_data));
-	return *this;
-}
-*/
-/***********************************************************************************
-Texture& Texture::operator=(Texture&& rhs) {
-	m_data = std::move(rhs.m_data);
-	return *this;
-}
-*/

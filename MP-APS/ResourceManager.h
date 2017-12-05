@@ -20,20 +20,23 @@ public:
 	ResourceManager& operator=(const ResourceManager&) = delete;
 
 	// Passed to stb_image as the number of components (channels) to load
-	enum class ColorMode {
+	enum class ColorMode : std::size_t {
 		GREY = 1,
 		GREY_A,
 		RGB,
 		RGB_A
 	};
 
+	// Load a text file and return as a string.
 	std::string LoadTextFile(const std::string_view path);
-
 	// Loads an HDR image and generates an OpenGL floating-point texture.
 	unsigned int LoadHDRI(const std::string_view path) const;
+	
 	TexturePtr GetTexture(const std::string_view path, const ColorMode mode = ColorMode::RGB);
 	ModelPtr GetModel(const std::string_view name, const std::string_view path);
 	MaterialPtr GetMaterial(const std::string_view name);
+
+	ModelPtr CacheModel(const std::string_view name, const Model& model, const bool overwriteIfExists = false);
 
 	auto GetNumLoadedImages() const noexcept { return m_textureCache.size(); }
 	auto GetNumLoadedModels() const noexcept { return m_modelCache.size(); }

@@ -1,5 +1,6 @@
 #pragma once
-#include "GL/GLShaderProgram.h"
+
+#include "Graphics/GLShaderProgram.h"
 
 class Skybox {
 public:

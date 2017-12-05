@@ -15,10 +15,12 @@ public:
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
 	Model(const std::string_view Name, const Mesh& mesh) noexcept;
-	virtual ~Model() {}
+	virtual ~Model() = default;
 
 	void AssignMaterial(const Material& material);
 	auto GetMaterial() const noexcept { return m_material; }
+
+	void AttachMesh(const Mesh& mesh) noexcept;
 
 	// Transformations
 	void Scale(const glm::vec3& scale) noexcept;

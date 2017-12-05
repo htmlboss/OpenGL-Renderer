@@ -1,6 +1,7 @@
 #include "Skybox.h"
+
 #include "ResourceManager.h"
-#include "GL/GLShader.h"
+#include "Graphics/GLShader.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
