@@ -2,10 +2,8 @@
 
 #include "Camera.h"
 #include "Model.h"
-
-#include "Graphics/PointLight.h"
-#include "Graphics/DirectionalLight.h"
-#include "Graphics/LightCollection.h"
+#include "Graphics/StaticDirectionalLight.h"
+#include "Graphics/StaticPointLight.h"
 
 class RenderSystem;
 /***********************************************************************************/
@@ -20,7 +18,7 @@ public:
 
 	auto GetCamera() const noexcept { return m_camera; }
 
-private:
+protected:
 	// Frustum culling (and repopulate render list to be sent to renderer)
 	void cullViewFrustum();
 
@@ -28,10 +26,9 @@ private:
 
 	Camera m_camera;
 
-	LightCollection m_lightCollection;
+	std::vector<StaticDirectionalLight> m_staticDirectionalLights;
+	std::vector<StaticPointLight> m_staticPointLights;
 
-	DirectionalLight m_sun;
-	std::vector<PointLight> m_lights;
 	std::vector<ModelPtr> m_sceneModels;
 	std::vector<ModelPtr> m_renderList;
 };

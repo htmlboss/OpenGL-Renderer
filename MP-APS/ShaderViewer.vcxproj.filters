@@ -86,9 +86,6 @@
     <ClCompile Include="SceneBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\LightCollection.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -163,16 +160,13 @@
     <ClInclude Include="Core\RenderSystem.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\DirectionalLight.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\PointLight.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="SceneBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\LightCollection.h">
+    <ClInclude Include="Graphics\StaticDirectionalLight.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\StaticPointLight.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,6 +7,21 @@ in FragData {
     noperspective vec3 wireframeDist;
 } fragData;
 
+// Directional Light
+struct DirectionalLight {
+	vec3 color;
+	vec3 direction;
+};
+uniform DirectionalLight directionalLights[2];
+
+// Point Light
+struct PointLight {
+    vec3 color;
+    vec3 position;
+    float radius;
+};
+uniform PointLight pointLights[5];
+
 // material parameters
 uniform vec3  albedo;
 uniform float metallic;
@@ -15,10 +30,6 @@ uniform float ao;
 
 // IBL
 uniform samplerCube irradianceMap;
-
-// lights
-uniform vec3 sunDirection;
-uniform vec3 sunColor;
 
 uniform vec3 viewPos;
 
@@ -111,10 +122,10 @@ vec3 pointRadiance(const vec3 lightPosition, const vec3 lightColor, const vec3 V
 }
 
 // ----------------------------------------------------------------------------
-vec3 directionalRadiance(const vec3 N, const vec3 V, const vec3 F0) {
-    const vec3 L = -sunDirection;
+vec3 directionalRadiance(const vec3 N, const vec3 V, const vec3 F0, const vec3 color, const vec3 direction) {
+    const vec3 L = -direction;
     const vec3 H = normalize(V + L);
-    const vec3 radiance = sunColor;
+    const vec3 radiance = color;
 
     return calcBRDF(N, H, L, V, F0) * radiance;
 }
@@ -129,8 +140,11 @@ void main() {
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
-    // Calculate reflectance for the lights
-    vec3 Lo = directionalRadiance(N, V, F0); // Sun
+    // Calculate reflectance for the directional lights
+    vec3 Lo = vec3(0.0);
+    for (int i = 0; i < 2; ++i) {
+        Lo += directionalRadiance(N, V, F0, directionalLights[i].color, directionalLights[i].direction);
+    }
 
     vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
     vec3 kD = 1.0 - kS;

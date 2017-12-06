@@ -347,7 +347,6 @@
     <ClCompile Include="Graphics\GLShaderProgram.cpp" />
     <ClCompile Include="Graphics\GLTexture.cpp" />
     <ClCompile Include="Graphics\GLVertexArray.cpp" />
-    <ClCompile Include="Graphics\LightCollection.cpp" />
     <ClCompile Include="HeightGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -369,14 +368,13 @@
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="Graphics\DirectionalLight.h" />
+    <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />
     <ClInclude Include="Graphics\GLShader.h" />
     <ClInclude Include="Graphics\GLShaderProgram.h" />
     <ClInclude Include="Graphics\GLTexture.h" />
     <ClInclude Include="Graphics\GLVertexArray.h" />
-    <ClInclude Include="Graphics\LightCollection.h" />
-    <ClInclude Include="Graphics\PointLight.h" />
+    <ClInclude Include="Graphics\StaticPointLight.h" />
     <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Material.h" />

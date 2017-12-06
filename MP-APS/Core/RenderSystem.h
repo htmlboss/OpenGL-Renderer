@@ -10,12 +10,12 @@
 #include <unordered_map>
 #include <memory>
 
-
 /***********************************************************************************/
 // Forward Declarations
 class Terrain;
 class Camera;
 class SceneBase;
+struct RenderData;
 namespace pugi {
 	class xml_node;
 }
@@ -42,7 +42,7 @@ public:
 	void InitView(const Camera& camera);
 
 	// Where the magic happens
-	void Render(const SceneBase& scene);
+	void Render(const SceneBase& scene, const bool wireframe = false);
 
 private:
 	void renderModels(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList, const bool shadowPass) const;
@@ -78,7 +78,7 @@ private:
 
 	// Depth pass
 	GLuint m_depthTexture;
-	std::unique_ptr<GLFramebuffer> m_depthFBO;
+	GLFramebuffer m_depthFBO;
 
 	// Environment map
 	std::unique_ptr<Skybox> m_skybox;
@@ -92,7 +92,7 @@ private:
 	// Post-Processing
 	// HDR
 	GLuint m_hdrColorBufferTexture;
-	std::unique_ptr<GLFramebuffer> m_hdrFBO;
+	GLFramebuffer m_hdrFBO;
 	// Saturation
 	float m_saturation = 1.1f;
 	// Vibrance

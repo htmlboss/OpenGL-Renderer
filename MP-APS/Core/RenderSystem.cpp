@@ -43,8 +43,8 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	m_workGroupsX = (width + width % 8) / 8;
 	m_workGroupsY = (height + height % 8) / 8;
 
-	m_depthFBO = std::make_unique<GLFramebuffer>("Depth FBO", width, height);
-	m_hdrFBO = std::make_unique<GLFramebuffer>("HDR FBO", width, height);
+	m_depthFBO.Init("Depth FBO", width, height);
+	m_hdrFBO.Init("HDR FBO", width, height);
 	m_skybox = std::make_unique<Skybox>("Data/hdri/barcelona.hdr", 1024);
 
 	// Compile all shader programs
@@ -92,7 +92,7 @@ void RenderSystem::Shutdown() const {
 }
 
 /***********************************************************************************/
-void RenderSystem::Render(const SceneBase& scene) {
+void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	const auto viewMatrix = scene.GetCamera().GetViewMatrix();
 
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
@@ -115,10 +115,10 @@ void RenderSystem::Render(const SceneBase& scene) {
 	// Step 1: Render the depth of the scene to a depth map
 	depthShader.Bind();
 	
-	m_depthFBO->Bind();
+	m_depthFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderModels(depthShader, scene.m_renderList, true);
-	m_depthFBO->Unbind();
+	m_depthFBO.Unbind();
 
 	// Step 2: Perform light culling on point lights in the scene
 	lightCullShader.Bind();
@@ -136,7 +136,7 @@ void RenderSystem::Render(const SceneBase& scene) {
 	// Execute compute shader
 	glDispatchCompute(m_workGroupsX, m_workGroupsY, 1);
 
-	m_hdrFBO->Bind();
+	m_hdrFBO.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//m_lightAccumShader.Bind();
@@ -147,10 +147,12 @@ void RenderSystem::Render(const SceneBase& scene) {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox->GetIrradianceMap());
 
 	pbrShader.Bind();
-	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", true);
+	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", wireframe);
 	pbrShader.SetUniform("viewPos", scene.GetCamera().GetPosition());
-	pbrShader.SetUniform("sunDirection", glm::vec3(scene.m_sun.Direction));
-	pbrShader.SetUniform("sunColor", glm::vec3(scene.m_sun.Color));
+	for (auto i = 0; i < scene.m_staticDirectionalLights.size(); i++) {
+		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
+		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
+	}
 	renderModels(pbrShader, scene.m_renderList, false);
 
 	// Draw skybox
@@ -186,7 +188,7 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 		m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 		InitView(camera);
 		glViewport(0, 0, m_width, m_height);
-		m_depthFBO->Resize(m_width, m_height);
+		m_depthFBO.Resize(m_width, m_height);
 	}
 
 	// Update view matrix inside UBO
@@ -206,7 +208,7 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
 
 		auto meshes = model->GetMeshes();
-		for (auto& mesh : meshes) {
+		for (const auto& mesh : meshes) {
 
 			if (!depthPass) {
 				shader.SetUniform("albedo", model->GetMaterial().Albedo);
@@ -254,7 +256,7 @@ void RenderSystem::setupLightBuffers() {
 
 	glGenBuffers(1, &m_lightBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_NUM_LIGHTS * sizeof(PointLight), nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_NUM_LIGHTS * sizeof(StaticPointLight), nullptr, GL_DYNAMIC_DRAW);
 
 	glGenBuffers(1, &m_visibleLightIndicesBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_visibleLightIndicesBuffer);
@@ -277,7 +279,7 @@ void RenderSystem::setupLightStorageBuffer() {
 	std::uniform_real_distribution<> dist(0.0f, 1.0f);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	auto* pointLights = (PointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	auto* pointLights = (StaticPointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 	
 	for (auto i = 0; i < MAX_NUM_LIGHTS; i++) {
 		auto& light = pointLights[i];
@@ -292,7 +294,7 @@ void RenderSystem::setupLightStorageBuffer() {
 
 /***********************************************************************************/
 void RenderSystem::setupDepthBuffer() {
-	m_depthFBO->Bind();
+	m_depthFBO.Bind();
 
 	if (m_depthTexture) {
 		glDeleteTextures(1, &m_depthTexture);
@@ -307,18 +309,18 @@ void RenderSystem::setupDepthBuffer() {
 	const GLfloat borderColor[] { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	m_depthFBO->AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
-	m_depthFBO->DrawBuffer(GLFramebuffer::GLBuffer::NONE);
-	m_depthFBO->ReadBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_depthFBO.AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
+	m_depthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_depthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
 	
-	m_depthFBO->Unbind();
+	m_depthFBO.Unbind();
 }
 
 /***********************************************************************************/
 void RenderSystem::setupHDRBuffer() {
 	
-	m_hdrFBO->Reset(m_width, m_height);
-	m_hdrFBO->Bind();
+	m_hdrFBO.Reset(m_width, m_height);
+	m_hdrFBO.Bind();
 	GLuint rboDepth;
 	glGenTextures(1, &m_hdrColorBufferTexture);
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
@@ -331,8 +333,8 @@ void RenderSystem::setupHDRBuffer() {
 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
 	// - Attach buffers
-	m_hdrFBO->AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
-	m_hdrFBO->AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
+	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
+	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
 }
 
 /***********************************************************************************/
@@ -350,10 +352,10 @@ glm::vec3 RenderSystem::RandomPosition(std::uniform_real_distribution<> dis, std
 /***********************************************************************************/
 void RenderSystem::UpdateLights(const double dt) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	PointLight *pointLights = (PointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	StaticPointLight *pointLights = (StaticPointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 
 	for (int i = 0; i < MAX_NUM_LIGHTS; i++) {
-		PointLight &light = pointLights[i];
+		StaticPointLight &light = pointLights[i];
 		float min = LIGHT_MIN_BOUNDS[1];
 		float max = LIGHT_MAX_BOUNDS[1];
 

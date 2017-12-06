@@ -3,11 +3,6 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLFramebuffer::GLFramebuffer(const std::string_view name, const std::size_t width, const std::size_t height) : m_name(name), m_width(width), m_height(height) {
-	glGenFramebuffers(1, &m_fbo);
-}
-
-/***********************************************************************************/
 void GLFramebuffer::AttachTexture(const GLuint texID, const AttachmentType colorAttach) const {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, static_cast<int>(colorAttach), GL_TEXTURE_2D, texID, 0);
 	checkErrors();
@@ -17,6 +12,12 @@ void GLFramebuffer::AttachTexture(const GLuint texID, const AttachmentType color
 void GLFramebuffer::AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, static_cast<int>(type), GL_RENDERBUFFER, rboID);
 	checkErrors();
+}
+
+/***********************************************************************************/
+void GLFramebuffer::Init(const std::string_view name, const std::size_t width, const std::size_t height) {
+	m_name = name;
+	Reset(width, height);
 }
 
 /***********************************************************************************/

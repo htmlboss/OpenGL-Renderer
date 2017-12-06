@@ -24,9 +24,10 @@ void SceneBase::Init() {
 	//model->Scale(glm::vec3(2.0f));
 	//m_sceneModels.push_back(model);
 
-	// Sun parameters
-	m_sun.Color = { 0.0f, 0.5f, 1.0f , 1.0f};
-	m_sun.Direction = { -0.2f, -1.0f, -0.3f , 0.0f};
+	// Sun
+	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 1.0f, 0.5f, 0.25f}, { -0.2f, -1.0f, -0.3f}));
+	// other sun?
+	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 0.0f, 0.25f, 1.0f }, { -0.5f, -1.5f, -0.5f }));
 }
 
 /***********************************************************************************/
@@ -43,6 +44,7 @@ void SceneBase::Update(const double delta) {
 
 /***********************************************************************************/
 void SceneBase::cullViewFrustum() {
+	// TODO: optimize projection matrix calculation
 	ViewFrustum viewFrustum(m_camera.GetViewMatrix(), m_camera.GetProjMatrix(m_width, m_height));
 	m_renderList.clear();
 

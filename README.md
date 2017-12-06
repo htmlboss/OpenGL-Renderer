@@ -12,26 +12,20 @@
 CPU-based terrain generation using Perlin noise:
 ![Terrain](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/01.png "Terrain")
 
+Anti-aliased wireframe rendering:
+![Wireframe rendering](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/02.png "Wireframe rendering")
+
 ## Features
 * Assimp model loading.
 * CPU-based procedural terrain (first iteration).
 * Post processing (HDR, saturation, vibrance).
 * Frustum culling (AABB only).
-* Forward/Forward+ rendering.
 * HDR cubemaps.
 * XML engine configuration.
 * Shader-based wireframe overlay.
 
 ## WIP
 * PBR.
-
-## Coming "Soon"
-* Defining a scene with XML.
-* Post processing (bloom, lens flares).
-* GPU terrain generation.
-* Extended frustum culling:
-    * Sphere and point testing.
-    * AABB hierarchy.
 
 ## Third Party Code
 * Assimp.
