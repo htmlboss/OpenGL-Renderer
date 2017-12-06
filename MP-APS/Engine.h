@@ -4,7 +4,7 @@
 #include "Core/WindowSystem.h"
 #include "Core/RenderSystem.h"
 
-#include "Scene.h"
+#include "SceneBase.h"
 
 #include <memory>
 
@@ -28,5 +28,5 @@ private:
 
 	WindowSystem m_mainWindow;
 	RenderSystem m_renderer;
-	std::unique_ptr<Scene> m_scene;
+	std::unique_ptr<SceneBase> m_scene;
 };

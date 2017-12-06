@@ -3,7 +3,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-GLFramebuffer::GLFramebuffer(const std::string_view name, const size_t width, const size_t height) : IRenderComponent(name, width, height) {
+GLFramebuffer::GLFramebuffer(const std::string_view name, const std::size_t width, const std::size_t height) : m_name(name), m_width(width), m_height(height) {
 	glGenFramebuffers(1, &m_fbo);
 }
 
@@ -27,7 +27,7 @@ void GLFramebuffer::Delete() {
 }
 
 /***********************************************************************************/
-void GLFramebuffer::Reset(const size_t width, const size_t height) {
+void GLFramebuffer::Reset(const std::size_t width, const std::size_t height) {
 	Delete();
 	glGenFramebuffers(1, &m_fbo);
 	m_width = width;
@@ -69,7 +69,7 @@ void GLFramebuffer::ReadBuffer(const GLBuffer buffer) const {
 }
 
 /***********************************************************************************/
-void GLFramebuffer::Resize(const size_t width, const size_t height) {
+void GLFramebuffer::Resize(const std::size_t width, const std::size_t height) {
 	m_width = width;
 	m_height = height;
 }

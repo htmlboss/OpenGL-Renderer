@@ -36,7 +36,7 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 	
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing scene...\n";
-	m_scene = std::make_unique<Scene>(1280, 720);
+	m_scene = std::make_unique<SceneBase>(1280, 720);
 
 	m_renderer.InitView(m_scene->GetCamera());
 	m_scene->Init();
@@ -53,7 +53,7 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		m_renderer.Render(m_scene->GetCamera(), m_scene->GetRenderData());
+		m_renderer.Render(*m_scene);
 
 		m_mainWindow.SwapBuffers();
 	}

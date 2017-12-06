@@ -3,7 +3,7 @@
 #include "../Graphics/GLShader.h"
 
 #include "../Input.h"
-#include "../Scene.h"
+#include "../SceneBase.h"
 #include "../ResourceManager.h"
 
 #include <pugixml.hpp>
@@ -17,9 +17,7 @@
 RenderSystem::RenderSystem() :	m_width{0},
 							m_height{0},
 							m_workGroupsX{0},
-							m_workGroupsY{0} {
-
-}
+							m_workGroupsY{0} {}
 
 /***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
@@ -94,12 +92,12 @@ void RenderSystem::Shutdown() const {
 }
 
 /***********************************************************************************/
-void RenderSystem::Render(const Camera& camera, const RenderData& renderData) {
-	const auto viewMatrix = camera.GetViewMatrix();
+void RenderSystem::Render(const SceneBase& scene) {
+	const auto viewMatrix = scene.GetCamera().GetViewMatrix();
 
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
-	// Get the shaders we need
+	// Get the shaders we need (static vars initialized during first render call).
 	static auto& depthShader = m_shaderCache.at("DepthPassShader");
 	static auto& lightCullShader = m_shaderCache.at("LightCullShader");
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
@@ -119,7 +117,7 @@ void RenderSystem::Render(const Camera& camera, const RenderData& renderData) {
 	
 	m_depthFBO->Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderModels(depthShader, renderData, true);
+	renderModels(depthShader, scene.m_renderList, true);
 	m_depthFBO->Unbind();
 
 	// Step 2: Perform light culling on point lights in the scene
@@ -150,10 +148,10 @@ void RenderSystem::Render(const Camera& camera, const RenderData& renderData) {
 
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", true);
-	pbrShader.SetUniform("viewPos", camera.GetPosition());
-	pbrShader.SetUniform("sunDirection", glm::vec3(renderData.Sun.Direction));
-	pbrShader.SetUniform("sunColor", glm::vec3(renderData.Sun.Color));
-	renderModels(pbrShader, renderData, false);
+	pbrShader.SetUniform("viewPos", scene.GetCamera().GetPosition());
+	pbrShader.SetUniform("sunDirection", glm::vec3(scene.m_sun.Direction));
+	pbrShader.SetUniform("sunColor", glm::vec3(scene.m_sun.Color));
+	renderModels(pbrShader, scene.m_renderList, false);
 
 	// Draw skybox
 	m_skybox->Draw();
@@ -167,10 +165,10 @@ void RenderSystem::Render(const Camera& camera, const RenderData& renderData) {
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
 
 	renderQuad();
-
 }
 
 /***********************************************************************************/
+// TODO: This needs to be gutted and put elsewhere
 void RenderSystem::InitView(const Camera& camera) {
 	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
@@ -202,9 +200,9 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 }
 
 /***********************************************************************************/
-void RenderSystem::renderModels(GLShaderProgram& shader, const RenderData& renderData, const bool depthPass) const {
+void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList, const bool depthPass) const {
 
-	for (const auto& model : renderData.renderList) {
+	for (const auto& model : renderList) {
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
 
 		auto meshes = model->GetMeshes();
@@ -226,24 +224,28 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const RenderData& rende
 
 /***********************************************************************************/
 void RenderSystem::renderQuad() const {
-	glBindVertexArray(m_quadVAO);
+	m_quadVAO.Bind();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 /***********************************************************************************/
 void RenderSystem::setupScreenquad() {
-	glGenVertexArrays(1, &m_quadVAO);
-	glGenBuffers(1, &m_quadVBO);
+	const std::array<Vertex, 4> screenQuadVertices {
+		// Positions				// GLTexture Coords
+		Vertex({ -1.0f, 1.0f, 0.0f },{ 0.0f, 1.0f }),
+		Vertex({ -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f }),
+		Vertex({ 1.0f, 1.0f, 0.0f },{ 1.0f, 1.0f }),
+		Vertex({ 1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f })
+	};
 
-	glBindVertexArray(m_quadVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_screenQuadVertices.size(), m_screenQuadVertices.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, TexCoords)));
+	m_quadVAO.Init();
+	m_quadVAO.Bind();
+	m_quadVAO.AttachBuffer(GLVertexArray::BufferType::ARRAY, 
+		sizeof(Vertex) * screenQuadVertices.size(), 
+		GLVertexArray::DrawMode::STATIC, 
+		screenQuadVertices.data());
+	m_quadVAO.EnableAttribute(0, 3, sizeof(Vertex), nullptr);
+	m_quadVAO.EnableAttribute(1, 2, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
 }
 
 /***********************************************************************************/
@@ -267,7 +269,7 @@ void RenderSystem::setupLightBuffers() {
 void RenderSystem::setupLightStorageBuffer() {
 	if (m_lightBuffer == 0) {
 		std::cerr << "Error: Forward+ light buffer has not been created.\n";
-		return;
+		std::abort();
 	}
 
 	std::random_device rd;
@@ -283,7 +285,6 @@ void RenderSystem::setupLightStorageBuffer() {
 		light.Color = glm::vec4(1.0f + dist(gen), 1.0f + dist(gen), 1.0f + dist(gen), 1.0f);
 		light.RadiusAndPadding = glm::vec4(glm::vec3(0.0f), 30.0f);
 	}
-
 
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

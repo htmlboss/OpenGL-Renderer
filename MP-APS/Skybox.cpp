@@ -3,14 +3,15 @@
 #include "ResourceManager.h"
 #include "Graphics/GLShader.h"
 
-#include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <array>
 
 /***********************************************************************************/
 Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m_skyboxShader("Skybox Shader", {GLShader("Data/Shaders/skyboxvs.glsl", GL_VERTEX_SHADER),
 																												GLShader("Data/Shaders/skyboxps.glsl", GL_FRAGMENT_SHADER) }) {
 
-	const float vertices[108] {
+	const std::array<float, 108> vertices {
 		// positions          
 		-1.0f,  1.0f, -1.0f,
 		-1.0f, -1.0f, -1.0f,
@@ -55,13 +56,14 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 		1.0f, -1.0f,  1.0f
 	};
 
+	// No seams at cubemap edges
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
-	// fill buffer
+	// Fill buffer
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 	// link vertex attributes
 	glBindVertexArray(m_vao);
 	glEnableVertexAttribArray(0);

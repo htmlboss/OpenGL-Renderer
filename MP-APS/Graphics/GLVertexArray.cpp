@@ -1,7 +1,7 @@
 #include "GLVertexArray.h"
 
 /***********************************************************************************/
-GLVertexArray::GLVertexArray() {
+void GLVertexArray::Init() {
 	glGenVertexArrays(1, &m_vao);
 }
 
@@ -11,8 +11,8 @@ void GLVertexArray::AttachBuffer(const BufferType type, const size_t size, const
 	GLuint buffer;
 	glGenBuffers(1, &buffer);
 
-	glBindBuffer(static_cast<int>(type), buffer);
-	glBufferData(static_cast<int>(type), size, data, static_cast<int>(mode));
+	glBindBuffer(type, buffer);
+	glBufferData(type, size, data, mode);
 }
 
 /***********************************************************************************/

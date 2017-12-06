@@ -1,14 +1,14 @@
 #pragma once
-#include "../Interfaces/IRenderComponent.h"
 
 #include <glad/glad.h>
 
 #include <memory>
+#include <string_view>
 
 // Helper class to encapsulate common FBO stuff and clean up repeated code.
-class GLFramebuffer : public IRenderComponent {
+class GLFramebuffer {
 public:
-	GLFramebuffer(const std::string_view name, const size_t width, const size_t height);
+	GLFramebuffer(const std::string_view name, const std::size_t width, const std::size_t height);
 
 	enum class AttachmentType {
 		COLOR0 = GL_COLOR_ATTACHMENT0,
@@ -38,7 +38,7 @@ public:
 	};
 
 	void Delete();
-	void Reset(const size_t width, const size_t height);
+	void Reset(const std::size_t width, const std::size_t height);
 
 	void AttachTexture(const GLuint texID, const AttachmentType colorAttach) const;
 	void AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const;
@@ -49,12 +49,15 @@ public:
 	void ReadBuffer(const GLBuffer buffer) const;
 	void Unbind() const;
 
-	void Resize(const size_t width, const size_t height) override;
+	void Resize(const std::size_t width, const std::size_t height);
 
 private:
 	void checkErrors() const;
 
 	GLuint m_fbo;
+
+	const std::string_view m_name;
+	std::size_t m_width, m_height;
 };
 
 using GLFramebufferPtr = std::unique_ptr<GLFramebuffer>;

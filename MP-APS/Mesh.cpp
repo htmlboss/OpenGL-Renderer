@@ -4,14 +4,13 @@
 #include <string>
 
 /***********************************************************************************/
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_indexCount{ indices.size() }, m_vao{} {
-	
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : m_indexCount{ indices.size() } {
+
 	setupMesh(vertices, indices);
 }
 
 /***********************************************************************************/
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) :
-	m_vao{},
 	m_indexCount{indices.size()},
 	m_textures(textures) {
 
@@ -55,6 +54,8 @@ void Mesh::BindTextures(GLShaderProgram* shader) {
 
 /***********************************************************************************/
 void Mesh::setupMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) {
+	
+	m_vao.Init();
 	m_vao.Bind();
 	// Attach VBO
 	m_vao.AttachBuffer(GLVertexArray::BufferType::ARRAY, vertices.size() * sizeof(Vertex), GLVertexArray::DrawMode::STATIC, &vertices[0]);

@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Interfaces">
-      <UniqueIdentifier>{512dfd80-a6fa-4c2f-acd2-b8d04dbbdf51}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Graphics">
       <UniqueIdentifier>{14b2a9a3-677a-4d70-9f10-b68720d8a227}</UniqueIdentifier>
     </Filter>
@@ -53,9 +50,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ViewFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,6 +82,12 @@
     </ClCompile>
     <ClCompile Include="Core\RenderSystem.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\LightCollection.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,12 +122,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeightGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Interfaces\IRenderComponent.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ViewFrustum.h">
@@ -169,11 +163,17 @@
     <ClInclude Include="Core\RenderSystem.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Lights\PointLight.h">
+    <ClInclude Include="Graphics\DirectionalLight.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\PointLight.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lights\DirectionalLight.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Graphics\LightCollection.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
