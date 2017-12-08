@@ -60,12 +60,15 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	glGenVertexArrays(1, &m_vao);
-	glGenBuffers(1, &m_vbo);
-	// Fill buffer
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-	// link vertex attributes
 	glBindVertexArray(m_vao);
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// Fill buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+
+	// link vertex attributes
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
@@ -125,6 +128,7 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	}
 
 	glDeleteTextures(1, &hdrTexture);
+	convertToCubemapShader.DeleteProgram();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Precompute irradiance cubemap.
@@ -160,10 +164,9 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		renderCube();
-
 	}
+	irradianceShader.DeleteProgram();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 /***********************************************************************************/

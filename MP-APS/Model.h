@@ -11,8 +11,8 @@
 
 class Model {
 public:
-	explicit Model() noexcept : m_radians(0.0f) {}
-	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false);
+	explicit Model() : m_radians(0.0f) {}
+	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false, const bool loadTextures = true);
 	Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept;
 	Model(const std::string_view Name, const Mesh& mesh) noexcept;
 	virtual ~Model() = default;
@@ -35,9 +35,9 @@ protected:
 	std::vector<Mesh> m_meshes;
 
 private:
-	bool loadModel(const std::string_view Path, const bool flipWindingOrder);
-	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	bool loadModel(const std::string_view Path, const bool flipWindingOrder, const bool loadTextures);
+	void processNode(aiNode* node, const aiScene* scene, const bool loadTextures);
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene, const bool loadTextures);
 	std::vector<GLTexture> loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName);
 
 	Material m_material;

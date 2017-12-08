@@ -12,15 +12,14 @@ struct DirectionalLight {
 	vec3 color;
 	vec3 direction;
 };
-uniform DirectionalLight directionalLights[2];
+uniform DirectionalLight directionalLights[3];
 
 // Point Light
 struct PointLight {
     vec3 color;
     vec3 position;
-    float radius;
 };
-uniform PointLight pointLights[5];
+uniform PointLight pointLights[2];
 
 // material parameters
 uniform vec3  albedo;
@@ -31,6 +30,7 @@ uniform float ao;
 // IBL
 uniform samplerCube irradianceMap;
 
+// Camera
 uniform vec3 viewPos;
 
 uniform bool wireframe;
@@ -38,7 +38,6 @@ uniform bool wireframe;
 out vec4 FragColor;
 
 const float PI = 3.14159265359;
-
 // ----------------------------------------------------------------------------
 float DistributionGGX(const vec3 N, const vec3 H, const float roughness) {
     float a = roughness*roughness;
@@ -140,10 +139,15 @@ void main() {
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
-    // Calculate reflectance for the directional lights
     vec3 Lo = vec3(0.0);
-    for (int i = 0; i < 2; ++i) {
+    // Calculate reflectance for the directional lights
+    for (int i = 0; i < 3; ++i) {
         Lo += directionalRadiance(N, V, F0, directionalLights[i].color, directionalLights[i].direction);
+    }
+
+    // Calculate reflectance for point lights
+    for (int i = 0; i < 2; ++i) {
+        Lo += pointRadiance(pointLights[i].position, pointLights[i].color, V, N, F0);
     }
 
     vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);

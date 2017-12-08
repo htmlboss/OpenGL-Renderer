@@ -13,7 +13,7 @@ public:
 private:
 	void renderCube();
 
-	unsigned int m_vao, m_vbo, m_envMap, m_envMapFBO, m_irradianceMap;
+	unsigned int m_vao, m_envMap, m_envMapFBO, m_irradianceMap;
 	
 	GLShaderProgram m_skyboxShader;
 };

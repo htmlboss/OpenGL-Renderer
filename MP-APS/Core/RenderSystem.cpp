@@ -149,9 +149,13 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", wireframe);
 	pbrShader.SetUniform("viewPos", scene.GetCamera().GetPosition());
-	for (auto i = 0; i < scene.m_staticDirectionalLights.size(); i++) {
+	for (auto i = 0; i < scene.m_staticDirectionalLights.size(); ++i) {
 		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
 		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
+	}
+	for (auto i = 0; i < scene.m_staticPointLights.size(); ++i) {
+		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].position", scene.m_staticPointLights[i].Position);
+		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].color", scene.m_staticPointLights[i].Color);
 	}
 	renderModels(pbrShader, scene.m_renderList, false);
 
@@ -281,13 +285,14 @@ void RenderSystem::setupLightStorageBuffer() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
 	auto* pointLights = (StaticPointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 	
+	/*
 	for (auto i = 0; i < MAX_NUM_LIGHTS; i++) {
 		auto& light = pointLights[i];
 		light.Position = glm::vec4(RandomPosition(dist, gen), 1.0f);
 		light.Color = glm::vec4(1.0f + dist(gen), 1.0f + dist(gen), 1.0f + dist(gen), 1.0f);
 		light.RadiusAndPadding = glm::vec4(glm::vec3(0.0f), 30.0f);
 	}
-
+	*/
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }

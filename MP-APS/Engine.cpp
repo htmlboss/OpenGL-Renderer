@@ -53,7 +53,7 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		m_renderer.Render(*m_scene, true);
+		m_renderer.Render(*m_scene, false);
 
 		m_mainWindow.SwapBuffers();
 	}

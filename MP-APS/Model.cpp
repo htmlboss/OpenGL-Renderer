@@ -9,9 +9,9 @@
 #include <ppl.h>
 
 /***********************************************************************************/
-Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder) : m_name(Name), m_path(Path) {
+Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder, const bool loadTextures) : m_name(Name), m_path(Path) {
 	
-	if (!loadModel(Path, flipWindingOrder)) {
+	if (!loadModel(Path, flipWindingOrder, loadTextures)) {
 		std::cerr << "Failed to load: " << Name << '\n';
 	}
 	m_loadedTextures.clear();
@@ -65,8 +65,10 @@ glm::mat4 Model::GetModelMatrix() const noexcept {
 }
 
 /***********************************************************************************/
-bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) {
-	std::cout << "---Loading model: " << m_name << '\n';
+bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, const bool loadTextures = true) {
+#ifdef _DEBUG
+	std::cout << "Loading model: " << m_name << '\n';
+#endif
 
 	Assimp::Importer importer;
 	const aiScene* scene = nullptr;
@@ -108,31 +110,30 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder) 
 	}
 
 	m_path = Path.substr(0, Path.find_last_of('/'));
-	processNode(scene->mRootNode, scene);
+	processNode(scene->mRootNode, scene, loadTextures);
 
 	importer.FreeScene();
-	std::cout << "---Loaded Model: " << m_name << '\n';
 	return true;
 }
 
 /***********************************************************************************/
-void Model::processNode(aiNode* node, const aiScene* scene) {
+void Model::processNode(aiNode* node, const aiScene* scene, const bool loadTextures) {
 
 	// Process all node meshes
 	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&](const auto idx)
 	{
 		auto* mesh = scene->mMeshes[node->mMeshes[idx]];
-		m_meshes.push_back(processMesh(mesh, scene));
+		m_meshes.push_back(processMesh(mesh, scene, loadTextures));
 	});
 
 	// Process their children
 	for (auto i = 0; i < node->mNumChildren; ++i) {
-		processNode(node->mChildren[i], scene);
+		processNode(node->mChildren[i], scene, loadTextures);
 	}
 }
 
 /***********************************************************************************/
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadTextures) {
 	std::vector<Vertex> vertices;
 	std::vector<GLTexture> textures;
 	glm::vec3 min, max;
@@ -173,7 +174,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 
-		if (mesh->HasTextureCoords(0)) {
+		if (mesh->HasTextureCoords(0) && loadTextures) {
 			// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
@@ -197,18 +198,20 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	// Process material
-	if (mesh->mMaterialIndex >= 0) {
-		auto* material = scene->mMaterials[mesh->mMaterialIndex];
+	if (loadTextures) {
+		if (mesh->mMaterialIndex >= 0) {
+			auto* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		// PBR textures
-		const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
+			// PBR textures
+			const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
 
-		const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-		const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		}
 	}
 	return Mesh(vertices, indices, textures);
 }
@@ -239,7 +242,7 @@ std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType typ
 			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
 			GLTexture texture(texDirPrefix, texturePath.C_Str(), samplerName, GLTexture::WrapMode::REPEAT);
 
-			std::cout << "GLTexture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
+			//std::cout << "GLTexture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
 
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture); // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

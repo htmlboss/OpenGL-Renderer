@@ -14,9 +14,10 @@ SceneBase::SceneBase(const std::size_t width, const std::size_t height) :	m_widt
 /***********************************************************************************/
 void SceneBase::Init() {
 
-	auto model = ResourceManager::GetInstance().GetModel("Sphere", "Data/Models/sphere.obj");
+	auto model = ResourceManager::GetInstance().GetModel("Sphere", "Data/Models/crytek-sponza/sponza.obj");
 	model->Translate(glm::vec3(0.0f));
-	model->Scale(glm::vec3(10.0f));
+	model->Scale(glm::vec3(0.1f));
+	//model->Scale(glm::vec3(10.0f));
 	m_sceneModels.push_back(model);
 
 	//model = ResourceManager::GetInstance().GetModel("Dragon", "models/dragon/dragon.obj");
@@ -28,6 +29,14 @@ void SceneBase::Init() {
 	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 1.0f, 0.5f, 0.25f}, { -0.2f, -1.0f, -0.3f}));
 	// other sun?
 	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 0.0f, 0.25f, 1.0f }, { -0.5f, -1.5f, -0.5f }));
+	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 1.0f, 0.0f, 0.0f }, { -0.75f, -0.5f, -0.5f }));
+
+	// Random lights
+	m_staticPointLights.emplace_back(StaticPointLight(glm::vec3(1.0f), glm::vec3(0.0f)));
+	m_staticPointLights.emplace_back(StaticPointLight({1.0f, 2.0f, 0.0f}, {5.0f, 2.0f, 0.0f}));
+	//m_staticPointLights.emplace_back(StaticPointLight());
+	//m_staticPointLights.emplace_back(StaticPointLight());
+	//m_staticPointLights.emplace_back(StaticPointLight());
 }
 
 /***********************************************************************************/
