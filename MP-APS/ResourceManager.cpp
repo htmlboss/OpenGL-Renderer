@@ -20,7 +20,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 
 	if (!in) {
 		std::cerr << "Resource Manager: File loading error: " + *path.data() << " " << errno << '\n';
-		return std::string();
+		std::abort();
 	}
 
 	return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
@@ -37,7 +37,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 
 	if (!data) {
 		std::cerr << "Resource Manager: Failed to load HDRI." << std::endl;
-		return 0;
+		std::abort();
 	}
 
 	unsigned int hdrTexture;
@@ -71,7 +71,7 @@ TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorM
 
 		if (data == nullptr) {
 			std::cerr << "Resource Manager: stb_image error (" << path << "): " << stbi_failure_reason() << std::endl;
-			return nullptr;
+			std::abort();
 		}
 		++m_currentTexID;
 		// Add and return new loaded texture.

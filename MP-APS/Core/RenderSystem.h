@@ -1,14 +1,12 @@
 #pragma once
 
 #include "../Skybox.h"
-#include "../Vertex.h"
 #include "../Model.h"
 #include "../Graphics/GLFramebuffer.h"
 #include "../Graphics/GLVertexArray.h"
 
-#include <random>
 #include <unordered_map>
-#include <memory>
+#include <random>
 
 /***********************************************************************************/
 // Forward Declarations
@@ -45,10 +43,12 @@ public:
 	void Render(const SceneBase& scene, const bool wireframe = false);
 
 private:
+	// Helper functions
+
+	// Render models contained in the renderlist
 	void renderModels(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList, const bool shadowPass) const;
 	// Render NDC screenquad
 	void renderQuad() const;
-
 	// Configure NDC screenquad
 	void setupScreenquad();
 	// Generate storage buffers for Forward+ rendering
@@ -66,6 +66,7 @@ private:
 	// Screen dimensions
 	std::size_t m_width, m_height;
 
+	// Uniform buffer for projection and view matrix
 	GLuint m_uboMatrices;
 
 	// Projection matrix
@@ -73,7 +74,7 @@ private:
 
 	// Storage buffers for lights and visible light indices
 	GLuint m_lightBuffer, m_visibleLightIndicesBuffer;
-	// Workgroup dimensions for compute shader
+	// Workgroup dimensions for light culling compute shader
 	GLuint m_workGroupsX, m_workGroupsY;
 
 	// Depth pass
@@ -81,7 +82,7 @@ private:
 	GLFramebuffer m_depthFBO;
 
 	// Environment map
-	std::unique_ptr<Skybox> m_skybox;
+	Skybox m_skybox;
 
 	// Compiled shader cache
 	std::unordered_map<std::string, GLShaderProgram> m_shaderCache;

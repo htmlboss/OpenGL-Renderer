@@ -43,7 +43,7 @@ public:
 	auto GetNumLoadedMaterials() const noexcept { return m_materialCache.size(); }
 
 private:
-	size_t m_currentTexID = 0;
+	std::size_t m_currentTexID = 0;
 
 	std::unordered_map<std::string, TexturePtr> m_textureCache;
 	std::unordered_map<std::string, ModelPtr> m_modelCache;

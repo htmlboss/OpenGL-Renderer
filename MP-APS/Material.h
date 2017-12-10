@@ -6,7 +6,7 @@
 
 // Material for a PBR pipeline
 struct Material {
-	explicit Material() = default;
+	Material() = default;
 	Material(const std::string_view name, const glm::vec3& albedo, const float metallic, const float ao, const float roughness) :	Name(name),
 																																	Albedo(albedo),
 																																	Metallic(metallic),

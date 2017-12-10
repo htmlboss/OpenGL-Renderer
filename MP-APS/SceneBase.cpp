@@ -27,16 +27,17 @@ void SceneBase::Init() {
 
 	// Sun
 	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 1.0f, 0.5f, 0.25f}, { -0.2f, -1.0f, -0.3f}));
-	// other sun?
+	// other suns?
 	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 0.0f, 0.25f, 1.0f }, { -0.5f, -1.5f, -0.5f }));
 	m_staticDirectionalLights.emplace_back(StaticDirectionalLight({ 1.0f, 0.0f, 0.0f }, { -0.75f, -0.5f, -0.5f }));
 
 	// Random lights
 	m_staticPointLights.emplace_back(StaticPointLight(glm::vec3(1.0f), glm::vec3(0.0f)));
 	m_staticPointLights.emplace_back(StaticPointLight({1.0f, 2.0f, 0.0f}, {5.0f, 2.0f, 0.0f}));
-	//m_staticPointLights.emplace_back(StaticPointLight());
-	//m_staticPointLights.emplace_back(StaticPointLight());
-	//m_staticPointLights.emplace_back(StaticPointLight());
+	m_staticPointLights.emplace_back(StaticPointLight({ 0.0f, 2.0f, 0.0f }, { 5.0f, 5.0f, 5.0f }));
+	m_staticPointLights.emplace_back(StaticPointLight({ 0.0f, 0.0f, 5.0f }, { 10.0f, 2.0f, 0.0f }));
+
+
 }
 
 /***********************************************************************************/

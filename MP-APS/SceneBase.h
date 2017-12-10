@@ -2,8 +2,10 @@
 
 #include "Camera.h"
 #include "Model.h"
+
 #include "Graphics/StaticDirectionalLight.h"
 #include "Graphics/StaticPointLight.h"
+#include "Graphics/StaticSpotLight.h"
 
 class RenderSystem;
 /***********************************************************************************/
@@ -28,6 +30,7 @@ protected:
 
 	std::vector<StaticDirectionalLight> m_staticDirectionalLights;
 	std::vector<StaticPointLight> m_staticPointLights;
+	std::vector<StaticSpotLight> m_staticSpotLights;
 
 	std::vector<ModelPtr> m_sceneModels;
 	std::vector<ModelPtr> m_renderList;

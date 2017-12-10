@@ -19,15 +19,26 @@ struct PointLight {
     vec3 color;
     vec3 position;
 };
-uniform PointLight pointLights[2];
+uniform PointLight pointLights[4];
 
-// material parameters
+// Spot Light
+struct SpotLight {
+    vec3 color;
+    vec3 position;
+    vec3 direction;
+
+    float cutoff;
+    float outerCutoff;
+};
+uniform SpotLight spotLights[1];
+
+// Material parameters
 uniform vec3  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
 
-// IBL
+// IBL (skybox)
 uniform samplerCube irradianceMap;
 
 // Camera
@@ -146,7 +157,7 @@ void main() {
     }
 
     // Calculate reflectance for point lights
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 4; ++i) {
         Lo += pointRadiance(pointLights[i].position, pointLights[i].color, V, N, F0);
     }
 

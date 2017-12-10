@@ -8,10 +8,9 @@
 #include <array>
 
 /***********************************************************************************/
-Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m_skyboxShader("Skybox Shader", {GLShader("Data/Shaders/skyboxvs.glsl", GL_VERTEX_SHADER),
-																												GLShader("Data/Shaders/skyboxps.glsl", GL_FRAGMENT_SHADER) }) {
+void Skybox::Init(const std::string_view hdrPath, const std::size_t resolution) {
 
-	const std::array<float, 108> vertices {
+	const std::array<float, 108> vertices{
 		// positions          
 		-1.0f,  1.0f, -1.0f,
 		-1.0f, -1.0f, -1.0f,
@@ -97,7 +96,7 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 
 	// Setup projection and view matrices for capturing data onto the 6 cubemap face directions
 	const auto captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-	const glm::mat4 captureViews[] {
+	const glm::mat4 captureViews[]{
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
@@ -107,8 +106,8 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	};
 
 	// Convert HDR equirectangular environment map to cubemap
-	auto convertToCubemapShader = GLShaderProgram("Equirectangular to cubemap shader", {GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
-																						GLShader("Data/Shaders/cubemapconverterps.glsl", GL_FRAGMENT_SHADER) });
+	auto convertToCubemapShader = GLShaderProgram("Equirectangular to cubemap shader", { GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
+		GLShader("Data/Shaders/cubemapconverterps.glsl", GL_FRAGMENT_SHADER) });
 	convertToCubemapShader.Bind();
 	convertToCubemapShader.SetUniformi("equirectangularMap", 0).SetUniform("projection", captureProjection);
 
@@ -144,8 +143,8 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	auto irradianceShader = GLShaderProgram("Irradiance Shader", {	GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
-																	GLShader("Data/Shaders/irradianceConvolutionps.glsl", GL_FRAGMENT_SHADER) });
+	auto irradianceShader = GLShaderProgram("Irradiance Shader", { GLShader("Data/Shaders/cubemapconvertervs.glsl", GL_VERTEX_SHADER),
+		GLShader("Data/Shaders/irradianceConvolutionps.glsl", GL_FRAGMENT_SHADER) });
 	glBindFramebuffer(GL_FRAMEBUFFER, m_envMapFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution / 16, resolution / 16);
@@ -171,13 +170,7 @@ Skybox::Skybox(const std::string_view hdrPath, const std::size_t resolution) : m
 
 /***********************************************************************************/
 void Skybox::Draw() {
-	m_skyboxShader.Bind();
-
-	glActiveTexture(GL_TEXTURE0);
-	m_skyboxShader.SetUniformi("environmentMap", 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_envMap);
-
-	// Skybox Cube
 	renderCube();
 }
 

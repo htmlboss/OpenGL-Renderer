@@ -4,13 +4,11 @@
 
 #include "../Input.h"
 #include "../SceneBase.h"
-#include "../ResourceManager.h"
 
 #include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
-#include <random>
 #include <iostream>
 
 /***********************************************************************************/
@@ -45,7 +43,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 
 	m_depthFBO.Init("Depth FBO", width, height);
 	m_hdrFBO.Init("HDR FBO", width, height);
-	m_skybox = std::make_unique<Skybox>("Data/hdri/barcelona.hdr", 1024);
+	m_skybox.Init("Data/hdri/barcelona.hdr", 1024);
 
 	// Compile all shader programs
 	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
@@ -59,6 +57,11 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 		// Compile and cache shader program
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
+
+#ifdef _DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#endif
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -102,6 +105,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& lightCullShader = m_shaderCache.at("LightCullShader");
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
 	static auto& postProcessShader = m_shaderCache.at("PostProcessShader");
+	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 
 	/*
 	m_forwardShader.Bind();
@@ -144,23 +148,32 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 
 	// Bind pre-computed IBL data
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox->GetIrradianceMap());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetIrradianceMap());
 
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", wireframe);
 	pbrShader.SetUniform("viewPos", scene.GetCamera().GetPosition());
+	// Update Directional Lights
 	for (auto i = 0; i < scene.m_staticDirectionalLights.size(); ++i) {
 		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
 		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
 	}
+	// Update Point Lights
 	for (auto i = 0; i < scene.m_staticPointLights.size(); ++i) {
 		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].position", scene.m_staticPointLights[i].Position);
 		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].color", scene.m_staticPointLights[i].Color);
 	}
+	// Update Spot Lights
+	for (auto i = 0; i < scene.m_staticSpotLights.size(); ++i) {
+		
+	}
 	renderModels(pbrShader, scene.m_renderList, false);
 
 	// Draw skybox
-	m_skybox->Draw();
+	skyboxShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	skyboxShader.SetUniformi("environmentMap", 0);
+	m_skybox.Draw();
 	
 	// Do post-processing
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

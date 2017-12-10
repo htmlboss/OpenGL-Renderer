@@ -15,6 +15,9 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 
 	std::cout << "**************************************************\n";
 	std::cout << "Engine starting up...\n";
+#ifdef _DEBUG
+	std::cout << "DEBUG MODE!!\n";
+#endif
 	std::cout << "**************************************************\n";
 	std::cout << "Available processor cores: " << Concurrency::GetProcessorCount() << '\n';
 	std::cout << "**************************************************\n";

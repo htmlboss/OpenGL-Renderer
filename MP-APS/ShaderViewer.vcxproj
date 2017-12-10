@@ -374,6 +374,7 @@
     <ClInclude Include="Graphics\GLTexture.h" />
     <ClInclude Include="Graphics\GLVertexArray.h" />
     <ClInclude Include="Graphics\StaticPointLight.h" />
+    <ClInclude Include="Graphics\StaticSpotLight.h" />
     <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Material.h" />
