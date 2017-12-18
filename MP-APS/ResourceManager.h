@@ -25,6 +25,8 @@ public:
 	unsigned int LoadHDRI(const std::string_view path) const;
 	// Loads an image (if not cached) and generates an OpenGL texture.
 	unsigned int LoadTexture(const std::string_view path);
+	// Loads a binary file into a vector and returns it
+	std::vector<char> LoadBinaryFile(const std::string_view path) const;
 	
 	ModelPtr GetModel(const std::string_view name, const std::string_view path);
 	// Add a loaded model the the model cache

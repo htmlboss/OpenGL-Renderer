@@ -364,6 +364,7 @@
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Graphics\smaa_glsl.h" />
     <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />
     <ClInclude Include="Graphics\GLShader.h" />

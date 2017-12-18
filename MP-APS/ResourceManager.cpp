@@ -114,6 +114,24 @@ unsigned int ResourceManager::LoadTexture(const std::string_view path) {
 }
 
 /***********************************************************************************/
+std::vector<char> ResourceManager::LoadBinaryFile(const std::string_view path) const {
+	std::ifstream in(path.data(), std::ios::binary);
+	in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+	if (!in) {
+		std::cerr << "Resource Manager: Failed to load binary file: " << path << std::endl;
+		std::abort();
+	}
+
+#ifdef _DEBUG
+	std::cout << "Resource Manager: loaded binary file: " << path << std::endl;
+#endif
+
+	// Copy and return binary contents into vector
+	return std::vector<char>(std::istreambuf_iterator<char>(in), (std::istreambuf_iterator<char>()));
+}
+
+/***********************************************************************************/
 ModelPtr ResourceManager::GetModel(const std::string_view name, const std::string_view path) {
 
 	// Check if model is already loaded.

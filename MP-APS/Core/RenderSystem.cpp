@@ -4,6 +4,7 @@
 
 #include "../Input.h"
 #include "../SceneBase.h"
+#include "../ResourceManager.h"
 
 #include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -62,6 +63,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	setupScreenquad();
 	setupDepthBuffer();
 	setupHDRBuffer();
+	setupSMAA();
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -393,6 +395,32 @@ void RenderSystem::setupHDRBuffer() {
 	// - Attach buffers
 	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
 	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
+}
+
+/***********************************************************************************/
+void RenderSystem::setupSMAA() {
+
+	glGenTextures(1, &m_areaTexture);
+	glBindTexture(GL_TEXTURE_2D, m_areaTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	const auto areaTex = ResourceManager::GetInstance().LoadBinaryFile("Data/shaders/smaa/smaa_area.raw");
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, m_areaTexWidth, m_areaTexHeight, 0, GL_RG, GL_UNSIGNED_BYTE, areaTex.data());
+
+	glGenTextures(1, &m_searchTexture);
+	glBindTexture(GL_TEXTURE_2D, m_searchTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	const auto searchTex = ResourceManager::GetInstance().LoadBinaryFile("Data/shaders/smaa/smaa_search.raw");
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, m_searchTexWidth, m_searchTexHeight, 0, GL_RED, GL_UNSIGNED_BYTE, searchTex.data());
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /***********************************************************************************/

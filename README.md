@@ -26,13 +26,13 @@ Physically Based Rendering:
 * Assimp model loading.
 * CPU-based procedural terrain (first iteration).
 * Post processing (HDR, saturation, vibrance).
-* Frustum culling (AABB only).
-* HDR cubemaps.
+* Parallel AABB frustum culling.
 * XML engine configuration.
 * Shader-based wireframe overlay.
+* Physically-based rendering.
 
 ## WIP
-* PBR.
+* SMAA
 
 ## Third Party Code
 * Assimp.
@@ -47,4 +47,4 @@ Physically Based Rendering:
 *  _Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix_ ([http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf](http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf)). Gribb, Hartman (2001).
 * _Forward+: Bringing Deferred Lighting to the Next Level_ ([https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf](https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf)). Harada, McKee, Yang (2012).
 * _Solid Wireframe_ ([http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf](http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf)). Nvidia (2007).
-* _Physically Based Rendering_ ([https://learnopengl.com/#!PBR/IBL/Specular-IBL] (https://learnopengl.com/#!PBR/IBL/Specular-IBL))
+* _Physically Based Rendering_ ([https://learnopengl.com/#!PBR/IBL/Specular-IBL](https://learnopengl.com/#!PBR/IBL/Specular-IBL))
