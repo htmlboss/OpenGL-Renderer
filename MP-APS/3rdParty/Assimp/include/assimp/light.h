@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -76,16 +76,12 @@ enum aiLightSourceType
     aiLightSource_SPOT          = 0x3,
 
     //! The generic light level of the world, including the bounces
-    //! of all other light sources.
+    //! of all other lightsources.
     //! Typically, there's at most one ambient light in a scene.
     //! This light type doesn't have a valid position, direction, or
     //! other properties, just a color.
     aiLightSource_AMBIENT       = 0x4,
 
-    //! An area light is a rectangle with predefined size that uniformly
-    //! emits light from one of its sides. The position is center of the
-    //! rectangle and direction is its normal vector.
-    aiLightSource_AREA          = 0x5,
 
     /** This value is not used. It is just there to force the
      *  compiler to map this enum to a 32 Bit integer.
@@ -138,14 +134,6 @@ struct aiLight
      *  may be normalized, but it needn't.
      */
     C_STRUCT aiVector3D mDirection;
-
-    /** Up direction of the light source in space. Relative to the
-     *  transformation of the node corresponding to the light.
-     *
-     *  The direction is undefined for point lights. The vector
-     *  may be normalized, but it needn't.
-     */
-    C_STRUCT aiVector3D mUp;
 
     /** Constant light attenuation factor.
      *
@@ -229,9 +217,6 @@ struct aiLight
      */
     float mAngleOuterCone;
 
-    /** Size of area light source. */
-    C_STRUCT aiVector2D mSize;
-
 #ifdef __cplusplus
 
     aiLight()
@@ -241,7 +226,6 @@ struct aiLight
         ,   mAttenuationQuadratic (0.f)
         ,   mAngleInnerCone       ((float)AI_MATH_TWO_PI)
         ,   mAngleOuterCone       ((float)AI_MATH_TWO_PI)
-        ,   mSize                 (0.f, 0.f)
     {
     }
 

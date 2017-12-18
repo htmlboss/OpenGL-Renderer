@@ -7,42 +7,23 @@ in FragData {
     noperspective vec3 wireframeDist;
 } fragData;
 
-// Directional Light
-struct DirectionalLight {
-	vec3 color;
-	vec3 direction;
-};
-uniform DirectionalLight directionalLights[3];
-
-// Point Light
-struct PointLight {
-    vec3 color;
-    vec3 position;
-};
-uniform PointLight pointLights[4];
-
-// Spot Light
-struct SpotLight {
-    vec3 color;
-    vec3 position;
-    vec3 direction;
-
-    float cutoff;
-    float outerCutoff;
-};
-uniform SpotLight spotLights[1];
-
-// Material parameters
-uniform vec3  albedo;
-uniform float metallic;
-uniform float roughness;
-uniform float ao;
-
-// IBL (skybox)
+// IBL
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
-// Camera
-uniform vec3 viewPos;
+// PBR material parameters
+uniform sampler2D albedoMap;
+uniform sampler2D normalMap;
+uniform sampler2D metallicMap;
+uniform sampler2D roughnessMap;
+//uniform sampler2D aoMap;
+
+// lights
+uniform vec3 lightPositions[4];
+uniform vec3 lightColors[4];
+
+uniform vec3 camPos;
 
 uniform bool wireframe;
 
@@ -50,7 +31,29 @@ out vec4 FragColor;
 
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
-float DistributionGGX(const vec3 N, const vec3 H, const float roughness) {
+// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
+// Don't worry if you don't get what's going on; you generally want to do normal 
+// mapping the usual way for performance anways; I do plan make a note of this 
+// technique somewhere later in the normal mapping tutorial.
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(normalMap, fragData.TexCoords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(fragData.FragPos);
+    vec3 Q2  = dFdy(fragData.FragPos);
+    vec2 st1 = dFdx(fragData.TexCoords);
+    vec2 st2 = dFdy(fragData.TexCoords);
+
+    vec3 N   = normalize(fragData.Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+// ----------------------------------------------------------------------------
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
     float a = roughness*roughness;
     float a2 = a*a;
     float NdotH = max(dot(N, H), 0.0);
@@ -62,9 +65,9 @@ float DistributionGGX(const vec3 N, const vec3 H, const float roughness) {
 
     return nom / denom;
 }
-
 // ----------------------------------------------------------------------------
-float GeometrySchlickGGX(const float NdotV, const float roughness) {
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
     float r = (roughness + 1.0);
     float k = (r*r) / 8.0;
 
@@ -73,107 +76,107 @@ float GeometrySchlickGGX(const float NdotV, const float roughness) {
 
     return nom / denom;
 }
-
 // ----------------------------------------------------------------------------
-float GeometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughness) {
-    const float NdotV = max(dot(N, V), 0.0);
-    const float NdotL = max(dot(N, L), 0.0);
-    const float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    const float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
     return ggx1 * ggx2;
 }
-
 // ----------------------------------------------------------------------------
-vec3 fresnelSchlick(const float cosTheta, const vec3 F0) {
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
-
 // ----------------------------------------------------------------------------
-vec3 calcBRDF(const vec3 N, const vec3 H, const vec3 L, const vec3 V, const vec3 F0) {
-    // Cook-Torrance BRDF   
-    const float NDF = DistributionGGX(N, H, roughness);   
-    const float G   = GeometrySmith(N, V, L, roughness);      
-    const vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-    const vec3 nominator    = NDF * G * F; 
-    const float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
-    const vec3 specular = nominator / denominator;
-        
-    // kS is equal to Fresnel
-    const vec3 kS = F;
-    // for energy conservation, the diffuse and specular light can't
-    // be above 1.0 (unless the surface emits light); to preserve this
-    // relationship the diffuse component (kD) should equal 1.0 - kS.
-    vec3 kD = vec3(1.0) - kS;
-    // multiply kD by the inverse metalness such that only non-metals 
-    // have diffuse lighting, or a linear blend if partly metal (pure metals
-    // have no diffuse light).
-    kD *= 1.0 - metallic;     
-
-    // scale light by NdotL
-    const float NdotL = max(dot(N, L), 0.0);        
-
-    // add to outgoing radiance Lo
-    // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-    return (kD * albedo / PI + specular) * NdotL;
-}
-
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}   
 // ----------------------------------------------------------------------------
-vec3 pointRadiance(const vec3 lightPosition, const vec3 lightColor, const vec3 V, const vec3 N, const vec3 F0) {
-    const vec3 L = normalize(lightPosition - fragData.FragPos);
-    const vec3 H = normalize(V + L);
-
-    const float distance = length(lightPosition - fragData.FragPos);
-    const float attenuation = 1.0 / (distance * distance); // Inverse-square fall-off
-    const vec3 radiance = lightColor * attenuation;
-
-    return calcBRDF(N, H, L, V, F0) * radiance;
-}
-
-// ----------------------------------------------------------------------------
-vec3 directionalRadiance(const vec3 N, const vec3 V, const vec3 F0, const vec3 color, const vec3 direction) {
-    const vec3 L = -direction;
-    const vec3 H = normalize(V + L);
-    const vec3 radiance = color;
-
-    return calcBRDF(N, H, L, V, F0) * radiance;
-}
-
-// ----------------------------------------------------------------------------
-void main() {		
-    const vec3 N = normalize(fragData.Normal);
-    const vec3 V = normalize(viewPos - fragData.FragPos);
+void main()
+{       
+    // material properties
+    vec3 albedo = pow(texture(albedoMap, fragData.TexCoords).rgb, vec3(2.2));
+    float metallic = texture(metallicMap, fragData.TexCoords).r;
+    float roughness = texture(roughnessMap, fragData.TexCoords).r;
+    //float ao = texture(aoMap, fragData.TexCoords).r;
+       
+    // input lighting data
+    vec3 N = getNormalFromMap();
+    vec3 V = normalize(camPos - fragData.FragPos);
+    vec3 R = reflect(-V, N); 
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
+    // reflectance equation
     vec3 Lo = vec3(0.0);
-    // Calculate reflectance for the directional lights
-    for (int i = 0; i < 3; ++i) {
-        Lo += directionalRadiance(N, V, F0, directionalLights[i].color, directionalLights[i].direction);
-    }
+    for(int i = 0; i < 4; ++i) 
+    {
+        // calculate per-light radiance
+        vec3 L = normalize(lightPositions[i] - fragData.FragPos);
+        vec3 H = normalize(V + L);
+        float distance = length(lightPositions[i] - fragData.FragPos);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance = lightColors[i] * attenuation;
 
-    // Calculate reflectance for point lights
-    for (int i = 0; i < 4; ++i) {
-        Lo += pointRadiance(pointLights[i].position, pointLights[i].color, V, N, F0);
-    }
+        // Cook-Torrance BRDF
+        float NDF = DistributionGGX(N, H, roughness);   
+        float G   = GeometrySmith(N, V, L, roughness);    
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);        
+        
+        vec3 nominator    = NDF * G * F;
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        vec3 specular = nominator / denominator;
+        
+         // kS is equal to Fresnel
+        vec3 kS = F;
+        // for energy conservation, the diffuse and specular light can't
+        // be above 1.0 (unless the surface emits light); to preserve this
+        // relationship the diffuse component (kD) should equal 1.0 - kS.
+        vec3 kD = vec3(1.0) - kS;
+        // multiply kD by the inverse metalness such that only non-metals 
+        // have diffuse lighting, or a linear blend if partly metal (pure metals
+        // have no diffuse light).
+        kD *= 1.0 - metallic;                   
+            
+        // scale light by NdotL
+        float NdotL = max(dot(N, L), 0.0);        
 
-    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+        // add to outgoing radiance Lo
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    }   
+    
+    // ambient lighting (we now use IBL as the ambient term)
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    
+    vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;     
-    const vec3 irradiance = texture(irradianceMap, N).rgb;
-    const vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+    
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
+    vec3 ambient = (kD * diffuse + specular);// * ao;
+    
     vec3 color = ambient + Lo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2));
+    color = pow(color, vec3(1.0/2.2)); 
 
     // Wireframe
     const vec3 d = fwidth(fragData.wireframeDist);
@@ -182,5 +185,5 @@ void main() {
 
     color = wireframe ? mix(vec3(1.0), color.rgb, edgeFactor) : color;
 
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(color , 1.0);
 }

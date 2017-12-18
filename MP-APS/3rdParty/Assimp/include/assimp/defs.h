@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -212,12 +212,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // "W8059 Packgr��e der Struktur ge�ndert"
 
 #endif
+    //////////////////////////////////////////////////////////////////////////
+    /* Define 'ASSIMP_BUILD_BOOST_WORKAROUND' to compile assimp
+     * without boost. This is done by using a few workaround
+     * classes and brings some limitations (e.g. some logging won't be done,
+     * the library won't utilize threads or be threadsafe at all).
+     * This implies the 'ASSIMP_BUILD_SINGLETHREADED' setting. */
+     //////////////////////////////////////////////////////////////////////////
+#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
+    // threading support requires boost
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#   define ASSIMP_BUILD_SINGLETHREADED
+#endif
+
+#endif // !! ASSIMP_BUILD_BOOST_WORKAROUND
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
      * without threading support. The library doesn't utilize
-     * threads then and is itself not threadsafe. */
+     * threads then and is itself not threadsafe.
+     * If this flag is specified boost::threads is *not* required. */
     //////////////////////////////////////////////////////////////////////////
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 #   define ASSIMP_BUILD_SINGLETHREADED

@@ -32,6 +32,10 @@
             <Shader path="Data/Shaders/postprocessvs.glsl" type="vertex" />
             <Shader path="Data/Shaders/postprocessps.glsl" type="fragment" />
         </Program>
+        <Program name="DebugTexShader">
+            <Shader path="Data/Shaders/debugtexvs.glsl" type="vertex" />
+            <Shader path="Data/Shaders/debugtexps.glsl" type="fragment" />
+        </Program>
     </Renderer>
     
 </Engine>

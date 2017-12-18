@@ -345,17 +345,14 @@
     <ClCompile Include="Graphics\GLFramebuffer.cpp" />
     <ClCompile Include="Graphics\GLShader.cpp" />
     <ClCompile Include="Graphics\GLShaderProgram.cpp" />
-    <ClCompile Include="Graphics\GLTexture.cpp" />
     <ClCompile Include="Graphics\GLVertexArray.cpp" />
-    <ClCompile Include="HeightGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PBRMaterial.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
   </ItemGroup>
@@ -371,20 +368,16 @@
     <ClInclude Include="Graphics\GLFramebuffer.h" />
     <ClInclude Include="Graphics\GLShader.h" />
     <ClInclude Include="Graphics\GLShaderProgram.h" />
-    <ClInclude Include="Graphics\GLTexture.h" />
     <ClInclude Include="Graphics\GLVertexArray.h" />
     <ClInclude Include="Graphics\StaticPointLight.h" />
     <ClInclude Include="Graphics\StaticSpotLight.h" />
-    <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PBRMaterial.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Terrain.h" />
-    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="ViewFrustum.h" />
   </ItemGroup>
@@ -395,11 +388,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets" Condition="Exists('packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" />
+    <Import Project="packages\assimp.v140.3.2\build\native\assimp.v140.targets" Condition="Exists('packages\assimp.v140.3.2\build\native\assimp.v140.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets'))" />
+    <Error Condition="!Exists('packages\assimp.v140.3.2\build\native\assimp.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp.v140.3.2\build\native\assimp.v140.targets'))" />
   </Target>
 </Project>

@@ -4,6 +4,7 @@
 #include "../Model.h"
 #include "../Graphics/GLFramebuffer.h"
 #include "../Graphics/GLVertexArray.h"
+#include "../Graphics/GLShaderProgram.h"
 
 #include <unordered_map>
 #include <random>
@@ -13,6 +14,7 @@
 class Terrain;
 class Camera;
 class SceneBase;
+class GLShaderProgram;
 struct RenderData;
 namespace pugi {
 	class xml_node;

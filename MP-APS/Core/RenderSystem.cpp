@@ -43,7 +43,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 
 	m_depthFBO.Init("Depth FBO", width, height);
 	m_hdrFBO.Init("HDR FBO", width, height);
-	m_skybox.Init("Data/hdri/barcelona.hdr", 1024);
+	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
 
 	// Compile all shader programs
 	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
@@ -58,32 +58,44 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
 
-#ifdef _DEBUG
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-#endif
-
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glEnable(GL_FRAMEBUFFER_SRGB);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// Create uniform buffer object for projection and view matrices (same data shared to multiple shaders)
-	glGenBuffers(1, &m_uboMatrices);
-	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_uboMatrices, 0, 2 * sizeof(glm::mat4));
-
 	setupLightBuffers();
 	setupScreenquad();
 	setupDepthBuffer();
 	setupHDRBuffer();
 
+#ifdef _DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#endif
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	//glEnable(GL_FRAMEBUFFER_SRGB);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	// Create uniform buffer object for projection and view matrices
+	// so same data shared to multiple shader programs.
+	glGenBuffers(1, &m_uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+	auto& pbrShader = m_shaderCache.at("PBRShader");
+	pbrShader.Bind();
+	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("prefilterMap", 1).SetUniformi("brdfLUT", 2);
+	pbrShader.SetUniformi("albedoMap", 3).SetUniformi("normalMap", 4).SetUniformi("metallicMap", 5);
+	pbrShader.SetUniformi("roughnessMap", 6);// .SetUniformi("aoMap", 7);
+
+	auto& skyboxShader = m_shaderCache.at("SkyboxShader");
+	skyboxShader.Bind();
+	skyboxShader.SetUniformi("environmentMap", 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glViewport(0, 0, width, height);
 }
 
@@ -96,9 +108,10 @@ void RenderSystem::Shutdown() const {
 
 /***********************************************************************************/
 void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
-	const auto viewMatrix = scene.GetCamera().GetViewMatrix();
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+
+	const auto viewMatrix = scene.GetCamera().GetViewMatrix();
 
 	// Get the shaders we need (static vars initialized during first render call).
 	static auto& depthShader = m_shaderCache.at("DepthPassShader");
@@ -129,8 +142,8 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	lightCullShader.SetUniform("projection", m_projMatrix);
 	lightCullShader.SetUniform("view", viewMatrix);
 
-	glActiveTexture(GL_TEXTURE5);
-	lightCullShader.SetUniformi("depthMap", 5);
+	glActiveTexture(GL_TEXTURE8);
+	lightCullShader.SetUniformi("depthMap", 8);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 
 	// Bind shader storage buffer objects for the light and index buffers
@@ -149,30 +162,48 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	// Bind pre-computed IBL data
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetIrradianceMap());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetPrefilterMap());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_skybox.GetBRDFLUT());
 
 	pbrShader.Bind();
-	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("wireframe", wireframe);
-	pbrShader.SetUniform("viewPos", scene.GetCamera().GetPosition());
+	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe);
+	
+	/*
 	// Update Directional Lights
-	for (auto i = 0; i < scene.m_staticDirectionalLights.size(); ++i) {
-		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
-		pbrShader.SetUniform("directionalLights[" + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
+	if (scene.m_staticDirectionalLights.size() > 0) {
+		for (auto i = 0; i < scene.m_staticDirectionalLights.size(); ++i) {
+			static const auto directionalLights = "directionalLights[";
+			pbrShader.SetUniform(directionalLights + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
+			pbrShader.SetUniform(directionalLights + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
+		}
 	}
 	// Update Point Lights
-	for (auto i = 0; i < scene.m_staticPointLights.size(); ++i) {
-		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].position", scene.m_staticPointLights[i].Position);
-		pbrShader.SetUniform("pointLights[" + std::to_string(i) + "].color", scene.m_staticPointLights[i].Color);
+	if (scene.m_staticPointLights.size() > 0) {
+		for (auto i = 0; i < scene.m_staticPointLights.size(); ++i) {
+			static const auto pointLights = "pointLights[";
+			pbrShader.SetUniform(pointLights + std::to_string(i) + "].color", scene.m_staticPointLights[i].Color);
+			pbrShader.SetUniform(pointLights + std::to_string(i) + "].position", scene.m_staticPointLights[i].Position);
+		}
 	}
 	// Update Spot Lights
-	for (auto i = 0; i < scene.m_staticSpotLights.size(); ++i) {
-		
+	if (scene.m_staticSpotLights.size() > 0) {
+		for (auto i = 0; i < scene.m_staticSpotLights.size(); ++i) {
+			static const auto spotlights = "spotLights[";
+			pbrShader.SetUniform(spotlights + std::to_string(i) + "].color", scene.m_staticSpotLights[i].Color);
+			pbrShader.SetUniform(spotlights + std::to_string(i) + "].position", scene.m_staticSpotLights[i].Position);
+			pbrShader.SetUniform(spotlights + std::to_string(i) + "].direction", scene.m_staticSpotLights[i].Direction);
+			pbrShader.SetUniformf(spotlights + std::to_string(i) + "].cutoff", scene.m_staticSpotLights[i].Cutoff);
+			pbrShader.SetUniformf(spotlights + std::to_string(i) + "].outerCutoff", scene.m_staticSpotLights[i].OuterCutoff);
+		}
 	}
+	*/
 	renderModels(pbrShader, scene.m_renderList, false);
 
 	// Draw skybox
 	skyboxShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
-	skyboxShader.SetUniformi("environmentMap", 0);
 	m_skybox.Draw();
 	
 	// Do post-processing
@@ -223,19 +254,28 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 
 	for (const auto& model : renderList) {
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
-
-		auto meshes = model->GetMeshes();
+		
+		const auto meshes = model->GetMeshes();
 		for (const auto& mesh : meshes) {
-
 			if (!depthPass) {
-				shader.SetUniform("albedo", model->GetMaterial().Albedo);
-				shader.SetUniformf("metallic", model->GetMaterial().Metallic);
-				shader.SetUniformf("ao", model->GetMaterial().AO);
-				shader.SetUniformf("roughness", model->GetMaterial().Roughness);
+				
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
+				glActiveTexture(GL_TEXTURE5);
+				glBindTexture(GL_TEXTURE_2D, mesh.Material.MetallicMap);
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, mesh.Material.RoughnessMap);
+				
+				//glActiveTexture(GL_TEXTURE7);
+				//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
 
+				//glActiveTexture(GL_TEXTURE0);
+				//glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
 			}
-			mesh.GetVAO().Bind();
-			glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, nullptr);
+			mesh.VAO.Bind();
+			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}

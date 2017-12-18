@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -109,9 +109,7 @@ struct aiNode
     /** The number of meshes of this node. */
     unsigned int mNumMeshes;
 
-    /** The meshes of this node. Each entry is an index into the 
-      * mesh list of the #aiScene.
-      */
+    /** The meshes of this node. Each entry is an index into the mesh */
     unsigned int* mMeshes;
 
     /** Metadata associated with this node or NULL if there is no metadata.

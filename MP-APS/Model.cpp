@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Core/RenderSystem.h"
 
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,17 +10,16 @@
 #include <ppl.h>
 
 /***********************************************************************************/
-Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder, const bool loadTextures) : m_name(Name), m_path(Path) {
+Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder, const bool loadMaterial) : m_name(Name), m_path(Path) {
 	
-	if (!loadModel(Path, flipWindingOrder, loadTextures)) {
+	if (!loadModel(Path, flipWindingOrder, loadMaterial)) {
 		std::cerr << "Failed to load: " << Name << '\n';
 	}
-	m_loadedTextures.clear();
 }
 
 /***********************************************************************************/
-Model::Model(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<GLTexture>& textures) noexcept { 
-	m_meshes.emplace_back(vertices, indices, textures); 
+Model::Model(const std::string_view Name, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterial& material) noexcept : m_name(Name) { 
+	m_meshes.emplace_back(vertices, indices, material); 
 }
 
 /***********************************************************************************/
@@ -28,35 +28,30 @@ Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Na
 }
 
 /***********************************************************************************/
-void Model::AssignMaterial(const Material& material) {
-	m_material = material;
-}
-
-/***********************************************************************************/
-void Model::AttachMesh(const Mesh& mesh) noexcept {
+void Model::AttachMesh(const Mesh mesh) noexcept {
 	m_meshes.push_back(mesh);
 }
 
 /***********************************************************************************/
-void Model::Scale(const glm::vec3& scale) noexcept {
+void Model::Scale(const glm::vec3& scale) {
 	m_scale = scale;
 	m_aabb.scale(scale, glm::vec3(0.0f));
 }
 
 /***********************************************************************************/
-void Model::Rotate(const float radians, const glm::vec3& axis) noexcept {
+void Model::Rotate(const float radians, const glm::vec3& axis) {
 	m_radians = radians;
 	m_axis = axis;
 }
 
 /***********************************************************************************/
-void Model::Translate(const glm::vec3& pos) noexcept {
+void Model::Translate(const glm::vec3& pos) {
 	m_position = pos;
 	m_aabb.translate(pos);
 }
 
 /***********************************************************************************/
-glm::mat4 Model::GetModelMatrix() const noexcept {
+glm::mat4 Model::GetModelMatrix() const {
 
 	const auto scale = glm::scale(glm::mat4(1.0f), m_scale);
 	const auto translate = glm::translate(glm::mat4(1.0f), m_position);
@@ -65,10 +60,12 @@ glm::mat4 Model::GetModelMatrix() const noexcept {
 }
 
 /***********************************************************************************/
-bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, const bool loadTextures = true) {
+bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, const bool loadMaterial = true) {
 #ifdef _DEBUG
 	std::cout << "Loading model: " << m_name << '\n';
 #endif
+
+	std::cout << sizeof(PBRMaterial) << '\n';
 
 	Assimp::Importer importer;
 	const aiScene* scene = nullptr;
@@ -109,36 +106,37 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, 
 		return false;
 	}
 
-	m_path = Path.substr(0, Path.find_last_of('/'));
-	processNode(scene->mRootNode, scene, loadTextures);
+	m_path = Path.substr(0, Path.find_last_of('/')); // Strip the model file name and keep the model folder.
+	m_path += "/";
+	
+	processNode(scene->mRootNode, scene, loadMaterial);
 
 	importer.FreeScene();
 	return true;
 }
 
 /***********************************************************************************/
-void Model::processNode(aiNode* node, const aiScene* scene, const bool loadTextures) {
+void Model::processNode(aiNode* node, const aiScene* scene, const bool loadMaterial) {
 
 	// Process all node meshes
 	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&](const auto idx)
 	{
 		auto* mesh = scene->mMeshes[node->mMeshes[idx]];
-		m_meshes.push_back(processMesh(mesh, scene, loadTextures));
+		m_meshes.push_back(processMesh(mesh, scene, loadMaterial));
 	});
 
-	// Process their children
+	// Process their children via recursive tree traversal
 	for (auto i = 0; i < node->mNumChildren; ++i) {
-		processNode(node->mChildren[i], scene, loadTextures);
+		processNode(node->mChildren[i], scene, loadMaterial);
 	}
 }
 
 /***********************************************************************************/
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadTextures) {
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMaterial) {
 	std::vector<Vertex> vertices;
-	std::vector<GLTexture> textures;
 	glm::vec3 min, max;
 
-	for (size_t i = 0; i < mesh->mNumVertices; ++i) {
+	for (auto i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;
 
 		if (mesh->HasPositions()) {
@@ -174,79 +172,63 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadTextu
 			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 
-		if (mesh->HasTextureCoords(0) && loadTextures) {
-			// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+		if (mesh->HasTextureCoords(0) && loadMaterial) {
+			// Just take the first set of texture coords (since we could have up to 8)
 			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
 			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+		} else { 
+			vertex.TexCoords = glm::vec2(0.0f);
 		}
-		else { vertex.TexCoords = glm::vec2(0.0f); }
+
 		vertices.push_back(vertex);
 	}
 
+	// Resize the bounding box
 	m_aabb.extend(min);
 	m_aabb.extend(max);
 
 	// Get indices from each face
 	std::vector<GLuint> indices;
-	for (size_t i = 0; i < mesh->mNumFaces; ++i) {
+	for (auto i = 0; i < mesh->mNumFaces; ++i) {
 		const auto face = mesh->mFaces[i];
-
-		for (size_t j = 0; j < face.mNumIndices; ++j) {
+		for (auto j = 0; j < face.mNumIndices; ++j) {
 			indices.emplace_back(face.mIndices[j]);
 		}
 	}
 
 	// Process material
-	if (loadTextures) {
+	// http://assimp.sourceforge.net/lib_html/structai_material.html
+	if (loadMaterial) {
 		if (mesh->mMaterialIndex >= 0) {
-			auto* material = scene->mMaterials[mesh->mMaterialIndex];
+			PBRMaterial material;
+			const auto* mat = scene->mMaterials[mesh->mMaterialIndex];
 
-			// PBR textures
-			const auto albedoMaps = loadMatTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
+			aiString name;
+			mat->Get(AI_MATKEY_NAME, name);
 
-			const auto specularMaps = loadMatTextures(material, aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			// Get the first texture for each texture type we need
+			// since there could be multiple textures per type
+			aiString albedoPath;
+			mat->GetTexture(aiTextureType_DIFFUSE, 0, &albedoPath);
 
-			const auto normalMaps = loadMatTextures(material, aiTextureType_HEIGHT, "texture_normal");
-			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			aiString metallicPath;
+			mat->GetTexture(aiTextureType_AMBIENT, 0, &metallicPath);
+
+			aiString normalPath;
+			mat->GetTexture(aiTextureType_HEIGHT, 0, &normalPath);
+
+			aiString roughnessPath;
+			mat->GetTexture(aiTextureType_SHININESS, 0, &roughnessPath);
+
+			std::cout << "MATERIAL NAME: " << name.C_Str() << std::endl;
+
+			material.Init(name.C_Str(), m_path + albedoPath.C_Str(), "", m_path + metallicPath.C_Str(), m_path + normalPath.C_Str(), m_path + roughnessPath.C_Str());
+
+			++m_numMats;
+			std::cout << "NUMBER OF MATERIALS: " << m_numMats << std::endl;
+			return Mesh(vertices, indices, material);
 		}
 	}
-	return Mesh(vertices, indices, textures);
-}
 
-/***********************************************************************************/
-std::vector<GLTexture> Model::loadMatTextures(aiMaterial* mat, aiTextureType type, const std::string_view samplerName) {
-
-	std::vector<GLTexture> textures;
-
-	// Get all textures
-	for (size_t c = 0; c < mat->GetTextureCount(type); ++c) {
-		aiString texturePath;
-		mat->GetTexture(type, c, &texturePath);
-
-		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-		GLboolean skip = false;
-		for (auto& loadedTex : m_loadedTextures) {
-
-			if (strcmp(loadedTex.GetRelativePath().c_str(), texturePath.C_Str()) == 0) {
-				textures.push_back(loadedTex);
-				skip = true;
-				break;
-			}
-		}
-
-		if (!skip) { // If texture hasn't been loaded already, load it
-
-			const auto texDirPrefix = m_path + "/"; // Get directory path and append forward-slash
-			GLTexture texture(texDirPrefix, texturePath.C_Str(), samplerName, GLTexture::WrapMode::REPEAT);
-
-			//std::cout << "GLTexture not found! Adding: " << texDirPrefix + texturePath.C_Str() << '\n';
-
-			textures.push_back(texture);
-			m_loadedTextures.push_back(texture); // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-		}
-	}
-	return textures;
+	return Mesh(vertices, indices);
 }

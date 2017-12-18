@@ -10,7 +10,7 @@
 #include <stb_image.h>
 
 /***********************************************************************************/
-std::string ResourceManager::LoadTextFile(const std::string_view path) {
+std::string ResourceManager::LoadTextFile(const std::string_view path) const {
 #ifdef _DEBUG
 	std::cout << "Resource Manager: Loading text file: " << path << '\n';
 #endif
@@ -19,7 +19,7 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) {
 	in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 	if (!in) {
-		std::cerr << "Resource Manager: File loading error: " + *path.data() << " " << errno << '\n';
+		std::cerr << "Resource Manager: File loading error: " + *path.data() << " " << errno << std::endl;
 		std::abort();
 	}
 
@@ -60,30 +60,63 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 }
 
 /***********************************************************************************/
-TexturePtr ResourceManager::GetTexture(const std::string_view path, const ColorMode mode) {
+unsigned int ResourceManager::LoadTexture(const std::string_view path) {
 
+	// Check if texture is already loaded somewhere
 	const auto val = m_textureCache.find(path.data());
-
-	if (val == m_textureCache.end()) {
-		// Image has not been loaded.
-		int x, y, comp;
-		auto data = stbi_load(path.data(), &x, &y, &comp, static_cast<int>(mode));
-
-		if (data == nullptr) {
-			std::cerr << "Resource Manager: stb_image error (" << path << "): " << stbi_failure_reason() << std::endl;
-			std::abort();
-		}
-		++m_currentTexID;
-		// Add and return new loaded texture.
-		return m_textureCache.try_emplace(path.data(), std::make_shared<Texture>(data, x, y, comp, m_currentTexID)).first->second;
+	
+	if (val != m_textureCache.end()) {
+		// Found it
+		return val->second;
 	}
 
-	return val->second;
+	// Create and cache a new texture
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path.data(), &width, &height, &nrComponents, 0);
+	if (!data) {
+		std::cerr << "Failed to load texture: " << path << std::endl;
+		stbi_image_free(data);
+		return 0;
+	}
+
+	GLenum format = 0;
+	switch (nrComponents) {
+	case 1:
+		format = GL_RED;
+		break;
+	case 3:
+		format = GL_RGB;
+		break;
+	case 4:
+		format = GL_RGBA;
+		break;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(data);
+
+#ifdef _DEBUG
+	std::cout << "Resource Manager: loaded texture: " << path << std::endl;
+#endif
+
+	return m_textureCache.try_emplace(path.data(), textureID).first->second;
 }
 
 /***********************************************************************************/
 ModelPtr ResourceManager::GetModel(const std::string_view name, const std::string_view path) {
 
+	// Check if model is already loaded.
 	const auto val = m_modelCache.find(path.data());
 
 	if (val == m_modelCache.end()) {
@@ -95,22 +128,7 @@ ModelPtr ResourceManager::GetModel(const std::string_view name, const std::strin
 }
 
 /***********************************************************************************/
-MaterialPtr ResourceManager::GetMaterial(const std::string_view name) {
-	const auto val = m_materialCache.find(name.data());
-
-	if (val == m_materialCache.end()) {
-		// Create empty material and return shared_ptr
-#ifdef _DEBUG
-		std::cout << "Failed to find material: " << name << std::endl;
-#endif
-		return m_materialCache.try_emplace(name.data(), std::make_shared<Material>()).first->second;
-	}
-
-	return val->second;
-}
-
-/***********************************************************************************/
-ModelPtr ResourceManager::CacheModel(const std::string_view name, const Model& model, const bool overwriteIfExists) {
+ModelPtr ResourceManager::CacheModel(const std::string_view name, const Model model, const bool overwriteIfExists) {
 	if (overwriteIfExists) {
 		return m_modelCache.insert_or_assign(name.data(), std::make_shared<Model>(model)).first->second;
 	}

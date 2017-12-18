@@ -18,6 +18,10 @@ CPU-based terrain generation using Perlin noise:
 Anti-aliased wireframe rendering:
 ![Wireframe rendering](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/02.png "Wireframe rendering")
 
+Physically Based Rendering:
+![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/03.png "Physically Based Rendering")
+![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/04.png "Physically Based Rendering")
+
 ## Features
 * Assimp model loading.
 * CPU-based procedural terrain (first iteration).
@@ -43,3 +47,4 @@ Anti-aliased wireframe rendering:
 *  _Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix_ ([http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf](http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf)). Gribb, Hartman (2001).
 * _Forward+: Bringing Deferred Lighting to the Next Level_ ([https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf](https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf)). Harada, McKee, Yang (2012).
 * _Solid Wireframe_ ([http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf](http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf)). Nvidia (2007).
+* _Physically Based Rendering_ ([https://learnopengl.com/#!PBR/IBL/Specular-IBL] (https://learnopengl.com/#!PBR/IBL/Specular-IBL))
