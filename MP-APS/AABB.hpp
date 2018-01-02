@@ -24,12 +24,14 @@ public:
 
 	/// Set the AABB as NULL (not set).
 	void setNull() {
-		mMin = glm::vec3(1.0);
-		mMax = glm::vec3(-1.0);
+		mMin = glm::vec3(1.0f);
+		mMax = glm::vec3(-1.0f);
 	}
 
 	/// Returns true if AABB is NULL (not set).
-	bool isNull() const noexcept { return mMin.x > mMax.x || mMin.y > mMax.y || mMin.z > mMax.z; }
+	auto isNull() const noexcept {
+		return mMin.x > mMax.x || mMin.y > mMax.y || mMin.z > mMax.z;
+	}
 
 	/// Extend the bounding box on all sides by \p val.
 	void extend(const glm::float_t val);
@@ -49,8 +51,7 @@ public:
 	/// Expand the AABB to include a disk centered at \p center, with normal \p
 	/// normal, and radius \p radius.
 	/// \xxx Untested -- This function is not represented in our unit tests.
-	void extendDisk(const glm::vec3& center, const glm::vec3& normal,
-	                glm::float_t radius);
+	void extendDisk(const glm::vec3& center, const glm::vec3& normal, glm::float_t radius);
 
 	/// Translates AABB by vector \p v.
 	void translate(const glm::vec3& v);
@@ -77,10 +78,14 @@ public:
 	glm::float_t getShortestEdge() const;
 
 	/// Retrieves the AABB's minimum point.
-	glm::vec3 getMin() const { return mMin; }
+	auto getMin() const {
+		return mMin;
+	}
 
 	/// Retrieves the AABB's maximum point.
-	glm::vec3 getMax() const { return mMax; }
+	auto getMax() const {
+		return mMax;
+	}
 
 	/// Returns true if AABBs share a face overlap.
 	/// \xxx Untested -- This function is not represented in our unit tests.

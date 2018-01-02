@@ -38,7 +38,7 @@
     <ProjectGuid>{79953202-FB57-485E-89E1-3E6E37692583}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShaderViewer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>MP-APS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -353,6 +353,9 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Terrain\GridMesh.cpp" />
+    <ClCompile Include="Terrain\QuadTree.cpp" />
+    <ClCompile Include="Terrain\TerrainRenderer.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
   </ItemGroup>
@@ -364,7 +367,6 @@
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="Graphics\smaa_glsl.h" />
     <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />
     <ClInclude Include="Graphics\GLShader.h" />
@@ -379,6 +381,10 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Terrain\GridMesh.h" />
+    <ClInclude Include="Terrain\QuadGridMesh.h" />
+    <ClInclude Include="Terrain\QuadTree.h" />
+    <ClInclude Include="Terrain\TerrainRenderer.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="ViewFrustum.h" />
   </ItemGroup>

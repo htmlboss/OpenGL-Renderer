@@ -33,4 +33,6 @@ void Mesh::setupMesh(const std::vector<Vertex>& vertices, const std::vector<GLui
 	VAO.EnableAttribute(1, 2, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
 	// Normal
 	VAO.EnableAttribute(2, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Normal)));
+	// Tangent
+	VAO.EnableAttribute(3, 3, vertexSize, reinterpret_cast<void*>(offsetof(Vertex, Tangent)));
 }

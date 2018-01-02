@@ -29,7 +29,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 #ifdef _DEBUG
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
 	std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
-	std::cout << "OpenGL Vendor: " << glGetString(GL_VENDOR) << '\n';
+	std::cout << "OpenGL Driver Vendor: " << glGetString(GL_VENDOR) << '\n';
 	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << '\n';
 #endif
 
@@ -46,7 +46,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	m_hdrFBO.Init("HDR FBO", width, height);
 	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
 
-	// Compile all shader programs
+	// Compile all shader programs in config.xml
 	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
 
 		// Get all shader files that make up the program
@@ -90,14 +90,14 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("prefilterMap", 1).SetUniformi("brdfLUT", 2);
 	pbrShader.SetUniformi("albedoMap", 3).SetUniformi("normalMap", 4).SetUniformi("metallicMap", 5);
-	pbrShader.SetUniformi("roughnessMap", 6);// .SetUniformi("aoMap", 7);
+	pbrShader.SetUniformi("roughnessMap", 6).SetUniformi("alphaMask", 8);// .SetUniformi("aoMap", 7);
 
 	auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	skyboxShader.Bind();
 	skyboxShader.SetUniformi("environmentMap", 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, width, height);
 }
 
@@ -121,6 +121,9 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
 	static auto& postProcessShader = m_shaderCache.at("PostProcessShader");
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
+	static auto& edgeShader = m_shaderCache.at("SMAAEdgeDetectShader");
+	static auto& neighbourShader = m_shaderCache.at("SMAANeighbourhoodShader");
+	static auto& blendShader = m_shaderCache.at("SMAABlendShader");
 
 	/*
 	m_forwardShader.Bind();
@@ -145,7 +148,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	lightCullShader.SetUniform("view", viewMatrix);
 
 	glActiveTexture(GL_TEXTURE8);
-	lightCullShader.SetUniformi("depthMap", 8);
+	lightCullShader.SetUniformi("depthMap", 9);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
 
 	// Bind shader storage buffer objects for the light and index buffers
@@ -171,44 +174,51 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 
 	pbrShader.Bind();
 	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe);
-	
-	/*
-	// Update Directional Lights
-	if (scene.m_staticDirectionalLights.size() > 0) {
-		for (auto i = 0; i < scene.m_staticDirectionalLights.size(); ++i) {
-			static const auto directionalLights = "directionalLights[";
-			pbrShader.SetUniform(directionalLights + std::to_string(i) + "].color", scene.m_staticDirectionalLights[i].Color);
-			pbrShader.SetUniform(directionalLights + std::to_string(i) + "].direction", scene.m_staticDirectionalLights[i].Direction);
-		}
-	}
-	// Update Point Lights
-	if (scene.m_staticPointLights.size() > 0) {
-		for (auto i = 0; i < scene.m_staticPointLights.size(); ++i) {
-			static const auto pointLights = "pointLights[";
-			pbrShader.SetUniform(pointLights + std::to_string(i) + "].color", scene.m_staticPointLights[i].Color);
-			pbrShader.SetUniform(pointLights + std::to_string(i) + "].position", scene.m_staticPointLights[i].Position);
-		}
-	}
-	// Update Spot Lights
-	if (scene.m_staticSpotLights.size() > 0) {
-		for (auto i = 0; i < scene.m_staticSpotLights.size(); ++i) {
-			static const auto spotlights = "spotLights[";
-			pbrShader.SetUniform(spotlights + std::to_string(i) + "].color", scene.m_staticSpotLights[i].Color);
-			pbrShader.SetUniform(spotlights + std::to_string(i) + "].position", scene.m_staticSpotLights[i].Position);
-			pbrShader.SetUniform(spotlights + std::to_string(i) + "].direction", scene.m_staticSpotLights[i].Direction);
-			pbrShader.SetUniformf(spotlights + std::to_string(i) + "].cutoff", scene.m_staticSpotLights[i].Cutoff);
-			pbrShader.SetUniformf(spotlights + std::to_string(i) + "].outerCutoff", scene.m_staticSpotLights[i].OuterCutoff);
-		}
-	}
-	*/
+
 	renderModels(pbrShader, scene.m_renderList, false);
 
 	// Draw skybox
 	skyboxShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
 	m_skybox.Draw();
+
+	/*
+	// SMAA
+
+	// Edge Detection
+	m_edgeFBO.Bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	edgeShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
+	renderQuad();
+
 	
-	// Do post-processing
+	// Blending
+	m_blendFBO.Bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	blendShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_edgeTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_areaTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_searchTexture);
+	renderQuad();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	neighbourShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_blendTexture);
+
+	renderQuad();
+	*/
+	// Post processing
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	postProcessShader.Bind();
 	postProcessShader.SetUniformf("vibranceAmount", m_vibrance);
@@ -217,6 +227,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
 
 	renderQuad();
+	
 }
 
 /***********************************************************************************/
@@ -261,6 +272,8 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 		for (const auto& mesh : meshes) {
 			if (!depthPass) {
 				
+				shader.SetUniformi("applyMask", false);
+				
 				glActiveTexture(GL_TEXTURE3);
 				glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
 				glActiveTexture(GL_TEXTURE4);
@@ -273,8 +286,11 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 				//glActiveTexture(GL_TEXTURE7);
 				//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
 
-				//glActiveTexture(GL_TEXTURE0);
-				//glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
+				if (mesh.Material.AlphaMask != 0) {
+					glActiveTexture(GL_TEXTURE8);
+					glBindTexture(GL_TEXTURE_2D, mesh.Material.AlphaMask);
+					shader.SetUniformi("applyMask", true);
+				}
 			}
 			mesh.VAO.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
@@ -400,6 +416,22 @@ void RenderSystem::setupHDRBuffer() {
 /***********************************************************************************/
 void RenderSystem::setupSMAA() {
 
+	glGenTextures(1, &m_edgeTexture);
+	glBindTexture(GL_TEXTURE_2D, m_edgeTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	glGenTextures(1, &m_blendTexture);
+	glBindTexture(GL_TEXTURE_2D, m_blendTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
 	glGenTextures(1, &m_areaTexture);
 	glBindTexture(GL_TEXTURE_2D, m_areaTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -418,9 +450,28 @@ void RenderSystem::setupSMAA() {
 	const auto searchTex = ResourceManager::GetInstance().LoadBinaryFile("Data/shaders/smaa/smaa_search.raw");
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, m_searchTexWidth, m_searchTexHeight, 0, GL_RED, GL_UNSIGNED_BYTE, searchTex.data());
 
+	m_edgeFBO.Init("SMAA Edge FBO", m_width, m_height);
+	m_edgeFBO.Bind();
+	m_edgeFBO.AttachTexture(m_edgeTexture, GLFramebuffer::AttachmentType::COLOR0);
+
+	m_blendFBO.Init("SMAA Blend FBO", m_width, m_height);
+	m_blendFBO.Bind();
+	m_blendFBO.AttachTexture(m_blendTexture, GLFramebuffer::AttachmentType::COLOR0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	auto& edgeShader = m_shaderCache.at("SMAAEdgeDetectShader");
+	edgeShader.Bind();
+	edgeShader.SetUniformi("albedo_tex", 0);
+
+	auto& blendShader = m_shaderCache.at("SMAABlendShader");
+	blendShader.Bind();
+	blendShader.SetUniformi("edge_tex", 0).SetUniformi("area_tex", 1).SetUniformi("search_tex", 2);
+
+	auto& neighbourShader = m_shaderCache.at("SMAANeighbourhoodShader");
+	neighbourShader.Bind();
+	neighbourShader.SetUniformi("albedo_tex", 0).SetUniformi("blend_tex", 1);
 }
 
 /***********************************************************************************/

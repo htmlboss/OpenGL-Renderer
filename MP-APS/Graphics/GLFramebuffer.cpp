@@ -3,13 +3,13 @@
 #include <iostream>
 
 /***********************************************************************************/
-void GLFramebuffer::AttachTexture(const GLuint texID, const AttachmentType colorAttach) const {
+void GLFramebuffer::AttachTexture(const GLuint& texID, const AttachmentType colorAttach) const {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, static_cast<int>(colorAttach), GL_TEXTURE_2D, texID, 0);
 	checkErrors();
 }
 
 /***********************************************************************************/
-void GLFramebuffer::AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const {
+void GLFramebuffer::AttachRenderBuffer(const GLuint& rboID, const AttachmentType type) const {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, static_cast<int>(type), GL_RENDERBUFFER, rboID);
 	checkErrors();
 }

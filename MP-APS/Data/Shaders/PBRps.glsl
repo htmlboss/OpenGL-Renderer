@@ -3,7 +3,7 @@
 in FragData {
     vec2 TexCoords;
     vec3 FragPos;
-    vec3 Normal;
+    mat3 TBN;
     noperspective vec3 wireframeDist;
 } fragData;
 
@@ -18,6 +18,7 @@ uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 //uniform sampler2D aoMap;
+uniform sampler2D alphaMask;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -26,34 +27,14 @@ uniform vec3 lightColors[4];
 uniform vec3 camPos;
 
 uniform bool wireframe;
+uniform bool applyMask;
 
 out vec4 FragColor;
 
 const float PI = 3.14159265359;
+
 // ----------------------------------------------------------------------------
-// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-// Don't worry if you don't get what's going on; you generally want to do normal 
-// mapping the usual way for performance anways; I do plan make a note of this 
-// technique somewhere later in the normal mapping tutorial.
-vec3 getNormalFromMap()
-{
-    vec3 tangentNormal = texture(normalMap, fragData.TexCoords).xyz * 2.0 - 1.0;
-
-    vec3 Q1  = dFdx(fragData.FragPos);
-    vec3 Q2  = dFdy(fragData.FragPos);
-    vec2 st1 = dFdx(fragData.TexCoords);
-    vec2 st2 = dFdy(fragData.TexCoords);
-
-    vec3 N   = normalize(fragData.Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
-// ----------------------------------------------------------------------------
-float DistributionGGX(vec3 N, vec3 H, float roughness)
-{
+float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a = roughness*roughness;
     float a2 = a*a;
     float NdotH = max(dot(N, H), 0.0);
@@ -66,8 +47,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
     return nom / denom;
 }
 // ----------------------------------------------------------------------------
-float GeometrySchlickGGX(float NdotV, float roughness)
-{
+float GeometrySchlickGGX(float NdotV, float roughness) {
     float r = (roughness + 1.0);
     float k = (r*r) / 8.0;
 
@@ -77,8 +57,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
     return nom / denom;
 }
 // ----------------------------------------------------------------------------
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
     float ggx2 = GeometrySchlickGGX(NdotV, roughness);
@@ -87,28 +66,28 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 // ----------------------------------------------------------------------------
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
-{
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 // ----------------------------------------------------------------------------
-vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
-{
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }   
 // ----------------------------------------------------------------------------
-void main()
-{       
+void main() {       
     // material properties
-    vec3 albedo = pow(texture(albedoMap, fragData.TexCoords).rgb, vec3(2.2));
-    float metallic = texture(metallicMap, fragData.TexCoords).r;
-    float roughness = texture(roughnessMap, fragData.TexCoords).r;
+    const vec3 albedo = pow(texture(albedoMap, fragData.TexCoords).rgb, vec3(2.2));
+    const float metallic = texture(metallicMap, fragData.TexCoords).r;
+    const float roughness = texture(roughnessMap, fragData.TexCoords).r;
     //float ao = texture(aoMap, fragData.TexCoords).r;
        
     // input lighting data
-    vec3 N = getNormalFromMap();
-    vec3 V = normalize(camPos - fragData.FragPos);
-    vec3 R = reflect(-V, N); 
+    // Get world-space normals from TBN matrix
+    vec3 N = texture(normalMap, fragData.TexCoords).rgb;
+    N = normalize(N * 2.0 - 1.0);
+    N = normalize(fragData.TBN * N); 
+    const vec3 V = normalize(camPos - fragData.FragPos);
+    const vec3 R = reflect(-V, N); 
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -117,8 +96,8 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i) 
-    {
+    /*
+    for(int i = 0; i < 4; ++i) {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - fragData.FragPos);
         vec3 H = normalize(V + L);
@@ -151,7 +130,8 @@ void main()
 
         // add to outgoing radiance Lo
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-    }   
+    }
+    */
     
     // ambient lighting (we now use IBL as the ambient term)
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -173,6 +153,10 @@ void main()
     
     vec3 color = ambient + Lo;
 
+    // Alpha mask
+    const vec4 mask = texture(alphaMask, fragData.TexCoords);
+    const float alpha = applyMask ? 1.0 * mask.r : 1.0;
+
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
@@ -185,5 +169,5 @@ void main()
 
     color = wireframe ? mix(vec3(1.0), color.rgb, edgeFactor) : color;
 
-    FragColor = vec4(color , 1.0);
+    FragColor = vec4(color, alpha);
 }

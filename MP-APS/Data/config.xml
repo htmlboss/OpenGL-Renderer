@@ -9,10 +9,6 @@
             <Shader path="Data/Shaders/wireframegs.glsl" type="geometry" />
     		<Shader path="Data/Shaders/PBRps.glsl" type="fragment" />
     	</Program>
-    	<Program name="TerrainShader">
-    		<Shader path="Data/Shaders/terrainvs.glsl" type="vertex" />
-    		<Shader path="Data/Shaders/terrainps.glsl" type="fragment" />
-    	</Program>
     	<Program name="DepthPassShader">
     		<Shader path="Data/Shaders/depthvs.glsl" type="vertex" />
     		<Shader path="Data/Shaders/depthps.glsl" type="fragment" />
@@ -35,6 +31,18 @@
         <Program name="DebugTexShader">
             <Shader path="Data/Shaders/debugtexvs.glsl" type="vertex" />
             <Shader path="Data/Shaders/debugtexps.glsl" type="fragment" />
+        </Program>
+        <Program name="SMAAEdgeDetectShader">
+        	<Shader path="Data/Shaders/smaa/edgedetectvs.glsl" type="vertex" />
+        	<Shader path="Data/Shaders/smaa/edgedetectps.glsl" type="fragment" />
+        </Program>
+        <Program name="SMAANeighbourhoodShader">
+        	<Shader path="Data/Shaders/smaa/neighbourvs.glsl" type="vertex" />
+        	<Shader path="Data/Shaders/smaa/neighbourps.glsl" type="fragment" />
+        </Program>
+        <Program name="SMAABlendShader">
+        	<Shader path="Data/Shaders/smaa/blendvs.glsl" type="vertex" />
+        	<Shader path="Data/Shaders/smaa/blendps.glsl" type="fragment" />
         </Program>
     </Renderer>
     

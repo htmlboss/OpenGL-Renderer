@@ -61,7 +61,7 @@ private:
 	void setupDepthBuffer();
 	// Configure HDR FBO
 	void setupHDRBuffer();
-	// Setup SMAA
+	// Setup Screen Morphological Anti-Aliasing
 	void setupSMAA();
 	
 	glm::vec3 RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen);
@@ -99,16 +99,17 @@ private:
 	const std::size_t m_areaTexHeight = 560;
 	const std::size_t m_searchTexWidth = 66;
 	const std::size_t m_searchTexHeight = 33;
-	GLuint m_areaTexture, m_searchTexture;
+	GLuint m_areaTexture, m_searchTexture, m_edgeTexture, m_blendTexture;
+	GLFramebuffer m_edgeFBO, m_blendFBO;
 
 	// Post-Processing
 	// HDR
 	GLuint m_hdrColorBufferTexture;
 	GLFramebuffer m_hdrFBO;
 	// Saturation
-	float m_saturation = 1.1f;
+	const float m_saturation = 1.1f;
 	// Vibrance
-	float m_vibrance = 0.3f;
+	const float m_vibrance = 0.3f;
 	const glm::vec4 m_coefficient{ 0.299f, 0.587f, 0.114f, 0.0f };
 
 	const std::size_t MAX_NUM_LIGHTS = 128;

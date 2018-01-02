@@ -41,8 +41,8 @@ public:
 	void Reset(const std::size_t width, const std::size_t height);
 	void Resize(const std::size_t width, const std::size_t height);
 
-	void AttachTexture(const GLuint texID, const AttachmentType colorAttach) const;
-	void AttachRenderBuffer(const GLuint rboID, const AttachmentType type) const;
+	void AttachTexture(const GLuint& texID, const AttachmentType colorAttach) const;
+	void AttachRenderBuffer(const GLuint& rboID, const AttachmentType type) const;
 	void Bind() const;
 	void Unbind() const;
 	void Blit(const BufferBitMasks bufferBit, const GLint targetID) const;

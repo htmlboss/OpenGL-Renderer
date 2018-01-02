@@ -166,10 +166,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMater
 			vertex.Tangent.x = mesh->mTangents[i].x;
 			vertex.Tangent.y = mesh->mTangents[i].y;
 			vertex.Tangent.z = mesh->mTangents[i].z;
-
-			vertex.Bitangent.x = mesh->mBitangents[i].x;
-			vertex.Bitangent.y = mesh->mBitangents[i].y;
-			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 
 		if (mesh->HasTextureCoords(0) && loadMaterial) {
@@ -220,9 +216,19 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMater
 			aiString roughnessPath;
 			mat->GetTexture(aiTextureType_SHININESS, 0, &roughnessPath);
 
+			aiString alphaMaskPath;
+			mat->GetTexture(aiTextureType_OPACITY, 0, &alphaMaskPath);
+
 			std::cout << "MATERIAL NAME: " << name.C_Str() << std::endl;
 
-			material.Init(name.C_Str(), m_path + albedoPath.C_Str(), "", m_path + metallicPath.C_Str(), m_path + normalPath.C_Str(), m_path + roughnessPath.C_Str());
+			material.Init(name.C_Str(),
+				m_path + albedoPath.C_Str(),
+				"",
+				m_path + metallicPath.C_Str(),
+				m_path + normalPath.C_Str(),
+				m_path + roughnessPath.C_Str(),
+				m_path + alphaMaskPath.C_Str()
+			);
 
 			++m_numMats;
 			std::cout << "NUMBER OF MATERIALS: " << m_numMats << std::endl;

@@ -32,7 +32,7 @@ void WindowSystem::Init(const pugi::xml_node& windowNode) {
 #ifdef _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
-	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	const auto width = windowNode.attribute("width").as_uint();
 	const auto height = windowNode.attribute("height").as_uint();
