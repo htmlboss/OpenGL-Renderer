@@ -4,7 +4,6 @@
 
 #include "../Input.h"
 #include "../SceneBase.h"
-#include "../ResourceManager.h"
 
 #include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -62,7 +61,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	setupLightBuffers();
 	setupScreenquad();
 	setupDepthBuffer();
-	setupHDRBuffer();
+	setupPostProcessing();
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -73,9 +72,9 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-	//glEnable(GL_FRAMEBUFFER_SRGB);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
+	glEnable(GL_MULTISAMPLE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// Create uniform buffer object for projection and view matrices
@@ -89,7 +88,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("prefilterMap", 1).SetUniformi("brdfLUT", 2);
 	pbrShader.SetUniformi("albedoMap", 3).SetUniformi("normalMap", 4).SetUniformi("metallicMap", 5);
-	pbrShader.SetUniformi("roughnessMap", 6).SetUniformi("alphaMask", 8);// .SetUniformi("aoMap", 7);
+	pbrShader.SetUniformi("roughnessMap", 6);//.SetUniformi("aoMap", 7);
 
 	auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	skyboxShader.Bind();
@@ -118,7 +117,8 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& depthShader = m_shaderCache.at("DepthPassShader");
 	static auto& lightCullShader = m_shaderCache.at("LightCullShader");
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
-	static auto& postProcessShader = m_shaderCache.at("PostProcessShader");
+	static auto& blurShader = m_shaderCache.at("GaussianBlurShader");
+	static auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 
 	/*
@@ -154,6 +154,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	// Execute compute shader
 	glDispatchCompute(m_workGroupsX, m_workGroupsY, 1);
 
+	// Regular rendering
 	m_hdrFBO.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -178,14 +179,34 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glActiveTexture(GL_TEXTURE0);
 	m_skybox.Draw();
 
-	// Post processing
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	postProcessShader.Bind();
-	postProcessShader.SetUniformf("vibranceAmount", m_vibrance);
-	postProcessShader.SetUniform("vibranceCoefficient", m_coefficient);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
+	// Do bloom
+	blurShader.Bind();
+	bool horizontal = true, first_iteration = true;
+	static const unsigned int amount = 10;
+	for (unsigned int i = 0; i < amount; i++) {
+		m_pingPongFBOs[horizontal].Bind();
 
+		blurShader.SetUniformi("horizontal", horizontal);
+
+		// Bind texture of other framebuffer (or scene if first iteration)
+		glBindTexture(GL_TEXTURE_2D, first_iteration ? m_brightnessThresholdColorBuffer : m_pingPongColorBuffers[!horizontal]);
+
+		renderQuad();
+		horizontal = !horizontal;
+
+		if (first_iteration) {
+			first_iteration = false;
+		}
+	}
+
+	// Blend bloom with original image and apply other post-processing effects
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	bloomBlendShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_hdrColorBuffer);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[!horizontal]);
 	renderQuad();
 	
 }
@@ -217,7 +238,7 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 
-	UpdateLights(delta);
+	//UpdateLights(delta);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -232,8 +253,6 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 		for (const auto& mesh : meshes) {
 			if (!depthPass) {
 				
-				shader.SetUniformi("applyMask", false);
-				
 				glActiveTexture(GL_TEXTURE3);
 				glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
 				glActiveTexture(GL_TEXTURE4);
@@ -245,12 +264,6 @@ void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<Model
 				
 				//glActiveTexture(GL_TEXTURE7);
 				//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
-
-				if (mesh.Material.AlphaMask != 0) {
-					glActiveTexture(GL_TEXTURE8);
-					glBindTexture(GL_TEXTURE_2D, mesh.Material.AlphaMask);
-					shader.SetUniformi("applyMask", true);
-				}
 			}
 			mesh.VAO.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
@@ -353,24 +366,72 @@ void RenderSystem::setupDepthBuffer() {
 }
 
 /***********************************************************************************/
-void RenderSystem::setupHDRBuffer() {
+void RenderSystem::setupPostProcessing() {
 	
+	// HDR
 	m_hdrFBO.Reset(m_width, m_height);
 	m_hdrFBO.Bind();
-	GLuint rboDepth;
-	glGenTextures(1, &m_hdrColorBufferTexture);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	// Regular old HDR
+	glGenTextures(1, &m_hdrColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, m_hdrColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+	// For extracting bright parts of image for bloom
+	glGenTextures(1, &m_brightnessThresholdColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, m_brightnessThresholdColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	GLuint rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
-	// - Attach buffers
-	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
+	
+	// Attach buffers
+	m_hdrFBO.AttachTexture(m_hdrColorBuffer, GLFramebuffer::AttachmentType::COLOR0);
+	m_hdrFBO.AttachTexture(m_brightnessThresholdColorBuffer, GLFramebuffer::AttachmentType::COLOR1);
 	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
+
+	// Enable MRT
+	const unsigned int attachments[2] { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	m_hdrFBO.DrawBuffers(attachments);
+
+	// Bloom
+	glGenTextures(2, m_pingPongColorBuffers.data());
+	for (auto i = 0; i < 2; i++) {
+		m_pingPongFBOs[i].Reset(m_width, m_height);
+		m_pingPongFBOs[i].Bind();
+
+		glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		m_pingPongFBOs[i].AttachTexture(m_pingPongColorBuffers[i], GLFramebuffer::AttachmentType::COLOR0);
+	}
+
+	// Configure bloom + blur shader
+	auto& blurShader = m_shaderCache.at("GaussianBlurShader");
+	blurShader.Bind();
+	blurShader.SetUniformi("image", 0);
+
+	auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
+	bloomBlendShader.Bind();
+	bloomBlendShader.SetUniformi("scene", 0).SetUniformi("bloomBlur", 1);
+	bloomBlendShader.SetUniformf("vibranceAmount", m_vibrance);
+	bloomBlendShader.SetUniform("vibranceCoefficient", m_coefficient);
+	bloomBlendShader.SetUniformi("bloom", true);
+
 }
 
 /***********************************************************************************/

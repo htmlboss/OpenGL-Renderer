@@ -18,7 +18,6 @@ uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 //uniform sampler2D aoMap;
-uniform sampler2D alphaMask;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -27,9 +26,9 @@ uniform vec3 lightColors[4];
 uniform vec3 camPos;
 
 uniform bool wireframe;
-uniform bool applyMask;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 const float PI = 3.14159265359;
 
@@ -134,14 +133,14 @@ void main() {
     */
     
     // ambient lighting (we now use IBL as the ambient term)
-    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    const vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
     
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;     
     
     vec3 irradiance = texture(irradianceMap, N).rgb;
-    vec3 diffuse      = irradiance * albedo;
+    vec3 diffuse    = irradiance * albedo;
     
     // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
     const float MAX_REFLECTION_LOD = 4.0;
@@ -149,18 +148,18 @@ void main() {
     vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    vec3 ambient = (kD * diffuse + specular);// * ao;
+    const vec3 ambient = (kD * diffuse + specular);// * ao;
     
     vec3 color = ambient + Lo;
 
-    // Alpha mask
-    const vec4 mask = texture(alphaMask, fragData.TexCoords);
-    const float alpha = applyMask ? 1.0 * mask.r : 1.0;
-
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    // Apply bloom threshold
+    const float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0) {
+        BrightColor = vec4(color, 1.0);
+    }
+    else {
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
 
     // Wireframe
     const vec3 d = fwidth(fragData.wireframeDist);
@@ -169,5 +168,5 @@ void main() {
 
     color = wireframe ? mix(vec3(1.0), color.rgb, edgeFactor) : color;
 
-    FragColor = vec4(color, alpha);
+    FragColor = vec4(color, 1.0);
 }

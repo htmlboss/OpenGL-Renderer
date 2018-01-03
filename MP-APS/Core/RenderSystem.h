@@ -59,8 +59,8 @@ private:
 	void setupLightStorageBuffer();
 	// Configure Depth FBO
 	void setupDepthBuffer();
-	// Configure HDR FBO
-	void setupHDRBuffer();
+	// Configure post-processing effects
+	void setupPostProcessing();
 	
 	glm::vec3 RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen);
 	void UpdateLights(const double dt);
@@ -94,12 +94,15 @@ private:
 
 	// Post-Processing
 	// HDR
-	GLuint m_hdrColorBufferTexture;
+	GLuint m_hdrColorBuffer, m_brightnessThresholdColorBuffer;
 	GLFramebuffer m_hdrFBO;
+	// Bloom
+	std::array<GLFramebuffer, 2> m_pingPongFBOs;
+	std::array<GLuint, 2> m_pingPongColorBuffers;
 	// Saturation
 	const float m_saturation = 1.1f;
 	// Vibrance
-	const float m_vibrance = 0.3f;
+	const float m_vibrance = 0.1f;
 	const glm::vec4 m_coefficient{ 0.299f, 0.587f, 0.114f, 0.0f };
 
 	const std::size_t MAX_NUM_LIGHTS = 128;

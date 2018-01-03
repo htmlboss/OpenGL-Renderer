@@ -10,7 +10,7 @@ layout (std140, binding = 0) uniform Matrices {
 out vec3 WorldPos;
 
 void main() {
-	WorldPos = position;
+	WorldPos = vec3(position.x, -position.y, position.z); // Flip the y-axis otherwise the reflection probe will be upside down.
     
     const vec4 pos = projection * mat4(mat3(view)) * vec4(position, 1.0);
 

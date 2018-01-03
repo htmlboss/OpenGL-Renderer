@@ -20,12 +20,15 @@ Physically Based Rendering:
 ![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/03.png "Physically Based Rendering")
 ![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/04.png "Physically Based Rendering")
 
+Bloom:
+![Bloom](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/05.png "Bloom")
+
 (OLD VERSION) CPU-based terrain generation using Perlin noise:
 ![Terrain](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/01.png "Terrain")
 
 ## Features
 * Assimp model loading.
-* Post processing (HDR, saturation, vibrance).
+* Post processing (HDR, vibrance, bloom).
 * Parallel AABB frustum culling.
 * XML engine configuration.
 * Support for `#include` directives in shaders.
@@ -33,6 +36,7 @@ Physically Based Rendering:
 * Physically-based rendering.
 
 ## WIP
+* Configurable bloom via uniforms.
 
 ## Roadmap
 * Re-implementing Forward+.

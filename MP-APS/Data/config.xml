@@ -24,13 +24,17 @@
             <Shader path="Data/Shaders/skyboxvs.glsl" type="vertex" />
             <Shader path="Data/Shaders/skyboxps.glsl" type="fragment" />
         </Program>
-        <Program name="PostProcessShader">
-            <Shader path="Data/Shaders/postprocessvs.glsl" type="vertex" />
-            <Shader path="Data/Shaders/postprocessps.glsl" type="fragment" />
-        </Program>
         <Program name="DebugTexShader">
             <Shader path="Data/Shaders/debugtexvs.glsl" type="vertex" />
             <Shader path="Data/Shaders/debugtexps.glsl" type="fragment" />
+        </Program>
+        <Program name="GaussianBlurShader">
+            <Shader path="Data/Shaders/screenquadvs.glsl" type="vertex" />
+            <Shader path="Data/Shaders/gaussianblurps.glsl" type="fragment" />
+        </Program>
+        <Program name="BloomBlendShader">
+            <Shader path="Data/Shaders/screenquadvs.glsl" type="vertex" />
+            <Shader path="Data/Shaders/bloomblendps.glsl" type="fragment" />
         </Program>
     </Renderer>
     

@@ -28,12 +28,14 @@ std::string ResourceManager::LoadTextFile(const std::string_view path) const {
 
 /***********************************************************************************/
 unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
 	
+	// Dont flip HDR otherwise the probe will be upside down. We flip the y-coord in the
+	// shader to correctly render the texture.
 	int width, height, nrComp;
 	auto* data = stbi_loadf(path.data(), &width, &height, &nrComp, 0);
 	
-	stbi_set_flip_vertically_on_load(false);
+	//stbi_set_flip_vertically_on_load(false);
 
 	if (!data) {
 		std::cerr << "Resource Manager: Failed to load HDRI." << std::endl;

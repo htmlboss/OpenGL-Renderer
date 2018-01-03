@@ -33,6 +33,8 @@ void GLFramebuffer::Reset(const std::size_t width, const std::size_t height) {
 	glGenFramebuffers(1, &m_fbo);
 	m_width = width;
 	m_height = height;
+
+	checkErrors();
 }
 
 /***********************************************************************************/
