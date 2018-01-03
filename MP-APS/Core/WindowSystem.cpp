@@ -29,6 +29,7 @@ void WindowSystem::Init(const pugi::xml_node& windowNode) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, windowNode.attribute("major").as_int());
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, windowNode.attribute("minor").as_int());
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif

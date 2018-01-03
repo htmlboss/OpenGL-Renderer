@@ -61,8 +61,6 @@ private:
 	void setupDepthBuffer();
 	// Configure HDR FBO
 	void setupHDRBuffer();
-	// Setup Screen Morphological Anti-Aliasing
-	void setupSMAA();
 	
 	glm::vec3 RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen);
 	void UpdateLights(const double dt);
@@ -93,14 +91,6 @@ private:
 
 	// Screen-quad
 	GLVertexArray m_quadVAO;
-
-	// SMAA
-	const std::size_t m_areaTexWidth = 160;
-	const std::size_t m_areaTexHeight = 560;
-	const std::size_t m_searchTexWidth = 66;
-	const std::size_t m_searchTexHeight = 33;
-	GLuint m_areaTexture, m_searchTexture, m_edgeTexture, m_blendTexture;
-	GLFramebuffer m_edgeFBO, m_blendFBO;
 
 	// Post-Processing
 	// HDR

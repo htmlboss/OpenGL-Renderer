@@ -63,7 +63,6 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	setupScreenquad();
 	setupDepthBuffer();
 	setupHDRBuffer();
-	setupSMAA();
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -121,9 +120,6 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
 	static auto& postProcessShader = m_shaderCache.at("PostProcessShader");
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
-	static auto& edgeShader = m_shaderCache.at("SMAAEdgeDetectShader");
-	static auto& neighbourShader = m_shaderCache.at("SMAANeighbourhoodShader");
-	static auto& blendShader = m_shaderCache.at("SMAABlendShader");
 
 	/*
 	m_forwardShader.Bind();
@@ -182,42 +178,6 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glActiveTexture(GL_TEXTURE0);
 	m_skybox.Draw();
 
-	/*
-	// SMAA
-
-	// Edge Detection
-	m_edgeFBO.Bind();
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	edgeShader.Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	renderQuad();
-
-	
-	// Blending
-	m_blendFBO.Bind();
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	blendShader.Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_edgeTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_areaTexture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_searchTexture);
-	renderQuad();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	neighbourShader.Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_hdrColorBufferTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_blendTexture);
-
-	renderQuad();
-	*/
 	// Post processing
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	postProcessShader.Bind();
@@ -411,67 +371,6 @@ void RenderSystem::setupHDRBuffer() {
 	// - Attach buffers
 	m_hdrFBO.AttachTexture(m_hdrColorBufferTexture, GLFramebuffer::AttachmentType::COLOR0);
 	m_hdrFBO.AttachRenderBuffer(rboDepth, GLFramebuffer::AttachmentType::DEPTH);
-}
-
-/***********************************************************************************/
-void RenderSystem::setupSMAA() {
-
-	glGenTextures(1, &m_edgeTexture);
-	glBindTexture(GL_TEXTURE_2D, m_edgeTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
-
-	glGenTextures(1, &m_blendTexture);
-	glBindTexture(GL_TEXTURE_2D, m_blendTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
-
-	glGenTextures(1, &m_areaTexture);
-	glBindTexture(GL_TEXTURE_2D, m_areaTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	const auto areaTex = ResourceManager::GetInstance().LoadBinaryFile("Data/shaders/smaa/smaa_area.raw");
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, m_areaTexWidth, m_areaTexHeight, 0, GL_RG, GL_UNSIGNED_BYTE, areaTex.data());
-
-	glGenTextures(1, &m_searchTexture);
-	glBindTexture(GL_TEXTURE_2D, m_searchTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	const auto searchTex = ResourceManager::GetInstance().LoadBinaryFile("Data/shaders/smaa/smaa_search.raw");
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, m_searchTexWidth, m_searchTexHeight, 0, GL_RED, GL_UNSIGNED_BYTE, searchTex.data());
-
-	m_edgeFBO.Init("SMAA Edge FBO", m_width, m_height);
-	m_edgeFBO.Bind();
-	m_edgeFBO.AttachTexture(m_edgeTexture, GLFramebuffer::AttachmentType::COLOR0);
-
-	m_blendFBO.Init("SMAA Blend FBO", m_width, m_height);
-	m_blendFBO.Bind();
-	m_blendFBO.AttachTexture(m_blendTexture, GLFramebuffer::AttachmentType::COLOR0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	auto& edgeShader = m_shaderCache.at("SMAAEdgeDetectShader");
-	edgeShader.Bind();
-	edgeShader.SetUniformi("albedo_tex", 0);
-
-	auto& blendShader = m_shaderCache.at("SMAABlendShader");
-	blendShader.Bind();
-	blendShader.SetUniformi("edge_tex", 0).SetUniformi("area_tex", 1).SetUniformi("search_tex", 2);
-
-	auto& neighbourShader = m_shaderCache.at("SMAANeighbourhoodShader");
-	neighbourShader.Bind();
-	neighbourShader.SetUniformi("albedo_tex", 0).SetUniformi("blend_tex", 1);
 }
 
 /***********************************************************************************/
