@@ -42,11 +42,12 @@ Bloom:
 * Re-implementing Forward+.
 * More post-processing effects.
 * FXAA ([http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html](http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html)).
-* CDLOD Terrain.
 * Switch to sampler objects.
-* Some kind of GUI (which will lead to a very simple "scene configurator" mode).
+* Some kind of GUI.
+* Atmospheric scattering: ([https://github.com/korgan00/TFG-Atmospheric-Scattering](https://github.com/korgan00/TFG-Atmospheric-Scattering)) or ([https://ebruneton.github.io/precomputed_atmospheric_scattering/](https://ebruneton.github.io/precomputed_atmospheric_scattering/))
 
 ## Pipe-dreaming
+* CDLOD Terrain.
 * Planetary rendering.
 * Global illumination (Cascaded Light Propagation Volumes).
 
