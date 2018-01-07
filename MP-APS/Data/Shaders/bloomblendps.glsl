@@ -6,7 +6,6 @@ in vec2 TexCoords;
 
 uniform sampler2D scene;
 uniform sampler2D bloomBlur;
-uniform bool bloom;
 
 uniform vec4 vibranceCoefficient;
 uniform float vibranceAmount;
@@ -29,14 +28,12 @@ void main() {
     const vec3 bloomColor = texture(bloomBlur, TexCoords).rgb;
     
     vec3 hdrColor = texture(scene, TexCoords).rgb;
-    if(bloom) {
-        hdrColor += bloomColor; // additive blending
-    }
+    hdrColor += bloomColor; // apply bloom
 
     hdrColor = vibrance(hdrColor, vibranceAmount);
 
     // Tone mapping
-    vec3 result = vec3(1.0) - exp(-hdrColor * 1.0);
+    vec3 result = vec3(1.0) - exp(-hdrColor);
     // Also gamma correct while we're at it       
     result = pow(result, vec3(1.0 / gamma));
     

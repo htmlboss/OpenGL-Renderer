@@ -88,7 +88,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("prefilterMap", 1).SetUniformi("brdfLUT", 2);
 	pbrShader.SetUniformi("albedoMap", 3).SetUniformi("normalMap", 4).SetUniformi("metallicMap", 5);
-	pbrShader.SetUniformi("roughnessMap", 6);//.SetUniformi("aoMap", 7);
+	pbrShader.SetUniformi("roughnessMap", 6).SetUniformf("bloomThreshold", 1.0f);//.SetUniformi("aoMap", 7);
 
 	auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	skyboxShader.Bind();
@@ -111,7 +111,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
-	const auto viewMatrix = scene.GetCamera().GetViewMatrix();
+	const auto viewMatrix = scene.m_camera.GetViewMatrix();
 
 	// Get the shaders we need (static vars initialized during first render call).
 	static auto& depthShader = m_shaderCache.at("DepthPassShader");
@@ -120,22 +120,13 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& blurShader = m_shaderCache.at("GaussianBlurShader");
 	static auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
-
-	/*
-	m_forwardShader.Bind();
-	m_forwardShader.SetUniform("viewPos", camera.GetPosition());
-	m_forwardShader.SetUniform("light.direction", renderData.Sun.Direction);
-	m_forwardShader.SetUniform("light.ambient", { 0.1f, 0.1f, 0.1f });
-	m_forwardShader.SetUniform("light.diffuse", renderData.Sun.Color);
-	m_forwardShader.SetUniform("light.specular", glm::vec3(1.0f));
-	*/
 	
 	// Step 1: Render the depth of the scene to a depth map
 	depthShader.Bind();
 	
 	m_depthFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderModels(depthShader, scene.m_renderList, true);
+	renderModelsNoTextures(depthShader, scene.m_renderList);
 	m_depthFBO.Unbind();
 
 	// Step 2: Perform light culling on point lights in the scene
@@ -172,7 +163,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	pbrShader.Bind();
 	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe);
 
-	renderModels(pbrShader, scene.m_renderList, false);
+	renderModelsWithTextures(pbrShader, scene.m_renderList);
 
 	// Draw skybox
 	skyboxShader.Bind();
@@ -244,27 +235,39 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 }
 
 /***********************************************************************************/
-void RenderSystem::renderModels(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList, const bool depthPass) const {
+void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const {
 
 	for (const auto& model : renderList) {
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
 		
 		const auto meshes = model->GetMeshes();
 		for (const auto& mesh : meshes) {
-			if (!depthPass) {
-				
-				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
-				glActiveTexture(GL_TEXTURE4);
-				glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
-				glActiveTexture(GL_TEXTURE5);
-				glBindTexture(GL_TEXTURE_2D, mesh.Material.MetallicMap);
-				glActiveTexture(GL_TEXTURE6);
-				glBindTexture(GL_TEXTURE_2D, mesh.Material.RoughnessMap);
-				
-				//glActiveTexture(GL_TEXTURE7);
-				//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
-			}
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material.MetallicMap);
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material.RoughnessMap);
+			//glActiveTexture(GL_TEXTURE7);
+			//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
+
+			mesh.VAO.Bind();
+			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
+}
+
+/***********************************************************************************/
+void RenderSystem::renderModelsNoTextures(GLShaderProgram & shader, const std::vector<ModelPtr>& renderList) const {
+	
+	for (const auto& model : renderList) {
+		shader.SetUniform("modelMatrix", model->GetModelMatrix());
+
+		const auto meshes = model->GetMeshes();
+		for (const auto& mesh : meshes) {
 			mesh.VAO.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -427,10 +430,12 @@ void RenderSystem::setupPostProcessing() {
 
 	auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
 	bloomBlendShader.Bind();
+	
 	bloomBlendShader.SetUniformi("scene", 0).SetUniformi("bloomBlur", 1);
+
 	bloomBlendShader.SetUniformf("vibranceAmount", m_vibrance);
 	bloomBlendShader.SetUniform("vibranceCoefficient", m_coefficient);
-	bloomBlendShader.SetUniformi("bloom", true);
+
 
 }
 

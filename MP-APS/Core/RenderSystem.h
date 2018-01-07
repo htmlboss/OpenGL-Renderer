@@ -48,7 +48,9 @@ private:
 	// Helper functions
 
 	// Render models contained in the renderlist
-	void renderModels(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList, const bool shadowPass) const;
+	void renderModelsWithTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const;
+	// Render models without binding textures (for a depth or shadow pass perhaps)
+	void renderModelsNoTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const;
 	// Render NDC screenquad
 	void renderQuad() const;
 	// Configure NDC screenquad
@@ -99,8 +101,6 @@ private:
 	// Bloom
 	std::array<GLFramebuffer, 2> m_pingPongFBOs;
 	std::array<GLuint, 2> m_pingPongColorBuffers;
-	// Saturation
-	const float m_saturation = 1.1f;
 	// Vibrance
 	const float m_vibrance = 0.1f;
 	const glm::vec4 m_coefficient{ 0.299f, 0.587f, 0.114f, 0.0f };

@@ -36,12 +36,12 @@ Bloom:
 * Physically-based rendering.
 
 ## WIP
-* Configurable bloom via uniforms.
 
 ## Roadmap
 * Re-implementing Forward+.
-* More post-processing effects.
-* FXAA ([http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html](http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html)).
+* More post-processing effects:
+  * FXAA ([http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html](http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html)).
+  * Chromatic aberration ([https://gamedev.stackexchange.com/a/58412/74957](https://gamedev.stackexchange.com/a/58412/74957)).
 * Switch to sampler objects.
 * Some kind of GUI.
 * Atmospheric scattering: ([https://github.com/korgan00/TFG-Atmospheric-Scattering](https://github.com/korgan00/TFG-Atmospheric-Scattering)) or ([https://ebruneton.github.io/precomputed_atmospheric_scattering/](https://ebruneton.github.io/precomputed_atmospheric_scattering/))

@@ -19,6 +19,8 @@ uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 //uniform sampler2D aoMap;
 
+uniform float bloomThreshold;
+
 // lights
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
@@ -154,7 +156,7 @@ void main() {
 
     // Apply bloom threshold
     const float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 1.0) {
+    if(brightness > bloomThreshold) {
         BrightColor = vec4(color, 1.0);
     }
     else {

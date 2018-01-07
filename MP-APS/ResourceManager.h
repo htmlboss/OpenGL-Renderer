@@ -24,7 +24,7 @@ public:
 	// Loads an HDR image and generates an OpenGL floating-point texture.
 	unsigned int LoadHDRI(const std::string_view path) const;
 	// Loads an image (if not cached) and generates an OpenGL texture.
-	unsigned int LoadTexture(const std::string_view path);
+	unsigned int LoadTexture(const std::string_view path, const bool useMipMaps = true);
 	// Loads a binary file into a vector and returns it
 	std::vector<char> LoadBinaryFile(const std::string_view path) const;
 	
