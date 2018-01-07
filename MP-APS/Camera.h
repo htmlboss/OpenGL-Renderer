@@ -5,7 +5,7 @@
 class Camera {
 
 public:
-	Camera(const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, const glm::vec3& up = { 0.0f, 1.0f, 0.0f }, const float yaw = -90.0f, const float pitch = 0.0f, const float FOV = 90.0f) noexcept;
+	Camera(const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, const glm::vec3& up = { 0.0f, 1.0f, 0.0f }, const float yaw = -90.0f, const float pitch = 0.0f, const float FOV = 70.0f) noexcept;
 
 	void Update(const double deltaTime);
 
