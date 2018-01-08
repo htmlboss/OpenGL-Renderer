@@ -57,6 +57,8 @@ void WindowSystem::Init(const pugi::xml_node& windowNode) {
 	glfwSetKeyCallback(m_window, genericInputCallback(Input::GetInstance().keyPressed));
 	glfwSetCursorPosCallback(m_window, genericInputCallback(Input::GetInstance().mouseMoved));
 
+	glfwSwapInterval(windowNode.attribute("vsync").as_bool());
+
 	// Center window
 	const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	glfwSetWindowPos(m_window, (mode->width / 2) - width / 2, (mode->height / 2) - height / 2);
