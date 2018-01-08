@@ -57,6 +57,8 @@ private:
 	void setupScreenquad();
 	// Generate storage buffers for Forward+ rendering
 	void setupLightBuffers();
+	// Setup texture samplers
+	void setupTextureSamplers();
 	// Allocate space for lights
 	void setupLightStorageBuffer();
 	// Configure Depth FBO
@@ -75,6 +77,9 @@ private:
 
 	// Projection matrix
 	glm::mat4 m_projMatrix;
+
+	// Texture samplers
+	GLuint m_samplerPBRTextures;
 
 	// Storage buffers for lights and visible light indices
 	GLuint m_lightBuffer, m_visibleLightIndicesBuffer;

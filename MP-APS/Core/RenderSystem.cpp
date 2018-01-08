@@ -60,6 +60,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 
 	setupLightBuffers();
 	setupScreenquad();
+	setupTextureSamplers();
 	setupDepthBuffer();
 	setupPostProcessing();
 
@@ -149,9 +150,6 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	m_hdrFBO.Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//m_lightAccumShader.Bind();
-	//m_lightAccumShader.SetUniform("viewPosition", camera.GetPosition());
-
 	// Bind pre-computed IBL data
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetIrradianceMap());
@@ -236,6 +234,11 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 
 /***********************************************************************************/
 void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const {
+	glBindSampler(m_samplerPBRTextures, 3);
+	glBindSampler(m_samplerPBRTextures, 4);
+	glBindSampler(m_samplerPBRTextures, 5);
+	glBindSampler(m_samplerPBRTextures, 6);
+	// glBindSampler(m_samplerPBRTextures, 7);
 
 	for (const auto& model : renderList) {
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
@@ -258,6 +261,8 @@ void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
+
+	glBindSampler(m_samplerPBRTextures, 0);
 }
 
 /***********************************************************************************/
@@ -316,6 +321,22 @@ void RenderSystem::setupLightBuffers() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	setupLightStorageBuffer();
+}
+
+/***********************************************************************************/
+void RenderSystem::setupTextureSamplers() {
+	// Find max supported hardware anisotropy
+	float aniso = 0.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+
+	// Sampler for PBR textures used on meshes
+	glGenSamplers(1, &m_samplerPBRTextures);
+	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameterf(m_samplerPBRTextures, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+
 }
 
 /***********************************************************************************/
