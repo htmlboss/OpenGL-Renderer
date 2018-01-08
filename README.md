@@ -38,6 +38,9 @@ Bloom:
 ## WIP
 
 ## Roadmap
+* Per-material array textures:
+  * ([https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703](https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703))
+  * ([https://www.khronos.org/opengl/wiki/Array_Texture](https://www.khronos.org/opengl/wiki/Array_Texture))
 * Re-implementing Forward+.
 * More post-processing effects:
   * FXAA ([http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html](http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html)).
