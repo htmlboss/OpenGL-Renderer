@@ -38,6 +38,8 @@ Bloom:
 ## WIP
 
 ## Roadmap
+* Shadow mapping.
+* Shadow volumes ([http://www.alexandre-pestana.com/volumetric-lights/](http://www.alexandre-pestana.com/volumetric-lights/)).
 * Per-material array textures:
   * ([https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703](https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703))
   * ([https://www.khronos.org/opengl/wiki/Array_Texture](https://www.khronos.org/opengl/wiki/Array_Texture))
