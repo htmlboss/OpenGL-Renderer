@@ -10,6 +10,13 @@
 #include <stb_image.h>
 
 /***********************************************************************************/
+void ResourceManager::ReleaseAllResources() {
+	for (auto& tex : m_textureCache) {
+		glDeleteTextures(1, &tex.second);
+	}
+}
+
+/***********************************************************************************/
 std::string ResourceManager::LoadTextFile(const std::string_view path) const {
 #ifdef _DEBUG
 	std::cout << "Resource Manager: Loading text file: " << path << '\n';

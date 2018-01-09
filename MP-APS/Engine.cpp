@@ -77,5 +77,6 @@ void Engine::update() {
 /***********************************************************************************/
 void Engine::shutdown() const {
 	m_renderer.Shutdown();
+	ResourceManager::GetInstance().ReleaseAllResources();
 	m_mainWindow.Shutdown();
 }

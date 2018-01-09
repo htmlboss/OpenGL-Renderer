@@ -52,10 +52,10 @@ void SceneBase::Update(const double delta) {
 /***********************************************************************************/
 void SceneBase::cullViewFrustum() {
 	// TODO: optimize projection matrix calculation
-	ViewFrustum viewFrustum(m_camera.GetViewMatrix(), m_camera.GetProjMatrix(m_width, m_height));
+	const ViewFrustum viewFrustum(m_camera.GetViewMatrix(), m_camera.GetProjMatrix(m_width, m_height));
 	m_renderList.clear();
 
-	concurrency::parallel_for_each(m_sceneModels.cbegin(), m_sceneModels.cend(), [&](const auto model) {
+	concurrency::parallel_for_each(m_sceneModels.cbegin(), m_sceneModels.cend(), [&](const auto& model) {
 		const auto result = viewFrustum.TestIntersection(model->GetBoundingBox());
 
 		if (result == BoundingVolume::TestResult::INSIDE || result == BoundingVolume::TestResult::INTERSECT) {

@@ -13,9 +13,8 @@
 
 /***********************************************************************************/
 RenderSystem::RenderSystem() :	m_width{0},
-							m_height{0},
-							m_workGroupsX{0},
-							m_workGroupsY{0} {}
+								m_height{0},
+								m_shadowMapResolution{1024} {}
 
 /***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
@@ -38,10 +37,6 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	m_width = width;
 	m_height = height;
 
-	m_workGroupsX = (width + width % 8) / 8;
-	m_workGroupsY = (height + height % 8) / 8;
-
-	m_depthFBO.Init("Depth FBO", width, height);
 	m_hdrFBO.Init("HDR FBO", width, height);
 	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
 
@@ -58,10 +53,9 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
 
-	setupLightBuffers();
 	setupScreenquad();
 	setupTextureSamplers();
-	setupDepthBuffer();
+	setupShadowMap();
 	setupPostProcessing();
 
 #ifdef _DEBUG
@@ -116,7 +110,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 
 	// Get the shaders we need (static vars initialized during first render call).
 	static auto& depthShader = m_shaderCache.at("DepthPassShader");
-	static auto& lightCullShader = m_shaderCache.at("LightCullShader");
+	//static auto& lightCullShader = m_shaderCache.at("LightCullShader");
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
 	static auto& blurShader = m_shaderCache.at("GaussianBlurShader");
 	static auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
@@ -125,26 +119,9 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	// Step 1: Render the depth of the scene to a depth map
 	depthShader.Bind();
 	
-	m_depthFBO.Bind();
+	m_shadowDepthFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderModelsNoTextures(depthShader, scene.m_renderList);
-	m_depthFBO.Unbind();
-
-	// Step 2: Perform light culling on point lights in the scene
-	lightCullShader.Bind();
-	lightCullShader.SetUniform("projection", m_projMatrix);
-	lightCullShader.SetUniform("view", viewMatrix);
-
-	glActiveTexture(GL_TEXTURE8);
-	lightCullShader.SetUniformi("depthMap", 9);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-
-	// Bind shader storage buffer objects for the light and index buffers
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_lightBuffer);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_visibleLightIndicesBuffer);
-
-	// Execute compute shader
-	glDispatchCompute(m_workGroupsX, m_workGroupsY, 1);
 
 	// Regular rendering
 	m_hdrFBO.Bind();
@@ -171,7 +148,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	// Do bloom
 	blurShader.Bind();
 	bool horizontal = true, first_iteration = true;
-	static const unsigned int amount = 10;
+	static constexpr unsigned int amount = 10;
 	for (unsigned int i = 0; i < amount; i++) {
 		m_pingPongFBOs[horizontal].Bind();
 
@@ -219,17 +196,13 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 		m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 		InitView(camera);
 		glViewport(0, 0, m_width, m_height);
-		m_depthFBO.Resize(m_width, m_height);
+		m_shadowDepthFBO.Resize(m_width, m_height);
 	}
 
 	// Update view matrix inside UBO
 	const auto view = camera.GetViewMatrix();
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-
-	//UpdateLights(delta);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /***********************************************************************************/
@@ -287,6 +260,10 @@ void RenderSystem::renderQuad() const {
 }
 
 /***********************************************************************************/
+void RenderSystem::renderShadowMap() const {
+}
+
+/***********************************************************************************/
 void RenderSystem::setupScreenquad() {
 	const std::array<Vertex, 4> screenQuadVertices {
 		// Positions				// GLTexture Coords
@@ -307,23 +284,6 @@ void RenderSystem::setupScreenquad() {
 }
 
 /***********************************************************************************/
-void RenderSystem::setupLightBuffers() {
-	const auto numberOfTiles = m_workGroupsX * m_workGroupsY;
-
-	glGenBuffers(1, &m_lightBuffer);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_NUM_LIGHTS * sizeof(StaticPointLight), nullptr, GL_DYNAMIC_DRAW);
-
-	glGenBuffers(1, &m_visibleLightIndicesBuffer);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_visibleLightIndicesBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_NUM_LIGHTS, nullptr, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	setupLightStorageBuffer();
-}
-
-/***********************************************************************************/
 void RenderSystem::setupTextureSamplers() {
 	// Find max supported hardware anisotropy
 	float aniso = 0.0f;
@@ -340,40 +300,15 @@ void RenderSystem::setupTextureSamplers() {
 }
 
 /***********************************************************************************/
-void RenderSystem::setupLightStorageBuffer() {
-	if (m_lightBuffer == 0) {
-		std::cerr << "Error: Forward+ light buffer has not been created.\n";
-		std::abort();
+void RenderSystem::setupShadowMap() {
+	m_shadowDepthFBO.Init("Shadow Depth FBO", m_shadowMapResolution, m_shadowMapResolution);
+	m_shadowDepthFBO.Bind();
+
+	if (m_shadowDepthTexture) {
+		glDeleteTextures(1, &m_shadowDepthTexture);
 	}
-
-	std::random_device rd;
-	std::mt19937_64 gen(rd());
-	std::uniform_real_distribution<> dist(0.0f, 1.0f);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	auto* pointLights = (StaticPointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-	
-	/*
-	for (auto i = 0; i < MAX_NUM_LIGHTS; i++) {
-		auto& light = pointLights[i];
-		light.Position = glm::vec4(RandomPosition(dist, gen), 1.0f);
-		light.Color = glm::vec4(1.0f + dist(gen), 1.0f + dist(gen), 1.0f + dist(gen), 1.0f);
-		light.RadiusAndPadding = glm::vec4(glm::vec3(0.0f), 30.0f);
-	}
-	*/
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
-
-/***********************************************************************************/
-void RenderSystem::setupDepthBuffer() {
-	m_depthFBO.Bind();
-
-	if (m_depthTexture) {
-		glDeleteTextures(1, &m_depthTexture);
-	}
-	glGenTextures(1, &m_depthTexture);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	glGenTextures(1, &m_shadowDepthTexture);
+	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -382,11 +317,11 @@ void RenderSystem::setupDepthBuffer() {
 	const GLfloat borderColor[] { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	m_depthFBO.AttachTexture(m_depthTexture, GLFramebuffer::AttachmentType::DEPTH);
-	m_depthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
-	m_depthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_shadowDepthFBO.AttachTexture(m_shadowDepthTexture, GLFramebuffer::AttachmentType::DEPTH);
+	m_shadowDepthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
+	m_shadowDepthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
 	
-	m_depthFBO.Unbind();
+	m_shadowDepthFBO.Unbind();
 }
 
 /***********************************************************************************/
@@ -453,38 +388,7 @@ void RenderSystem::setupPostProcessing() {
 	bloomBlendShader.Bind();
 	
 	bloomBlendShader.SetUniformi("scene", 0).SetUniformi("bloomBlur", 1);
-
 	bloomBlendShader.SetUniformf("vibranceAmount", m_vibrance);
 	bloomBlendShader.SetUniform("vibranceCoefficient", m_coefficient);
 
-
-}
-
-/***********************************************************************************/
-glm::vec3 RenderSystem::RandomPosition(std::uniform_real_distribution<> dis, std::mt19937_64 gen) {
-	auto position = glm::vec3(0.0);
-	for (auto i = 0; i < 3; i++) {
-		const auto min = LIGHT_MIN_BOUNDS[i];
-		const auto max = LIGHT_MAX_BOUNDS[i];
-		position[i] = (GLfloat)dis(gen) * (max - min) + min;
-	}
-
-	return position;
-}
-
-/***********************************************************************************/
-void RenderSystem::UpdateLights(const double dt) {
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightBuffer);
-	StaticPointLight *pointLights = (StaticPointLight*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-
-	for (int i = 0; i < MAX_NUM_LIGHTS; i++) {
-		StaticPointLight &light = pointLights[i];
-		float min = LIGHT_MIN_BOUNDS[1];
-		float max = LIGHT_MAX_BOUNDS[1];
-
-		light.Position.y = fmod((light.Position.y + (-4.5f * dt) - min + max), max) + min;
-	}
-
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
