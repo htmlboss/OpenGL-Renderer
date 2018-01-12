@@ -36,6 +36,7 @@ Bloom:
 * Physically-based rendering.
 
 ## WIP
+* Depth-buffer optimization ([https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html](https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html)).
 
 ## Roadmap
 * Shadow mapping.
