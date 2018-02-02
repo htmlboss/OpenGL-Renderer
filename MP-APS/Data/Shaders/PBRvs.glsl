@@ -10,11 +10,13 @@ layout (std140, binding = 0) uniform Matrices {
   mat4 view;
 };
 uniform mat4 modelMatrix;
+uniform mat4 lightSpaceMatrix;
 
 out VertexData {
 	out vec2 TexCoords;
 	out vec3 FragPos;
 	out mat3 TBN;
+    out vec4 FragPosLightSpace;
 } vertexData;
 
 void main() {
@@ -32,6 +34,8 @@ void main() {
     const vec3 B = cross(N, T);
 
     vertexData.TBN = mat3(T, B, N);
+
+    vertexData.FragPosLightSpace = lightSpaceMatrix * vec4(vertexData.FragPos, 1.0);
 
     gl_Position = projection * view * vec4(vertexData.FragPos, 1.0);
 }

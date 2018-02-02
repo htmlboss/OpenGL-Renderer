@@ -13,8 +13,7 @@
 
 /***********************************************************************************/
 RenderSystem::RenderSystem() :	m_width{0},
-								m_height{0},
-								m_shadowMapResolution{1024} {}
+								m_height{0} {}
 
 /***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
@@ -36,6 +35,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 
 	m_width = width;
 	m_height = height;
+	m_shadowMapResolution = rendererNode.attribute("shadowResolution").as_uint();
 
 	m_hdrFBO.Init("HDR FBO", width, height);
 	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
@@ -52,11 +52,12 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 		// Compile and cache shader program
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
-
+	
 	setupScreenquad();
 	setupTextureSamplers();
 	setupShadowMap();
 	setupPostProcessing();
+	
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -78,13 +79,13 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_uboMatrices, 0, 2 * sizeof(glm::mat4));
-
+	
 	auto& pbrShader = m_shaderCache.at("PBRShader");
 	pbrShader.Bind();
 	pbrShader.SetUniformi("irradianceMap", 0).SetUniformi("prefilterMap", 1).SetUniformi("brdfLUT", 2);
 	pbrShader.SetUniformi("albedoMap", 3).SetUniformi("normalMap", 4).SetUniformi("metallicMap", 5);
-	pbrShader.SetUniformi("roughnessMap", 6).SetUniformf("bloomThreshold", 1.0f);//.SetUniformi("aoMap", 7);
-
+	pbrShader.SetUniformi("roughnessMap", 6).SetUniformi("shadowMap", 7).SetUniformf("bloomThreshold", 1.0f);//.SetUniformi("aoMap", 7);
+	
 	auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	skyboxShader.Bind();
 	skyboxShader.SetUniformi("environmentMap", 0);
@@ -92,6 +93,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, width, height);
+
 }
 
 /***********************************************************************************/
@@ -106,22 +108,14 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
-	const auto viewMatrix = scene.m_camera.GetViewMatrix();
-
 	// Get the shaders we need (static vars initialized during first render call).
-	static auto& depthShader = m_shaderCache.at("DepthPassShader");
-	//static auto& lightCullShader = m_shaderCache.at("LightCullShader");
 	static auto& pbrShader = m_shaderCache.at("PBRShader");
 	static auto& blurShader = m_shaderCache.at("GaussianBlurShader");
 	static auto& bloomBlendShader = m_shaderCache.at("BloomBlendShader");
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	
-	// Step 1: Render the depth of the scene to a depth map
-	depthShader.Bind();
-	
-	m_shadowDepthFBO.Bind();
-	glClear(GL_DEPTH_BUFFER_BIT);
-	renderModelsNoTextures(depthShader, scene.m_renderList);
+	// Shadow mapping
+	renderShadowMap(scene);
 
 	// Regular rendering
 	m_hdrFBO.Bind();
@@ -134,9 +128,12 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetPrefilterMap());
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_skybox.GetBRDFLUT());
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
 
 	pbrShader.Bind();
-	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe);
+	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe).SetUniform("lightSpaceMatrix", m_lightSpaceMatrix);
+	pbrShader.SetUniform("directionalLight", scene.m_staticDirectionalLights[0].Direction).SetUniform("lightColor", scene.m_staticDirectionalLights[0].Color);
 
 	renderModelsWithTextures(pbrShader, scene.m_renderList);
 
@@ -149,7 +146,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	blurShader.Bind();
 	bool horizontal = true, first_iteration = true;
 	static constexpr unsigned int amount = 10;
-	for (unsigned int i = 0; i < amount; i++) {
+	for (unsigned int i = 0; i < amount; ++i) {
 		m_pingPongFBOs[horizontal].Bind();
 
 		blurShader.SetUniformi("horizontal", horizontal);
@@ -193,7 +190,6 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 		m_width = Input::GetInstance().GetWidth();
 		m_height = Input::GetInstance().GetHeight();
 
-		m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 		InitView(camera);
 		glViewport(0, 0, m_width, m_height);
 		m_shadowDepthFBO.Resize(m_width, m_height);
@@ -239,7 +235,7 @@ void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::
 }
 
 /***********************************************************************************/
-void RenderSystem::renderModelsNoTextures(GLShaderProgram & shader, const std::vector<ModelPtr>& renderList) const {
+void RenderSystem::renderModelsNoTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const {
 	
 	for (const auto& model : renderList) {
 		shader.SetUniform("modelMatrix", model->GetModelMatrix());
@@ -260,8 +256,32 @@ void RenderSystem::renderQuad() const {
 }
 
 /***********************************************************************************/
-void RenderSystem::renderShadowMap() const {
+void RenderSystem::renderShadowMap(const SceneBase& scene) {
+	static auto& shadowDepthShader = m_shaderCache.at("ShadowDepthShader");
+	shadowDepthShader.Bind();
+	static constexpr float near_plane = 0.0f, far_plane = 100.0f;
+	static const glm::mat4 lightProjection = glm::ortho(-50.0f, 50.0f, 50.0f, -50.0f, near_plane, far_plane);
+
+	static const glm::mat4 lightView = glm::lookAt(scene.m_staticDirectionalLights[0].Direction, 
+								  glm::vec3(0.0), 
+								  glm::vec3(0.0f, -1.0f, 0.0f));
+
+	m_lightSpaceMatrix = lightProjection * lightView;
+
+	shadowDepthShader.SetUniform("lightSpaceMatrix", m_lightSpaceMatrix);
+	
+	glCullFace(GL_FRONT); // Solve peter-panning
+	glViewport(0, 0, m_shadowMapResolution, m_shadowMapResolution);
+	m_shadowDepthFBO.Bind();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	renderModelsNoTextures(shadowDepthShader, scene.m_renderList);
+
+	m_shadowDepthFBO.Unbind();
+	glViewport(0, 0, m_width, m_height);
+	glCullFace(GL_BACK);
 }
+
 
 /***********************************************************************************/
 void RenderSystem::setupScreenquad() {
@@ -309,13 +329,13 @@ void RenderSystem::setupShadowMap() {
 	}
 	glGenTextures(1, &m_shadowDepthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_shadowMapResolution, m_shadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); // Clamp to border to fix over-sampling
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	const GLfloat borderColor[] { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	const float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor); 
 
 	m_shadowDepthFBO.AttachTexture(m_shadowDepthTexture, GLFramebuffer::AttachmentType::DEPTH);
 	m_shadowDepthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
@@ -352,7 +372,7 @@ void RenderSystem::setupPostProcessing() {
 	GLuint rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_width, m_height);
 	
 	// Attach buffers
 	m_hdrFBO.AttachTexture(m_hdrColorBuffer, GLFramebuffer::AttachmentType::COLOR0);

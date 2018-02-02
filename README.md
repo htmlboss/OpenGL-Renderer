@@ -36,10 +36,10 @@ Bloom:
 * Physically-based rendering.
 
 ## WIP
+* Shadow mapping.
 * Depth-buffer optimization ([https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html](https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html)).
 
 ## Roadmap
-* Shadow mapping.
 * Shadow volumes ([http://www.alexandre-pestana.com/volumetric-lights/](http://www.alexandre-pestana.com/volumetric-lights/)).
 * Per-material array textures:
   * ([https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703](https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703))

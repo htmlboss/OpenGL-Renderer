@@ -3,7 +3,7 @@
 #include <glm/vec4.hpp>
 
 struct StaticDirectionalLight {
-	StaticDirectionalLight() {}
+	StaticDirectionalLight() = default;
 
 	StaticDirectionalLight(const glm::vec3& color, const glm::vec3& direction) : Color(color),
 																				Direction(direction) {}

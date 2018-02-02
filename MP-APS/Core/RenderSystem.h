@@ -10,7 +10,6 @@
 
 /***********************************************************************************/
 // Forward Declarations
-class Terrain;
 class Camera;
 class SceneBase;
 class GLShaderProgram;
@@ -47,7 +46,7 @@ private:
 	// Render NDC screenquad
 	void renderQuad() const;
 	// Renders shadowmap
-	void renderShadowMap() const;
+	void renderShadowMap(const SceneBase& scene);
 	// Configure NDC screenquad
 	void setupScreenquad();
 	// Setup texture samplers
@@ -64,7 +63,7 @@ private:
 	GLuint m_uboMatrices;
 
 	// Projection matrix
-	glm::mat4 m_projMatrix;
+	glm::mat4 m_projMatrix, m_lightSpaceMatrix;
 
 	// Texture samplers
 	GLuint m_samplerPBRTextures;

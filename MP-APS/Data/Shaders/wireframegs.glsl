@@ -7,12 +7,14 @@ in VertexData {
 	vec2 TexCoords;
 	vec3 FragPos;
 	mat3 TBN;
+	vec4 FragPosLightSpace;
 } inData[];
 
 out FragData {
 	vec2 TexCoords;
 	vec3 FragPos;
 	mat3 TBN;
+	vec4 FragPosLightSpace;
 	// Noperspective so the interpolation is in screen-space
 	noperspective vec3 wireframeDist;
 } outData;
@@ -26,6 +28,7 @@ void main() {
 		outData.TexCoords = inData[i].TexCoords;
 		outData.FragPos = inData[i].FragPos;
 		outData.TBN = inData[i].TBN;
+		outData.FragPosLightSpace = inData[i].FragPosLightSpace;
 
 		// The attribute will be interpolated, so
         // all you have to do is set the ith dimension to 1.0 to get barycentric coordinates

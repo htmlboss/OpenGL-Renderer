@@ -10,7 +10,7 @@ public:
 	void Update(const double deltaTime);
 
 	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
-	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 1.0f, 500.0f); }
+	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 1.0f, 100.0f); }
 	auto GetPosition() const noexcept { return m_position; }
 
 private:
@@ -42,7 +42,7 @@ private:
 	// Eular Angles
 	double m_yaw, m_pitch;
 
-	const double m_speed = 25.0;
+	const double m_speed = 5.0;
 	const double m_sensitivity = 0.3;
 	const float m_FOV;
 

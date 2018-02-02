@@ -123,13 +123,13 @@ bool GLShaderProgram::linkAndValidate() {
 /***********************************************************************************/
 void GLShaderProgram::getUniforms() {
 	
-	auto total = -1;
+	int total = -1;
 	glGetProgramiv(m_programID, GL_ACTIVE_UNIFORMS, &total);
 	for (auto i = 0; i < total; ++i) {
 		auto name_len = -1, num = -1;
 		GLenum type = GL_ZERO;
 		char name[100];
-		glGetActiveUniform(m_programID, GLuint(i), sizeof(name) - 1, &name_len, &num, &type, name);
+		glGetActiveUniform(m_programID, static_cast<GLuint>(i), sizeof(name) - 1, &name_len, &num, &type, name);
 		name[name_len] = 0;
 
 		const auto nameStr = std::string(name);
