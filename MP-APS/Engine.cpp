@@ -2,6 +2,7 @@
 
 #include "Input.h"
 #include "ResourceManager.h"
+#include "SceneBase.h"
 
 #include <GLFW/glfw3.h>
 #include <pugixml.hpp>
@@ -11,7 +12,8 @@
 
 /***********************************************************************************/
 Engine::Engine(const std::string_view configPath) : m_mainWindow{},
-													m_renderer{} {
+													m_renderer{},
+													m_activeScene{nullptr} {
 
 	std::cout << "**************************************************\n";
 	std::cout << "Engine starting up...\n";
@@ -36,17 +38,33 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
 	m_renderer.Init(engineNode.child("Renderer"));
-	
-	std::cout << "**************************************************\n";
-	std::cout << "Initializing scene...\n";
-	m_scene = std::make_unique<SceneBase>(1280, 720);
+}
 
-	m_renderer.InitView(m_scene->GetCamera());
-	m_scene->Init();
+/***********************************************************************************/
+void Engine::AddScene(const SceneBase& scene) {
+	m_scenes.try_emplace(scene.GetName(), scene);
+}
+
+/***********************************************************************************/
+void Engine::SetActiveScene(const std::string_view sceneName) {
+	const auto& scene = m_scenes.find(sceneName.data());
+
+	if (scene == m_scenes.end()) {
+		std::cerr << "Engine Error: Scene not found: " << sceneName << std::endl;
+		return;
+	}
+
+	m_activeScene = &scene->second;
+	m_renderer.InitView(m_activeScene->GetCamera());
 }
 
 /***********************************************************************************/
 void Engine::Execute() {
+
+	if (m_activeScene == nullptr) {
+		std::cerr << "Engine Error: No active scene specified!" << std::endl;
+		std::abort();
+	}
 
 	std::cout << "\n**************************************************\n";
 	std::cout << "Engine initialization complete!\n";
@@ -56,7 +74,7 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		m_renderer.Render(*m_scene, false);
+		m_renderer.Render(*m_activeScene, false);
 
 		m_mainWindow.SwapBuffers();
 	}
@@ -70,8 +88,8 @@ void Engine::update() {
 	Input::GetInstance().Update();
 	m_mainWindow.Update();
 
-	m_scene->Update(m_timer.GetDelta());
-	m_renderer.Update(m_scene->GetCamera(), m_timer.GetDelta());
+	m_activeScene->Update(m_timer.GetDelta());
+	m_renderer.Update(m_activeScene->GetCamera(), m_timer.GetDelta());
 }
 
 /***********************************************************************************/

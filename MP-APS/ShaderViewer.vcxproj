@@ -353,9 +353,7 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Terrain\GridMesh.cpp" />
-    <ClCompile Include="Terrain\QuadTree.cpp" />
-    <ClCompile Include="Terrain\TerrainRenderer.cpp" />
+    <ClCompile Include="Terrain\Terrain.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
   </ItemGroup>
@@ -381,10 +379,8 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Terrain\GridMesh.h" />
-    <ClInclude Include="Terrain\QuadGridMesh.h" />
-    <ClInclude Include="Terrain\QuadTree.h" />
-    <ClInclude Include="Terrain\TerrainRenderer.h" />
+    <ClInclude Include="Terrain\Terrain.h" />
+    <ClInclude Include="Terrain\TerrainNode.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="ViewFrustum.h" />
   </ItemGroup>

@@ -77,13 +77,7 @@
     <ClCompile Include="PBRMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain\QuadTree.cpp">
-      <Filter>Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain\GridMesh.cpp">
-      <Filter>Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain\TerrainRenderer.cpp">
+    <ClCompile Include="Terrain\Terrain.cpp">
       <Filter>Terrain</Filter>
     </ClCompile>
   </ItemGroup>
@@ -157,16 +151,10 @@
     <ClInclude Include="PBRMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain\QuadTree.h">
+    <ClInclude Include="Terrain\TerrainNode.h">
       <Filter>Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain\GridMesh.h">
-      <Filter>Terrain</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain\QuadGridMesh.h">
-      <Filter>Terrain</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain\TerrainRenderer.h">
+    <ClInclude Include="Terrain\Terrain.h">
       <Filter>Terrain</Filter>
     </ClInclude>
   </ItemGroup>

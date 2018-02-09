@@ -5,11 +5,12 @@
 
 #include <array>
 
+// Stupid win32 junk
 #ifdef FAR
-#undef FAR
+	#undef FAR
 #endif
 #ifdef NEAR
-#undef NEAR
+	#undef NEAR
 #endif
 
 class AABB;

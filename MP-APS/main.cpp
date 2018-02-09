@@ -6,6 +6,8 @@
 #endif
 #include "Engine.h"
 
+#include "SceneBase.h"
+
 /***********************************************************************************/
 int main() {
 #ifdef _DEBUG
@@ -14,6 +16,12 @@ int main() {
 #endif
 
 	Engine engine("Data/config.xml");
+
+	SceneBase scene(1280, 720);
+	scene.Init("Crytek Sponza");
+
+	engine.AddScene(scene);
+	engine.SetActiveScene("Crytek Sponza");
 
 	engine.Execute();
 

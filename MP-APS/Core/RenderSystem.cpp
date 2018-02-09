@@ -263,7 +263,7 @@ void RenderSystem::renderShadowMap(const SceneBase& scene) {
 	static const glm::mat4 lightProjection = glm::ortho(-50.0f, 50.0f, 50.0f, -50.0f, near_plane, far_plane);
 
 	static const glm::mat4 lightView = glm::lookAt(scene.m_staticDirectionalLights[0].Direction, 
-								  glm::vec3(0.0), 
+								  glm::vec3(0.0f), 
 								  glm::vec3(0.0f, -1.0f, 0.0f));
 
 	m_lightSpaceMatrix = lightProjection * lightView;
