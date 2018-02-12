@@ -1,18 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MP-APS", "ShaderViewer.vcxproj", "{79953202-FB57-485E-89E1-3E6E37692583}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Editor_Release|x64 = Editor_Release|x64
+		Editor_Release|x86 = Editor_Release|x86
 		OpenGL_Debug|x64 = OpenGL_Debug|x64
 		OpenGL_Debug|x86 = OpenGL_Debug|x86
 		OpenGL_Release|x64 = OpenGL_Release|x64
 		OpenGL_Release|x86 = OpenGL_Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79953202-FB57-485E-89E1-3E6E37692583}.Editor_Release|x64.ActiveCfg = Editor_Release|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.Editor_Release|x64.Build.0 = Editor_Release|x64
+		{79953202-FB57-485E-89E1-3E6E37692583}.Editor_Release|x86.ActiveCfg = Editor_Release|Win32
+		{79953202-FB57-485E-89E1-3E6E37692583}.Editor_Release|x86.Build.0 = Editor_Release|Win32
 		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x64.ActiveCfg = Debug|x64
 		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x64.Build.0 = Debug|x64
 		{79953202-FB57-485E-89E1-3E6E37692583}.OpenGL_Debug|x86.ActiveCfg = Debug|Win32

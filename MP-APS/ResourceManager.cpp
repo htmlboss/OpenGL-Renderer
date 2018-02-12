@@ -11,6 +11,12 @@
 
 /***********************************************************************************/
 void ResourceManager::ReleaseAllResources() {
+	// Delete cached meshes
+	for (auto& model : m_modelCache) {
+		model.second->Delete();
+	}
+
+	// Deletes textures
 	for (auto& tex : m_textureCache) {
 		glDeleteTextures(1, &tex.second);
 	}
@@ -157,4 +163,15 @@ ModelPtr ResourceManager::CacheModel(const std::string_view name, const Model mo
 		return m_modelCache.insert_or_assign(name.data(), std::make_shared<Model>(model)).first->second;
 	}
 	return m_modelCache.try_emplace(name.data(), std::make_shared<Model>(model)).first->second;
+}
+
+/***********************************************************************************/
+void ResourceManager::UnloadModel(const std::string_view modelName) {
+	auto model = m_modelCache.find(modelName.data());
+
+	if (model != m_modelCache.end()) {
+		model->second->Delete();
+
+		m_modelCache.erase(modelName.data());
+	}
 }

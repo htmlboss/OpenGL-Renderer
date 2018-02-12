@@ -21,6 +21,11 @@ void GLVertexArray::Bind() const {
 }
 
 /***********************************************************************************/
+void GLVertexArray::Delete() {
+	glDeleteVertexArrays(1, &m_vao);
+}
+
+/***********************************************************************************/
 void GLVertexArray::EnableAttribute(const unsigned int index, const int size, const unsigned int offset, const void* data) {
 	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, size, GL_FLOAT, GL_FALSE, offset, data);

@@ -60,6 +60,13 @@ glm::mat4 Model::GetModelMatrix() const {
 }
 
 /***********************************************************************************/
+void Model::Delete() {
+	for (auto& mesh : m_meshes) {
+		mesh.VAO.Delete();
+	}
+}
+
+/***********************************************************************************/
 bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, const bool loadMaterial = true) {
 #ifdef _DEBUG
 	std::cout << "Loading model: " << m_name << '\n';

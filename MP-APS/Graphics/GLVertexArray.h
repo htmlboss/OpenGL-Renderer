@@ -21,6 +21,7 @@ public:
 	void AttachBuffer(const BufferType type, const size_t size, const DrawMode mode, const void* data);
 	void Bind() const;
 	void EnableAttribute(const GLuint index, const int size, const GLuint offset, const void* data);
+	void Delete();
 
 private:
 	GLuint m_vao;

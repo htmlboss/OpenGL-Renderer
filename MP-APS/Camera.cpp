@@ -13,7 +13,10 @@ Camera::Camera(const glm::vec3& position, const glm::vec3& up, const float yaw, 
 	m_FOV(FOV),
 	m_firstMouse(true),
 	m_prevX(0.0),
-	m_prevY(0.0) { updateVectors(); }
+	m_prevY(0.0) 
+{
+	updateVectors();
+}
 
 /***********************************************************************************/
 void Camera::Update(const double deltaTime) {
@@ -21,12 +24,12 @@ void Camera::Update(const double deltaTime) {
 	updateView();
 
 	// Update Keyboard
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_W)) { processKeyboard(Direction::FORWARD, deltaTime); }
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_S)) { processKeyboard(Direction::BACKWARD, deltaTime); }
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_A)) { processKeyboard(Direction::LEFT, deltaTime); }
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_D)) { processKeyboard(Direction::RIGHT, deltaTime); }
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_SPACE)) { processKeyboard(Direction::UP, deltaTime); }
-	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) { processKeyboard(Direction::DOWN, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_W)) { processKeyboard(Direction::FORWARD, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_S)) { processKeyboard(Direction::BACKWARD, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_A)) { processKeyboard(Direction::LEFT, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_D)) { processKeyboard(Direction::RIGHT, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_SPACE)) { processKeyboard(Direction::UP, deltaTime); }
+	if (Input::GetInstance().IsKeyHeld(GLFW_KEY_LEFT_CONTROL)) { processKeyboard(Direction::DOWN, deltaTime); }
 }
 
 /***********************************************************************************/

@@ -27,6 +27,9 @@ public:
 	void Translate(const glm::vec3& pos);
 	glm::mat4 GetModelMatrix() const;
 
+	// Destroys all OpenGL handles for all submeshes. This should only be called by ResourceManager.
+	void Delete();
+
 	auto GetMeshes() const noexcept { return m_meshes; }
 	auto GetBoundingBox() const noexcept { return m_aabb; }
 

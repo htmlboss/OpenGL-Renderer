@@ -8,8 +8,12 @@
 #endif
 
 class Input {
-	Input() = default;
+	Input() {
+		std::fill(m_keys.begin(), m_keys.end(), false);
+		std::fill(m_prevKeys.begin(), m_prevKeys.end(), false);
+	};
 	~Input() = default;
+
 public:
 
 	static auto& GetInstance() {
@@ -20,14 +24,26 @@ public:
 	Input(const Input&) = delete;
 	Input& operator=(const Input&) = delete;
 
-	void Update() noexcept {
+	void Update() {
 		m_mouseMoved = false;
 		m_shouldResize = false;
+
+		std::copy(m_keys.cbegin(), m_keys.cend(), m_prevKeys.begin());
 	}
 
 	// Getters
 	// Keyboard
-	auto IsKeyPressed(const size_t key) const noexcept {
+
+	// Was the key only tapped?
+	auto IsKeyPressed(const std::size_t key) const noexcept {
+#ifdef _DEBUG
+		assert(key < 1024);
+#endif
+		return m_keys[key] && !m_prevKeys[key];
+	}
+
+	// Is the key being held down?
+	auto IsKeyHeld(const std::size_t key) const noexcept {
 #ifdef _DEBUG
 		assert(key < 1024);
 #endif
@@ -60,7 +76,6 @@ public:
 				case 1:
 					this->m_keys[key] = true;
 					break;
-				// Released
 				case 0:
 					this->m_keys[key] = false;
 					break;
@@ -78,6 +93,7 @@ public:
 private:
 	// Keyboard
 	std::array<bool, 1024> m_keys;
+	std::array<bool, 1024> m_prevKeys;
 
 	// Mouse
 	bool m_mouseMoved = false;

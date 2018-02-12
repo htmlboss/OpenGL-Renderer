@@ -32,6 +32,9 @@ public:
 	// Add a loaded model the the model cache
 	ModelPtr CacheModel(const std::string_view name, const Model model, const bool overwriteIfExists = false);
 
+	// Removes a named model from cache.
+	void UnloadModel(const std::string_view modelName);
+
 	auto GetNumLoadedTextures() const noexcept { return m_textureCache.size(); }
 	auto GetNumLoadedModels() const noexcept { return m_modelCache.size(); }
 
