@@ -1,6 +1,20 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
+#define TERRAIN_SUBDUV_CUTTOF 100
+
+// http://victorbush.com/2015/01/tessellated-terrain/
+
 struct TerrainNode {
+
+	glm::vec3 Origin;
+	float Width, Height;
+	unsigned int Type; // Child # relative to parent
+
+	// Tesselation scaling
+	float TScaleNegX, TScalePosX;
+	float TScaleNegZ, TScalePosZ;
 	
 	TerrainNode* Parent;
 	TerrainNode* Child1;

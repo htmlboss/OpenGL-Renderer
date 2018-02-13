@@ -80,6 +80,9 @@
     <ClCompile Include="Terrain\Terrain.cpp">
       <Filter>Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="Core\GUISystem.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -156,6 +159,9 @@
     </ClInclude>
     <ClInclude Include="Terrain\Terrain.h">
       <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GUISystem.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

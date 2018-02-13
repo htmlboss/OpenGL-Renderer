@@ -63,15 +63,8 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_BLEND);
+	setDefaultState();
 	glEnable(GL_MULTISAMPLE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// Create uniform buffer object for projection and view matrices
 	// so same data shared to multiple shader programs.
@@ -105,6 +98,7 @@ void RenderSystem::Shutdown() const {
 
 /***********************************************************************************/
 void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
+	setDefaultState();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 
@@ -199,6 +193,18 @@ void RenderSystem::Update(const Camera& camera, const double delta) {
 	const auto view = camera.GetViewMatrix();
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+}
+
+/***********************************************************************************/
+void RenderSystem::setDefaultState() {
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 /***********************************************************************************/

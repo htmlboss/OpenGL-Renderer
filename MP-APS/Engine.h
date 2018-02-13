@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Timer.h"
+
 #include "Core/WindowSystem.h"
 #include "Core/RenderSystem.h"
+#include "Core/GUISystem.h"
 
 #include <unordered_map>
 
@@ -22,13 +24,14 @@ public:
 
 private:
 	void update();
-	void shutdown() const;
+	void shutdown();
 
 	Timer m_timer;
 
 	// Core Systems
 	WindowSystem m_mainWindow;
 	RenderSystem m_renderer;
+	GUISystem m_guiSystem;
 
 	// All loaded scenes stored in memory
 	std::unordered_map<std::string, SceneBase> m_scenes;

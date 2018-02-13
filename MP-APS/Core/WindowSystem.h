@@ -7,11 +7,12 @@
 namespace pugi {
 class xml_node;
 }
-
+class Engine;
 struct GLFWwindow;
 
 /***********************************************************************************/
 class WindowSystem {
+	friend class Engine;
 public:
 	WindowSystem() = default;
 	WindowSystem(const WindowSystem&) = delete;
@@ -29,12 +30,14 @@ public:
 
 	void SetVsync(const bool vsync) const;
 
-	bool ShouldClose() const noexcept { return m_shouldWindowClose; }
-	bool IsFocused() const noexcept { return m_focused; }
+	auto ShouldClose() const noexcept { return m_shouldWindowClose; }
+	auto IsCursorVisible() const noexcept { return m_showCursor; }
+	auto IsFocused() const noexcept { return m_focused; }
 
 private:
 	GLFWwindow* m_window = nullptr;
 
 	bool m_shouldWindowClose;
 	bool m_focused = true;
+	bool m_showCursor = false;
 };

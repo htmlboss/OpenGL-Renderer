@@ -38,6 +38,8 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
 	m_renderer.Init(engineNode.child("Renderer"));
+
+	m_guiSystem.Init(m_mainWindow.m_window);
 }
 
 /***********************************************************************************/
@@ -74,7 +76,12 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		m_renderer.Render(*m_activeScene, false);
+		// No need to render when the cursor is enabled
+		if (!m_mainWindow.IsCursorVisible()) {
+			m_renderer.Render(*m_activeScene, false);
+		}
+
+		m_guiSystem.Render();
 
 		m_mainWindow.SwapBuffers();
 	}
@@ -93,7 +100,8 @@ void Engine::update() {
 }
 
 /***********************************************************************************/
-void Engine::shutdown() const {
+void Engine::shutdown() {
+	m_guiSystem.Shutdown();
 	m_renderer.Shutdown();
 	ResourceManager::GetInstance().ReleaseAllResources();
 	m_mainWindow.Shutdown();

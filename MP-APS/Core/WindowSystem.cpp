@@ -95,6 +95,16 @@ void WindowSystem::SetVsync(const bool vsync) const {
 void WindowSystem::Update() {
 	glfwPollEvents();
 
+	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_TAB)) {
+		m_showCursor = !m_showCursor;
+		if (m_showCursor) {
+			EnableCursor();
+		} else {
+			DisableCursor();
+		}
+
+	}
+
 	// Check if the window needs to be closed
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE) || glfwWindowShouldClose(m_window)) {
 		m_shouldWindowClose = true;

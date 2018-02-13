@@ -103,7 +103,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\nuklear\include\;$(SolutionDir)3rdParty\glad\include\;$(SolutionDir)3rdParty\FreeType\include\;$(SolutionDir)3rdParty\nvidia\perfkit\;$(IncludePath);$(IncludePath);$(SolutionDir)3rdParty\libjpg\include\</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\pugixml\lib\Debug\;$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\FreeType\lib\Debug\;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -121,7 +121,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\nuklear\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\pugixml\lib\Release\;$(LibraryPath)</LibraryPath>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
     <OutDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</OutDir>
@@ -129,7 +129,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)3rdParty\pugixml\include\;$(SolutionDir)3rdParty\GLFW\include\;$(SolutionDir)3rdParty\stb\;$(SolutionDir)3rdParty\glm\;$(SolutionDir)3rdParty\Assimp\include\;$(SolutionDir)3rdParty\nuklear\include\;$(SolutionDir)3rdParty\glad\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)3rdParty\GLFW\lib-vc2015\;$(SolutionDir)3rdParty\Assimp\;$(SolutionDir)3rdParty\pugixml\lib\Release\;$(LibraryPath)</LibraryPath>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
     <OutDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</OutDir>
@@ -268,6 +268,7 @@
     <ClCompile Include="3rdParty\glad\src\glad.c" />
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Core\GUISystem.cpp" />
     <ClCompile Include="Core\RenderSystem.cpp" />
     <ClCompile Include="Core\WindowSystem.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -291,6 +292,7 @@
     <ClInclude Include="AABB.hpp" />
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Core\GUISystem.h" />
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Engine.h" />

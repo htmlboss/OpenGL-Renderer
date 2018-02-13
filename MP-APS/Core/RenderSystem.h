@@ -39,6 +39,8 @@ public:
 private:
 	// Helper functions
 
+	// Sets the default state required for rendering
+	void setDefaultState();
 	// Render models contained in the renderlist
 	void renderModelsWithTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const;
 	// Render models without binding textures (for a depth or shadow pass perhaps)
