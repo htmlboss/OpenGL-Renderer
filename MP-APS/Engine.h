@@ -13,9 +13,13 @@ public:
 	// Initializes engine from an XML config file
 	explicit Engine(const std::string_view configPath);
 
-	// Disable copy + assignment
+	// Disable copy + assignment + moving
+	Engine(Engine&&) = delete;
 	Engine(const Engine&) = delete;
+	Engine& operator=(Engine&&) = delete;
 	Engine& operator=(const Engine&) = delete;
+
+	~Engine() = default;
 
 	void AddScene(const SceneBase& scene);
 	void SetActiveScene(const std::string_view sceneName);

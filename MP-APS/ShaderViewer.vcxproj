@@ -267,6 +267,7 @@
   <ItemGroup>
     <ClCompile Include="3rdParty\glad\src\glad.c" />
     <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="AI\AISystem.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Core\GUISystem.cpp" />
     <ClCompile Include="Core\RenderSystem.cpp" />
@@ -290,6 +291,7 @@
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="AABB.hpp" />
+    <ClInclude Include="AI\AISystem.h" />
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Core\GUISystem.h" />

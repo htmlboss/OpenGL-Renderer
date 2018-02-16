@@ -14,9 +14,14 @@ struct GLFWwindow;
 class WindowSystem {
 	friend class Engine;
 public:
-	WindowSystem() = default;
+	WindowSystem() noexcept = default;
+
+	WindowSystem(WindowSystem&&) = delete;
 	WindowSystem(const WindowSystem&) = delete;
+	WindowSystem& operator=(WindowSystem&&) = delete;
 	WindowSystem& operator=(const WindowSystem&) = delete;
+
+	~WindowSystem() = default;
 
 	void Init(const pugi::xml_node& windowNode);
 	void Update();

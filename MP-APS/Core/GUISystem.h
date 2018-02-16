@@ -10,8 +10,11 @@ struct GLFWwindow;
 /***********************************************************************************/
 class GUISystem {
 public:
-	GUISystem() = default;
+	GUISystem() noexcept = default;
+
+	GUISystem(GUISystem&&) = delete;
 	GUISystem(const GUISystem&) = delete;
+	GUISystem& operator=(GUISystem&&) = delete;
 	GUISystem& operator=(const GUISystem&) = delete;
 
 	void Init(GLFWwindow* windowPtr);

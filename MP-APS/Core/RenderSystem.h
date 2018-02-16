@@ -23,8 +23,12 @@ class RenderSystem {
 public:
 	RenderSystem();
 
+	RenderSystem(RenderSystem&&) = delete;
 	RenderSystem(const RenderSystem&) = delete;
+	RenderSystem& operator=(RenderSystem&&) = delete;
 	RenderSystem& operator=(const RenderSystem&) = delete;
+
+	~RenderSystem() = default;
 
 	void Init(const pugi::xml_node& rendererNode);
 	void Update(const Camera& camera, const double delta);
