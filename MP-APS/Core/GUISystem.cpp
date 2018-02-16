@@ -27,11 +27,6 @@ void GUISystem::Init(GLFWwindow* windowPtr) {
 		nk_glfw3_font_stash_begin(&atlas);
 		nk_glfw3_font_stash_end();
 	}
-
-	int width, height;
-	glfwGetWindowSize(windowPtr, &width, &height);
-
-	m_guiFBO.Init("GUI FBO", width, height);
 }
 
 /***********************************************************************************/
@@ -83,13 +78,10 @@ void GUISystem::Render() {
 	nk_end(m_nuklearContext);
 
 
-	// Todo: render to different framebuffer and blit onto default
-	//glClear(GL_COLOR_BUFFER_BIT);
 	nk_glfw3_render(NK_ANTI_ALIASING_ON, m_maxVertexBuffer, m_maxElementBuffer);
 }
 
 /***********************************************************************************/
-void GUISystem::Shutdown() {
-	m_guiFBO.Delete();
+void GUISystem::Shutdown() const {
 	nk_glfw3_shutdown();
 }

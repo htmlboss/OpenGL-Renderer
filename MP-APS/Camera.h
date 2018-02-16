@@ -49,4 +49,6 @@ private:
 	// Mouse positions
 	bool m_firstMouse;
 	double m_prevX, m_prevY;
+
+	bool m_shouldUpdate = true;
 };

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../Graphics/GLFramebuffer.h"
-
 #include <cstddef>
 
 /***********************************************************************************/
@@ -19,13 +17,11 @@ public:
 	void Init(GLFWwindow* windowPtr);
 	void Update();
 	void Render();
-	void Shutdown();
+	void Shutdown() const;
 
 private:
 	nk_context* m_nuklearContext;
 
 	std::size_t m_maxVertexBuffer = 512 * 1024;
 	std::size_t m_maxElementBuffer = 128 * 1024;
-
-	GLFramebuffer m_guiFBO;
 };

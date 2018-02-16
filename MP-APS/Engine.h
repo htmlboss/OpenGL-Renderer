@@ -24,7 +24,7 @@ public:
 
 private:
 	void update();
-	void shutdown();
+	void shutdown() const;
 
 	Timer m_timer;
 

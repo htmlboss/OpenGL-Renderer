@@ -76,10 +76,7 @@ void Engine::Execute() {
 	while (!m_mainWindow.ShouldClose()) {
 		update();
 
-		// No need to render when the cursor is enabled
-		if (!m_mainWindow.IsCursorVisible()) {
-			m_renderer.Render(*m_activeScene, false);
-		}
+		m_renderer.Render(*m_activeScene, false);
 
 		m_guiSystem.Render();
 
@@ -100,7 +97,7 @@ void Engine::update() {
 }
 
 /***********************************************************************************/
-void Engine::shutdown() {
+void Engine::shutdown() const {
 	m_guiSystem.Shutdown();
 	m_renderer.Shutdown();
 	ResourceManager::GetInstance().ReleaseAllResources();
