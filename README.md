@@ -40,7 +40,7 @@ Bloom:
 * Depth-buffer optimization ([https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html](https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html)).
 
 ## Roadmap
-* Shadow volumes ([http://www.alexandre-pestana.com/volumetric-lights/](http://www.alexandre-pestana.com/volumetric-lights/)).
+* Shadow volumes ([http://www.alexandre-pestana.com/volumetric-lights/](http://www.alexandre-pestana.com/volumetric-lights/), [https://www.slideshare.net/BenjaminGlatzel/volumetric-lighting-for-many-lights-in-lords-of-the-fallen](https://www.slideshare.net/BenjaminGlatzel/volumetric-lighting-for-many-lights-in-lords-of-the-fallen)).
 * Per-material array textures:
   * ([https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703](https://www.gamedev.net/forums/topic/662654-best-practise-texture-atlas-38-vbo/?do=findComment&comment=5191703))
   * ([https://www.khronos.org/opengl/wiki/Array_Texture](https://www.khronos.org/opengl/wiki/Array_Texture))

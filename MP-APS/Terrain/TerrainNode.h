@@ -2,7 +2,7 @@
 
 #include <glm/vec3.hpp>
 
-#define TERRAIN_SUBDUV_CUTTOF 100
+#define TERRAIN_SUBDIV_CUTTOF 100
 
 // http://victorbush.com/2015/01/tessellated-terrain/
 

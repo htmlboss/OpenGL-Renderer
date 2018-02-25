@@ -89,6 +89,9 @@
     <ClCompile Include="AI\AISystem.cpp">
       <Filter>AI</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain\TerrainRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -163,14 +166,14 @@
     <ClInclude Include="Terrain\TerrainNode.h">
       <Filter>Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain\Terrain.h">
-      <Filter>Terrain</Filter>
-    </ClInclude>
     <ClInclude Include="Core\GUISystem.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="AI\AISystem.h">
       <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain\TerrainRenderer.h">
+      <Filter>Terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
