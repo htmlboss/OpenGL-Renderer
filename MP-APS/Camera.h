@@ -7,10 +7,14 @@ class Camera {
 public:
 	Camera(const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, const glm::vec3& up = { 0.0f, 1.0f, 0.0f }, const float yaw = -90.0f, const float pitch = 0.0f, const float FOV = 70.0f) noexcept;
 
+	void SetNear(const float near);
+	void SetFar(const float far);
+	void SetSpeed(const double speed);
+
 	void Update(const double deltaTime);
 
 	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
-	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, 1.0f, 100.0f); }
+	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, m_near, m_far); }
 	auto GetPosition() const noexcept { return m_position; }
 
 private:
@@ -39,10 +43,12 @@ private:
 	glm::vec3 m_right;
 	const glm::vec3 m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
+	float m_near = 1.0f, m_far = 100.0f;
+
 	// Eular Angles
 	double m_yaw, m_pitch;
 
-	const double m_speed = 5.0;
+	double m_speed = 5.0;
 	const double m_sensitivity = 0.3;
 	const float m_FOV;
 

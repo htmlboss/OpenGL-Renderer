@@ -273,6 +273,7 @@
     <ClCompile Include="Core\RenderSystem.cpp" />
     <ClCompile Include="Core\WindowSystem.cpp" />
     <ClCompile Include="Demos\DemoCrytekSponza.cpp" />
+    <ClCompile Include="Demos\DemoPathfinding.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Graphics\GLFramebuffer.cpp" />
     <ClCompile Include="Graphics\GLShader.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Demos\DemoCrytekSponza.h" />
+    <ClInclude Include="Demos\DemoPathfinding.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />

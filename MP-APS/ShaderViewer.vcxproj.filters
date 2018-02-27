@@ -95,6 +95,9 @@
     <ClCompile Include="Demos\DemoCrytekSponza.cpp">
       <Filter>Demos</Filter>
     </ClCompile>
+    <ClCompile Include="Demos\DemoPathfinding.cpp">
+      <Filter>Demos</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h">
@@ -179,6 +182,9 @@
       <Filter>Terrain</Filter>
     </ClInclude>
     <ClInclude Include="Demos\DemoCrytekSponza.h">
+      <Filter>Demos</Filter>
+    </ClInclude>
+    <ClInclude Include="Demos\DemoPathfinding.h">
       <Filter>Demos</Filter>
     </ClInclude>
   </ItemGroup>

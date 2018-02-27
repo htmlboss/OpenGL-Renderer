@@ -14,9 +14,9 @@ void DemoCrytekSponza::Init(const std::string_view sceneName) {
 	auto model = ResourceManager::GetInstance().GetModel("Sponza", "Data/Models/crytek-sponza/sponza.obj");
 	model->Translate(glm::vec3(0.0f));
 	model->Scale(glm::vec3(0.01f));
-	m_sceneModels.push_back(model);
+	AddModel(model);
 
 	// Sun
-	m_staticDirectionalLights.emplace_back(StaticDirectionalLight(glm::vec3(5.0f, 5.0f, 4.5f), { 25.0f, 50.0f, 10.0f }));
+	AddLight(StaticDirectionalLight({ 5.0f, 5.0f, 4.5f }, { 25.0f, 50.0f, 10.0f }));
 }
 

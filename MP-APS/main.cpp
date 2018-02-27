@@ -6,7 +6,7 @@
 #endif
 #include "Engine.h"
 
-#include "Demos/DemoCrytekSponza.h"
+#include "Demos/DemoPathfinding.h"
 
 /***********************************************************************************/
 int main() {
@@ -17,11 +17,11 @@ int main() {
 
 	Engine engine("Data/config.xml");
 
-	const auto scene = std::make_shared<DemoCrytekSponza>(1280, 720);
-	scene->Init("Crytek Sponza");
+	const auto scene = std::make_shared<DemoPathfinding>(1280, 720);
+	scene->Init("Pathfinding");
 
-	engine.AddScene(std::static_pointer_cast<SceneBase, DemoCrytekSponza>(scene));
-	engine.SetActiveScene("Crytek Sponza");
+	engine.AddScene(std::static_pointer_cast<SceneBase, DemoPathfinding>(scene));
+	engine.SetActiveScene("Pathfinding");
 
 	engine.Execute();
 

@@ -21,6 +21,12 @@ public:
 	virtual void Init(const std::string_view sceneName);
 	virtual void Update(const double delta);
 
+	void AddLight(const StaticDirectionalLight& light);
+	void AddLight(const StaticPointLight& light);
+	void AddLight(const StaticSpotLight& light);
+
+	void AddModel(const ModelPtr& model);
+
 	auto GetName() const noexcept { return m_sceneName; }
 	auto GetCamera() const noexcept { return m_camera; }
 
@@ -41,3 +47,4 @@ protected:
 	std::vector<ModelPtr> m_sceneModels;
 	std::vector<ModelPtr> m_renderList;
 };
+

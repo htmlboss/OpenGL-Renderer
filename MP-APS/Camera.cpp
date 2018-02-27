@@ -19,6 +19,21 @@ Camera::Camera(const glm::vec3& position, const glm::vec3& up, const float yaw, 
 }
 
 /***********************************************************************************/
+void Camera::SetNear(const float near) {
+	m_near = near;
+}
+
+/***********************************************************************************/
+void Camera::SetFar(const float far) {
+	m_far = far;
+}
+
+/***********************************************************************************/
+void Camera::SetSpeed(const double speed) {
+	m_speed = speed;
+}
+
+/***********************************************************************************/
 void Camera::Update(const double deltaTime) {
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_TAB)) {
