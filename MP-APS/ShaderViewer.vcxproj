@@ -272,6 +272,7 @@
     <ClCompile Include="Core\GUISystem.cpp" />
     <ClCompile Include="Core\RenderSystem.cpp" />
     <ClCompile Include="Core\WindowSystem.cpp" />
+    <ClCompile Include="Demos\DemoCrytekSponza.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Graphics\GLFramebuffer.cpp" />
     <ClCompile Include="Graphics\GLShader.cpp" />
@@ -285,7 +286,6 @@
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Terrain\Terrain.cpp" />
-    <ClCompile Include="Terrain\TerrainRenderer.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
   </ItemGroup>
@@ -298,6 +298,7 @@
     <ClInclude Include="Core\GUISystem.h" />
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
+    <ClInclude Include="Demos\DemoCrytekSponza.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />
@@ -313,7 +314,7 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Terrain\TerrainRenderer.h" />
+    <ClInclude Include="Terrain\Terrain.h" />
     <ClInclude Include="Terrain\TerrainNode.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="ViewFrustum.h" />

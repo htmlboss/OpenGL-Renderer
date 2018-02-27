@@ -7,7 +7,10 @@
 #include "Graphics/StaticPointLight.h"
 #include "Graphics/StaticSpotLight.h"
 
+/***********************************************************************************/
+// Forward Declarations
 class RenderSystem;
+
 /***********************************************************************************/
 class SceneBase {
 	friend class RenderSystem;

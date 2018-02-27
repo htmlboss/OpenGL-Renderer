@@ -21,7 +21,7 @@ public:
 
 	~Engine() = default;
 
-	void AddScene(const SceneBase& scene);
+	void AddScene(const std::shared_ptr<SceneBase>& scene);
 	void SetActiveScene(const std::string_view sceneName);
 
 	void Execute();
@@ -38,7 +38,7 @@ private:
 	GUISystem m_guiSystem;
 
 	// All loaded scenes stored in memory
-	std::unordered_map<std::string, SceneBase> m_scenes;
+	std::unordered_map<std::string, std::shared_ptr<SceneBase>> m_scenes;
 	// Current scene being processed by renderer
 	SceneBase* m_activeScene;
 };

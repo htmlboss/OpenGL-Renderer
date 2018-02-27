@@ -6,7 +6,7 @@
 #endif
 #include "Engine.h"
 
-#include "SceneBase.h"
+#include "Demos/DemoCrytekSponza.h"
 
 /***********************************************************************************/
 int main() {
@@ -17,10 +17,10 @@ int main() {
 
 	Engine engine("Data/config.xml");
 
-	SceneBase scene(1280, 720);
-	scene.Init("Crytek Sponza");
+	const auto scene = std::make_shared<DemoCrytekSponza>(1280, 720);
+	scene->Init("Crytek Sponza");
 
-	engine.AddScene(scene);
+	engine.AddScene(std::static_pointer_cast<SceneBase, DemoCrytekSponza>(scene));
 	engine.SetActiveScene("Crytek Sponza");
 
 	engine.Execute();

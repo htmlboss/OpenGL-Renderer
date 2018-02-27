@@ -43,8 +43,8 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 }
 
 /***********************************************************************************/
-void Engine::AddScene(const SceneBase& scene) {
-	m_scenes.try_emplace(scene.GetName(), scene);
+void Engine::AddScene(const std::shared_ptr<SceneBase>& scene) {
+	m_scenes.try_emplace(scene->GetName(), scene);
 }
 
 /***********************************************************************************/
@@ -56,7 +56,7 @@ void Engine::SetActiveScene(const std::string_view sceneName) {
 		return;
 	}
 
-	m_activeScene = &scene->second;
+	m_activeScene = scene->second.get();
 	m_renderer.InitView(m_activeScene->GetCamera());
 }
 
