@@ -3,6 +3,7 @@
 #include "Model.h"
 
 #include <unordered_map>
+#include <optional>
 
 class ResourceManager {
 	ResourceManager() = default;
@@ -32,13 +33,28 @@ public:
 	// Add a loaded model the the model cache
 	ModelPtr CacheModel(const std::string_view name, const Model model, const bool overwriteIfExists = false);
 
+	// Checks if a named material is cached. If so, we get an initialized optional. Otherwise we get an empty one.
+	// It's up to the caller to check the result.
+	std::optional<PBRMaterialPtr> GetMaterial(const std::string_view name) const;
+	// Cache a material and get a handle back. Usually called if GetMaterial returns empty.
+	PBRMaterialPtr CacheMaterial(const std::string_view name,
+		const std::string_view albedoPath,
+		const std::string_view aoPath,
+		const std::string_view metallicPath,
+		const std::string_view normalPath,
+		const std::string_view roughnessPath,
+		const std::string_view alphaMaskPath);
+
+
 	// Removes a named model from cache.
 	void UnloadModel(const std::string_view modelName);
 
 	auto GetNumLoadedTextures() const noexcept { return m_textureCache.size(); }
 	auto GetNumLoadedModels() const noexcept { return m_modelCache.size(); }
+	auto GetNumMaterials() const noexcept { return m_materialCache.size(); }
 
 private:
 	std::unordered_map<std::string, ModelPtr> m_modelCache;
 	std::unordered_map<std::string, unsigned int> m_textureCache;
+	std::unordered_map<std::string, PBRMaterialPtr> m_materialCache;
 };

@@ -7,7 +7,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 }
 
 /***********************************************************************************/
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterial& material) :
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterialPtr& material) :
 	IndexCount(indices.size()),
 	Material(material) {
 

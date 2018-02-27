@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <memory>
 
 // Material for a PBR pipeline
 struct PBRMaterial {
@@ -27,3 +28,5 @@ struct PBRMaterial {
 	unsigned int AlphaMask;
 	// unsigned int HeightMap;
 };
+
+using PBRMaterialPtr = std::shared_ptr<PBRMaterial>;

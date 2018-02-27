@@ -10,7 +10,7 @@
 /***********************************************************************************/
 struct Mesh {
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
-	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterial& material);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterialPtr& material);
 
 	void Clear();
 
@@ -18,7 +18,7 @@ struct Mesh {
 	
 	const std::size_t IndexCount;
 	GLVertexArray VAO;
-	PBRMaterial Material;
+	PBRMaterialPtr Material;
 
 private:
 	void setupMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);

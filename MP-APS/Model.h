@@ -15,7 +15,7 @@ class Model {
 public:
 	Model() = default;
 	Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder = false, const bool loadMaterial = true);
-	Model(const std::string_view Name, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterial& material) noexcept;
+	Model(const std::string_view Name, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterialPtr& material) noexcept;
 	Model(const std::string_view Name, const Mesh& mesh) noexcept;
 	virtual ~Model() = default;
 

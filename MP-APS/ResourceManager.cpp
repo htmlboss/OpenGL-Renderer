@@ -166,6 +166,27 @@ ModelPtr ResourceManager::CacheModel(const std::string_view name, const Model mo
 }
 
 /***********************************************************************************/
+std::optional<PBRMaterialPtr> ResourceManager::GetMaterial(const std::string_view name) const {
+	
+	// Check if material exists
+	const auto val = m_materialCache.find(name.data());
+
+	if (val == m_materialCache.end()) {
+		return std::optional<PBRMaterialPtr>();
+	}
+
+	return std::make_optional<PBRMaterialPtr>(val->second);
+}
+
+/***********************************************************************************/
+PBRMaterialPtr ResourceManager::CacheMaterial(const std::string_view name, const std::string_view albedoPath, const std::string_view aoPath, const std::string_view metallicPath, const std::string_view normalPath, const std::string_view roughnessPath, const std::string_view alphaMaskPath) {
+	auto mat = PBRMaterial();
+	mat.Init(name, albedoPath, aoPath, metallicPath, normalPath, roughnessPath, alphaMaskPath);
+
+	return m_materialCache.try_emplace(name.data(), std::make_shared<PBRMaterial>(mat)).first->second;
+}
+
+/***********************************************************************************/
 void ResourceManager::UnloadModel(const std::string_view modelName) {
 	auto model = m_modelCache.find(modelName.data());
 

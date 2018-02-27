@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <ppl.h>
+#include "ResourceManager.h"
 
 /***********************************************************************************/
 Model::Model(const std::string_view Path, const std::string_view Name, const bool flipWindingOrder, const bool loadMaterial) : m_name(Name), m_path(Path) {
@@ -18,13 +19,13 @@ Model::Model(const std::string_view Path, const std::string_view Name, const boo
 }
 
 /***********************************************************************************/
-Model::Model(const std::string_view Name, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterial& material) noexcept : m_name(Name) { 
+Model::Model(const std::string_view Name, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const PBRMaterialPtr& material) noexcept : m_name(Name) {
 	m_meshes.emplace_back(vertices, indices, material); 
 }
 
 /***********************************************************************************/
 Model::Model(const std::string_view Name, const Mesh& mesh) noexcept : m_name(Name) {
-	m_meshes.push_back(std::move(mesh));
+	m_meshes.push_back(mesh);
 }
 
 /***********************************************************************************/
@@ -203,11 +204,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMater
 	// http://assimp.sourceforge.net/lib_html/structai_material.html
 	if (loadMaterial) {
 		if (mesh->mMaterialIndex >= 0) {
-			PBRMaterial material;
 			const auto* mat = scene->mMaterials[mesh->mMaterialIndex];
 
 			aiString name;
 			mat->Get(AI_MATKEY_NAME, name);
+
+			// Is the material cached?
+			const auto cachedMaterial = ResourceManager::GetInstance().GetMaterial(name.C_Str());
+			if (cachedMaterial.has_value()) {
+				return Mesh(vertices, indices, cachedMaterial.value());
+			}
 
 			// Get the first texture for each texture type we need
 			// since there could be multiple textures per type
@@ -226,20 +232,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMater
 			aiString alphaMaskPath;
 			mat->GetTexture(aiTextureType_OPACITY, 0, &alphaMaskPath);
 
-			std::cout << "MATERIAL NAME: " << name.C_Str() << std::endl;
-
-			material.Init(name.C_Str(),
+			const auto newMaterial = ResourceManager::GetInstance().CacheMaterial(name.C_Str(),
 				m_path + albedoPath.C_Str(),
 				"",
 				m_path + metallicPath.C_Str(),
 				m_path + normalPath.C_Str(),
 				m_path + roughnessPath.C_Str(),
-				m_path + alphaMaskPath.C_Str()
-			);
+				m_path + alphaMaskPath.C_Str());
 
 			++m_numMats;
-			std::cout << "NUMBER OF MATERIALS: " << m_numMats << std::endl;
-			return Mesh(vertices, indices, material);
+			return Mesh(vertices, indices, newMaterial);
 		}
 	}
 

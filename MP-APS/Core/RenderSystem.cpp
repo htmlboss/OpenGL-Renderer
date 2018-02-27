@@ -221,13 +221,13 @@ void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::
 		const auto meshes = model->GetMeshes();
 		for (const auto& mesh : meshes) {
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, mesh.Material.AlbedoMap);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material->AlbedoMap);
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, mesh.Material.NormalMap);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material->NormalMap);
 			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, mesh.Material.MetallicMap);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material->MetallicMap);
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mesh.Material.RoughnessMap);
+			glBindTexture(GL_TEXTURE_2D, mesh.Material->RoughnessMap);
 			//glActiveTexture(GL_TEXTURE7);
 			//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
 
