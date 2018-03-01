@@ -4,6 +4,8 @@
 #include "ViewFrustum.h"
 
 #include <ppl.h> // Concurrency library
+
+#include <string_view>
 #include <iostream>
 
 /***********************************************************************************/

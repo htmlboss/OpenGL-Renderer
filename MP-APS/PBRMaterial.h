@@ -1,10 +1,21 @@
 #pragma once
 
-#include <string_view>
 #include <memory>
+#include <array>
 
 // Material for a PBR pipeline
-struct PBRMaterial {
+class PBRMaterial {
+
+public:
+
+	enum ParameterType {
+		ALBEDO = 0,
+		AO,
+		METALLIC,
+		NORMAL,
+		ROUGHNESS,
+		ALPHA
+	};
 
 	void Init(const std::string_view name,
 		const std::string_view albedoPath,
@@ -20,13 +31,14 @@ struct PBRMaterial {
 
 	std::string_view Name;
 
-	unsigned int AlbedoMap;
-	unsigned int AOMap;
-	unsigned int MetallicMap;
-	unsigned int NormalMap;
-	unsigned int RoughnessMap;
-	unsigned int AlphaMask;
+	unsigned int GetParameterTexture(const ParameterType parameter) const noexcept;
+	float GetParameterColor(const ParameterType parameter) const noexcept;
+
+private:
 	// unsigned int HeightMap;
+
+	std::array<unsigned int, 6> m_materialTextures;
+	std::array<float, 6> m_materialColors;
 };
 
 using PBRMaterialPtr = std::shared_ptr<PBRMaterial>;

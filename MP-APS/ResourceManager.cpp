@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <cassert>
+#include <string_view>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
