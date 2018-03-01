@@ -228,6 +228,7 @@ void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::
 			glBindTexture(GL_TEXTURE_2D, mesh.Material->GetParameterTexture(PBRMaterial::METALLIC));
 			glActiveTexture(GL_TEXTURE6);
 			glBindTexture(GL_TEXTURE_2D, mesh.Material->GetParameterTexture(PBRMaterial::ROUGHNESS));
+			
 			//glActiveTexture(GL_TEXTURE7);
 			//glBindTexture(GL_TEXTURE_2D, mesh.Material.AOMap);
 
