@@ -4,7 +4,6 @@
 
 #include <memory>
 #include <array>
-#include <variant>
 
 // Material for a PBR pipeline
 class PBRMaterial {
@@ -44,16 +43,22 @@ public:
 	unsigned int GetParameterTexture(const ParameterType parameter) const noexcept;
 	glm::vec3 GetParameterColor(const ParameterType parameter) const noexcept;
 
-	// Gets active alpha texture/value from union
-	auto GetAlpha() const noexcept;
+	auto GetAlphaValue() const noexcept {
+		return m_alpha;
+	}
+
+	auto GetAlphaMask() const noexcept {
+		return m_alphaMaskTexture;
+	}
 
 private:
-	std::variant<unsigned int, float> m_alpha;
-
 	// unsigned int HeightMap;
 
 	std::array<unsigned int, 5> m_materialTextures;
 	std::array<glm::vec3, 5> m_materialColors;
+
+	float m_alpha;
+	unsigned int m_alphaMaskTexture;
 };
 
 using PBRMaterialPtr = std::shared_ptr<PBRMaterial>;
