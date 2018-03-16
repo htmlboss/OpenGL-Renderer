@@ -76,7 +76,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 }
 
 /***********************************************************************************/
-unsigned int ResourceManager::LoadTexture(const std::string_view path, const bool useMipMaps) {
+unsigned int ResourceManager::LoadTexture(const std::string_view path, const bool useMipMaps, const bool useUnalignedUnpack) {
 
 	// Check if texture is already loaded somewhere
 	const auto val = m_textureCache.find(path.data());
@@ -84,6 +84,10 @@ unsigned int ResourceManager::LoadTexture(const std::string_view path, const boo
 	if (val != m_textureCache.end()) {
 		// Found it
 		return val->second;
+	}
+
+	if (useUnalignedUnpack) {
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	}
 
 	// Create and cache a new texture
@@ -122,6 +126,10 @@ unsigned int ResourceManager::LoadTexture(const std::string_view path, const boo
 #ifdef _DEBUG
 	std::cout << "Resource Manager: loaded texture: " << path << std::endl;
 #endif
+
+	if (useUnalignedUnpack) {
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+	}
 
 	return m_textureCache.try_emplace(path.data(), textureID).first->second;
 }
@@ -189,7 +197,7 @@ PBRMaterialPtr ResourceManager::CacheMaterial(const std::string_view name, const
 
 /***********************************************************************************/
 void ResourceManager::UnloadModel(const std::string_view modelName) {
-	auto model = m_modelCache.find(modelName.data());
+	const auto model = m_modelCache.find(modelName.data());
 
 	if (model != m_modelCache.end()) {
 		model->second->Delete();

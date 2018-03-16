@@ -8,6 +8,9 @@
 
 #include <unordered_map>
 
+//https://github.com/tapio/weep/blob/master/engine/glrenderer/renderdevice.cpp
+// https://github.com/pboechat/PCSS
+
 /***********************************************************************************/
 // Forward Declarations
 class Camera;
@@ -31,18 +34,31 @@ public:
 	~RenderSystem() = default;
 
 	void Init(const pugi::xml_node& rendererNode);
-	void Update(const Camera& camera, const double delta);
+	void Update(const SceneBase& scene, const double delta);
 	// Release OpenGL resources
 	void Shutdown() const;
 
-	void InitView(const Camera& camera);
+	void InitScene(const SceneBase& scene);
 
 	// Where the magic happens
 	void Render(const SceneBase& scene, const bool wireframe = false);
 
 private:
-	// Helper functions
+	struct Features {
+		float MaxAnisotropy;
+		int MaxArrayTextureLayers;
+		int MaxTextureSamples;
+		int MaxTextureSamplers;
+		int MaxVertexUniformBlocks;
+		int MaxGeometryUniformBlocks;
+		int MaxFragmentUniformBlocks;
+		int MaxComputeWorkGroupSize;
+		int MaxComputeWorkGroupCount;
+	} m_features;
 
+	// Helper functions
+	
+	void getHardwareFeatures();
 	// Sets the default state required for rendering
 	void setDefaultState();
 	// Render models contained in the renderlist
@@ -61,6 +77,8 @@ private:
 	void setupShadowMap();
 	// Configure post-processing effects
 	void setupPostProcessing();
+	// Sets projection matrix variable and updates UBO
+	void setProjectionMatrix(const Camera& camera);
 
 	// Screen dimensions
 	std::size_t m_width, m_height;

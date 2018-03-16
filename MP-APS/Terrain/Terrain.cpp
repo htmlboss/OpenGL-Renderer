@@ -1,14 +1,37 @@
 #include "Terrain.h"
 #include "TerrainNode.h"
 
+#include "../Graphics/GLShader.h"
+#include "../ResourceManager.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <cstring>
 #include <cmath>
 
 /***********************************************************************************/
-void Terrain::Init() {
+void Terrain::Init(const std::string_view heightmapPath) {
 
 	m_terrainTree = new TerrainNode[m_MaxTerrainNodes];
 	clearTerrainTree();
+
+	/*
+	m_program.Init("Terrain Shader", {	GLShader("", GL_VERTEX_SHADER),
+										GLShader("", GL_TESS_CONTROL_SHADER), 
+										GLShader("", GL_TESS_EVALUATION_SHADER), 
+										GLShader("", GL_GEOMETRY_SHADER), 
+										GLShader("", GL_FRAGMENT_SHADER)	}
+	);
+	*/
+
+	m_program.Bind();
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
+
+	const auto heightmap = ResourceManager::GetInstance().LoadTexture("", true, true);
+	glBindTexture(GL_TEXTURE_2D, heightmap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//m_program.SetUniformi();
 
 	const float quadData[] {
 		// Vert 1
@@ -72,10 +95,11 @@ void Terrain::Update(const float x, const float y, const float z, const float wi
 }
 
 /***********************************************************************************/
-void Terrain::Render() {
+void Terrain::Render(const glm::mat4x4& viewMatrix) {
 	m_renderDepth = 0;
+	m_program.Bind();
 
-	renderRecursive(m_terrainTree);
+	renderRecursive(m_terrainTree, viewMatrix);
 }
 
 /***********************************************************************************/
@@ -94,11 +118,11 @@ void Terrain::clearTerrainTree() {
 }
 
 /***********************************************************************************/
-void Terrain::renderRecursive(TerrainNode* node) {
+void Terrain::renderRecursive(TerrainNode* node, const glm::mat4x4& viewMatrix) {
 	
 	// If all children are null, render this node
 	if (!node->Child1 && !node->Child2 && !node->Child3 && !node->Child4) {
-		renderNode(node);
+		renderNode(node, viewMatrix);
 		++m_renderDepth;
 		return;
 	}
@@ -107,26 +131,47 @@ void Terrain::renderRecursive(TerrainNode* node) {
 	// either all the children are null or all the children are not null.
 	// There shouldn't be any other cases, but we check here for safety.
 	if (node->Child1) {
-		renderRecursive(node->Child1);
+		renderRecursive(node->Child1, viewMatrix);
 	}
 	if (node->Child2) {
-		renderRecursive(node->Child2);
+		renderRecursive(node->Child2, viewMatrix);
 	}
 	if (node->Child3) {
-		renderRecursive(node->Child3);
+		renderRecursive(node->Child3, viewMatrix);
 	}
 	if (node->Child4) {
-		renderRecursive(node->Child4);
+		renderRecursive(node->Child4, viewMatrix);
 	}
 }
 
 /***********************************************************************************/
-void Terrain::renderNode(TerrainNode* node) {
+void Terrain::renderNode(TerrainNode* node, const glm::mat4x4& viewMatrix) {
 	
 	// Calculate the tess scale factor
 	calcTesselationScale(node);
-
+	
 	// https://bitbucket.org/victorbush/ufl.cap5705.terrain/src/93c5ab3824a5a66d87d1bb6dcc9ed9aee7a16357/src_non_uniform/terrain.c?at=master&fileviewer=file-view-default#terrain.c-231
+	
+	glm::mat4x4 modelMatrix;
+	modelMatrix = glm::translate(modelMatrix, node->Origin);
+
+	const auto modelViewMatrix = viewMatrix * modelMatrix;
+
+	m_program.SetUniform("mMatrix", modelMatrix);
+	m_program.SetUniform("mvMatrix", modelViewMatrix);
+
+	glm::mat3x3 normalMatrix(modelViewMatrix);
+	normalMatrix = glm::transpose(normalMatrix);
+	normalMatrix = glm::inverse(normalMatrix);
+
+	m_program.SetUniform("nMatrix", normalMatrix);
+	
+	m_program.SetUniformf("tileScale", 0.5f * node->Width);
+	
+	m_program.SetUniformf("tscale_negx", node->TScaleNegX);
+	m_program.SetUniformf("tscale_negz", node->TScaleNegZ);
+	m_program.SetUniformf("tscale_posx", node->TScalePosX);
+	m_program.SetUniformf("tscale_posz", node->TScalePosZ);
 
 	glDrawElements(GL_PATCHES, 4, GL_UNSIGNED_INT, nullptr);
 }
@@ -216,7 +261,7 @@ TerrainNode* Terrain::createNode(TerrainNode* parent, const int type, const floa
 }
 
 /***********************************************************************************/
-bool Terrain::divideNode(TerrainNode* node, const glm::vec3& camPos) {
+void Terrain::divideNode(TerrainNode* node, const glm::vec3& camPos) {
 	
 	// Subdivide
 	const float w_new = 0.5f * node->Width;

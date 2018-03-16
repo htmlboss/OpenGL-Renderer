@@ -21,6 +21,8 @@ public:
 	virtual void Init(const std::string_view sceneName);
 	virtual void Update(const double delta);
 
+	void AddIBLProbe(const glm::vec3& position, const float radiusOfInfluence);
+
 	void AddLight(const StaticDirectionalLight& light);
 	void AddLight(const StaticPointLight& light);
 	void AddLight(const StaticSpotLight& light);
@@ -35,10 +37,14 @@ protected:
 	void cullViewFrustum();
 
 	std::string m_sceneName;
+	std::string m_skyboxPath = "Data/hdri/barcelona.hdr";
+	std::size_t m_skyboxResolution = 2048;
 
 	std::size_t m_width, m_height;
 
 	Camera m_camera;
+
+	std::vector<glm::vec4> m_IBLProbes;
 
 	std::vector<StaticDirectionalLight> m_staticDirectionalLights;
 	std::vector<StaticPointLight> m_staticPointLights;

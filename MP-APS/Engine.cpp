@@ -57,7 +57,7 @@ void Engine::SetActiveScene(const std::string_view sceneName) {
 	}
 
 	m_activeScene = scene->second.get();
-	m_renderer.InitView(m_activeScene->GetCamera());
+	m_renderer.InitScene(*m_activeScene);
 }
 
 /***********************************************************************************/
@@ -93,7 +93,7 @@ void Engine::update() {
 	m_mainWindow.Update();
 
 	m_activeScene->Update(m_timer.GetDelta());
-	m_renderer.Update(m_activeScene->GetCamera(), m_timer.GetDelta());
+	m_renderer.Update(*m_activeScene, m_timer.GetDelta());
 }
 
 /***********************************************************************************/
