@@ -9,6 +9,9 @@
 #include <unordered_map>
 #include <vector>
 
+//https://github.com/tapio/weep/blob/master/engine/glrenderer/renderdevice.cpp
+// https://github.com/pboechat/PCSS
+
 /***********************************************************************************/
 // Forward Declarations
 class Camera;
@@ -40,6 +43,18 @@ public:
 				);
 
 private:
+	struct Features {
+		float MaxAnisotropy;
+		int MaxArrayTextureLayers;
+		int MaxTextureSamples;
+		int MaxTextureSamplers;
+		int MaxVertexUniformBlocks;
+		int MaxGeometryUniformBlocks;
+		int MaxFragmentUniformBlocks;
+		int MaxComputeWorkGroupSize;
+		int MaxComputeWorkGroupCount;
+	} m_features;
+
 	// Helper functions
 
 	
@@ -61,6 +76,8 @@ private:
 	void setupShadowMap();
 	// Configure post-processing effects
 	void setupPostProcessing();
+	// Sets projection matrix variable and updates UBO
+	void setProjectionMatrix(const Camera& camera);
 
 	// Screen dimensions
 	std::size_t m_width{ 0 }, m_height{ 0 };

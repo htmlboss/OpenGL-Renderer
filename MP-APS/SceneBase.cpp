@@ -16,6 +16,11 @@ void SceneBase::Update(const double dt) {
 }
 
 /***********************************************************************************/
+void SceneBase::AddIBLProbe(const glm::vec3& position, const float radiusOfInfluence) {
+	m_IBLProbes.emplace_back(position, radiusOfInfluence);
+}
+
+/***********************************************************************************/
 void SceneBase::AddLight(const StaticDirectionalLight& light) {
 	m_staticDirectionalLights.push_back(light);
 }

@@ -46,9 +46,19 @@ float ComputeShadow(const vec4 fragPosLightSpace, const vec3 N, const vec3 L) {
 
     const float closestDepth = texture(shadowMap, projCoords.xy).r;   
     const float currentDepth = projCoords.z;
-
     const float bias = max(0.05 * (1.0 - dot(N, L)), 0.005); // Bias to solve shadow acne
-    const float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;  
+    
+    // PCF
+    float shadow = 0.0;
+    const vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -2; x <= 2; ++x) {
+        for(int y = -2; y <= 2; ++y) {
+            const float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+        }    
+    }
+    
+    shadow /= 25.0;
 
     return shadow;
 }

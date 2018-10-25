@@ -28,6 +28,8 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << '\n';
 #endif
 
+	getHardwareFeatures();
+
 	const auto width = rendererNode.attribute("width").as_uint();
 	const auto height = rendererNode.attribute("height").as_uint();
 
@@ -47,7 +49,11 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 			shaders.emplace_back(shader.attribute("path").as_string(), shader.attribute("type").as_string());
 		}
 
+		//GLShaderProgram prgrm;
+		//prgrm.Init(program.attribute("name").as_string(), shaders);
+
 		// Compile and cache shader program
+		//m_shaderCache.try_emplace(program.attribute("name").as_string(), prgrm);
 		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
 	}
 	
@@ -55,7 +61,6 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	setupTextureSamplers();
 	setupShadowMap();
 	setupPostProcessing();
-	
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -294,7 +299,6 @@ void RenderSystem::renderShadowMap(const SceneBase& scene, RenderListIterator re
 	glCullFace(GL_BACK);
 }
 
-
 /***********************************************************************************/
 void RenderSystem::setupScreenquad() {
 	const std::array<Vertex, 4> screenQuadVertices {
@@ -317,17 +321,13 @@ void RenderSystem::setupScreenquad() {
 
 /***********************************************************************************/
 void RenderSystem::setupTextureSamplers() {
-	// Find max supported hardware anisotropy
-	float aniso = 0.0f;
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-
 	// Sampler for PBR textures used on meshes
 	glGenSamplers(1, &m_samplerPBRTextures);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glSamplerParameterf(m_samplerPBRTextures, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+	glSamplerParameterf(m_samplerPBRTextures, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_features.MaxAnisotropy);
 
 }
 
@@ -423,4 +423,11 @@ void RenderSystem::setupPostProcessing() {
 	bloomBlendShader.SetUniformf("vibranceAmount", m_vibrance);
 	bloomBlendShader.SetUniform("vibranceCoefficient", m_coefficient);
 
+}
+
+/***********************************************************************************/
+void RenderSystem::setProjectionMatrix(const Camera& camera) {
+	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), value_ptr(m_projMatrix));
 }

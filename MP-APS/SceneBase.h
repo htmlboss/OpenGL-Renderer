@@ -36,6 +36,8 @@ protected:
 
 private:
 	std::string m_sceneName;
+	std::string m_skyboxPath = "Data/hdri/barcelona.hdr";
+	std::size_t m_skyboxResolution = 2048;
 
 	std::vector<StaticDirectionalLight> m_staticDirectionalLights;
 	std::vector<StaticPointLight> m_staticPointLights;
