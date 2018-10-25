@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 /***********************************************************************************/
 // Forward Declarations
 struct nk_context;
@@ -23,8 +21,5 @@ public:
 	void Shutdown() const;
 
 private:
-	nk_context* m_nuklearContext;
-
-	std::size_t m_maxVertexBuffer = 512 * 1024;
-	std::size_t m_maxElementBuffer = 128 * 1024;
+	nk_context* m_nuklearContext{ nullptr };
 };

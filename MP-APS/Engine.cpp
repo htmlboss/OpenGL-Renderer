@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 #include "Input.h"
+#include "ViewFrustum.h"
 #include "ResourceManager.h"
 #include "SceneBase.h"
 
@@ -9,11 +10,11 @@
 #include <concrtrm.h>
 
 #include <iostream>
+#include <algorithm>
+#include <execution>
 
 /***********************************************************************************/
-Engine::Engine(const std::string_view configPath) : m_mainWindow{},
-													m_renderer{},
-													m_activeScene{nullptr} {
+Engine::Engine(const std::filesystem::path& configPath) {
 
 	std::cout << "**************************************************\n";
 	std::cout << "Engine starting up...\n";
@@ -26,20 +27,20 @@ Engine::Engine(const std::string_view configPath) : m_mainWindow{},
 	std::cout << "Loading Engine config file...\n";
 	
 	pugi::xml_document doc;
-	const auto result = doc.load_string(ResourceManager::GetInstance().LoadTextFile(configPath).data());
+	const auto& result{ doc.load_string(ResourceManager::GetInstance().LoadTextFile(configPath).data()) };
 	std::cout << "Engine config load result: " << result.description() << std::endl;
 
-	const auto engineNode = doc.child("Engine");
+	const auto& engineNode{ doc.child("Engine") };
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing Window...\n";
-	m_mainWindow.Init(engineNode.child("Window"));
+	m_window.Init(engineNode.child("Window"));
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
 	m_renderer.Init(engineNode.child("Renderer"));
 
-	m_guiSystem.Init(m_mainWindow.m_window);
+	m_guiSystem.Init(m_window.m_window);
 }
 
 /***********************************************************************************/
@@ -49,7 +50,7 @@ void Engine::AddScene(const std::shared_ptr<SceneBase>& scene) {
 
 /***********************************************************************************/
 void Engine::SetActiveScene(const std::string_view sceneName) {
-	const auto& scene = m_scenes.find(sceneName.data());
+	const auto& scene{ m_scenes.find(sceneName.data()) };
 
 	if (scene == m_scenes.end()) {
 		std::cerr << "Engine Error: Scene not found: " << sceneName << std::endl;
@@ -57,7 +58,7 @@ void Engine::SetActiveScene(const std::string_view sceneName) {
 	}
 
 	m_activeScene = scene->second.get();
-	m_renderer.InitView(m_activeScene->GetCamera());
+	m_renderer.UpdateView(m_camera);
 }
 
 /***********************************************************************************/
@@ -68,32 +69,35 @@ void Engine::Execute() {
 		std::abort();
 	}
 
-	std::cout << "\n**************************************************\n";
+	std::cout << "**************************************************\n";
 	std::cout << "Engine initialization complete!\n";
-	std::cout << "**************************************************\n" << std::endl;
+	std::cout << "**************************************************\n";
 
 	// Main loop
-	while (!m_mainWindow.ShouldClose()) {
-		update();
+	while (!m_window.ShouldClose()) {
 
-		m_renderer.Render(*m_activeScene, false);
+		m_timer.Update(glfwGetTime());
+		const auto dt{ m_timer.GetDelta() };
+
+		Input::GetInstance().Update();
+
+		m_window.Update();
+
+		m_camera.Update(dt);
+
+		m_activeScene->Update(dt);
+
+		m_renderer.Update(m_camera);
+
+		const auto& renderList{ cullViewFrustum() };
+		m_renderer.Render(m_camera, renderList.cbegin(), renderList.cend(), *m_activeScene, false);
 
 		m_guiSystem.Render();
 
-		m_mainWindow.SwapBuffers();
+		m_window.SwapBuffers();
 	}
 
 	shutdown();
-}
-
-/***********************************************************************************/
-void Engine::update() {
-	m_timer.Update(glfwGetTime());
-	Input::GetInstance().Update();
-	m_mainWindow.Update();
-
-	m_activeScene->Update(m_timer.GetDelta());
-	m_renderer.Update(m_activeScene->GetCamera(), m_timer.GetDelta());
 }
 
 /***********************************************************************************/
@@ -101,5 +105,24 @@ void Engine::shutdown() const {
 	m_guiSystem.Shutdown();
 	m_renderer.Shutdown();
 	ResourceManager::GetInstance().ReleaseAllResources();
-	m_mainWindow.Shutdown();
+	m_window.Shutdown();
+}
+
+/***********************************************************************************/
+std::vector<ModelPtr> Engine::cullViewFrustum() const {
+	std::vector<ModelPtr> renderList;
+
+	const auto& dims{ m_window.GetFramebufferDims() };
+	const ViewFrustum viewFrustum(m_camera.GetViewMatrix(), m_camera.GetProjMatrix(dims.first, dims.second));
+
+	std::for_each(std::execution::parallel_unsequenced_policy(), m_activeScene->m_sceneModels.cbegin(), m_activeScene->m_sceneModels.cend(), 
+		[&](const auto& model) {
+		const auto result{ viewFrustum.TestIntersection(model->GetBoundingBox()) };
+
+		if (result == BoundingVolume::TestResult::INSIDE || result == BoundingVolume::TestResult::INTERSECT) {
+			renderList.push_back(model);
+		}
+	});
+
+	return renderList;
 }

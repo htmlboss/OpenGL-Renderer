@@ -4,7 +4,7 @@
 
 
 /***********************************************************************************/
-DemoCrytekSponza::DemoCrytekSponza(const std::size_t width, const std::size_t height) : SceneBase(width, height) {
+DemoCrytekSponza::DemoCrytekSponza() {
 }
 
 /***********************************************************************************/

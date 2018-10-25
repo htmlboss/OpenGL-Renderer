@@ -1,5 +1,7 @@
 #include "GUISystem.h"
 
+#include <cstddef>
+
 #include <glad/glad.h>
 
 #define NK_INCLUDE_FIXED_TYPES
@@ -15,6 +17,9 @@
 #include <nuklear/nuklear_glfw_gl3.h>
 
 //https://github.com/vurtun/nuklear/blob/master/demo/glfw_opengl3/main.c
+
+const constexpr std::size_t MaxVertexBuffer{ 512 * 1024 };
+const constexpr std::size_t MaxElementBuffer{ 128 * 1024 };
 
 /***********************************************************************************/
 void GUISystem::Init(GLFWwindow* windowPtr) {
@@ -78,7 +83,7 @@ void GUISystem::Render() {
 	nk_end(m_nuklearContext);
 
 
-	nk_glfw3_render(NK_ANTI_ALIASING_ON, m_maxVertexBuffer, m_maxElementBuffer);
+	nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
 }
 
 /***********************************************************************************/

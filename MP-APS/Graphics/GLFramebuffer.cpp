@@ -3,6 +3,28 @@
 #include <iostream>
 
 /***********************************************************************************/
+void GLFramebuffer::Init(const std::string_view name) {
+	m_name = name;
+	Reset();
+}
+
+/***********************************************************************************/
+void GLFramebuffer::Delete() {
+	if (m_fboID) {
+		glDeleteFramebuffers(1, &m_fboID);
+		m_fboID = 0;
+	}
+}
+
+/***********************************************************************************/
+void GLFramebuffer::Reset() {
+	Delete();
+	glGenFramebuffers(1, &m_fboID);
+
+	checkErrors();
+}
+
+/***********************************************************************************/
 void GLFramebuffer::AttachTexture(const GLuint& texID, const AttachmentType colorAttach) const {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, static_cast<int>(colorAttach), GL_TEXTURE_2D, texID, 0);
 	checkErrors();
@@ -15,43 +37,13 @@ void GLFramebuffer::AttachRenderBuffer(const GLuint& rboID, const AttachmentType
 }
 
 /***********************************************************************************/
-void GLFramebuffer::Init(const std::string_view name, const std::size_t width, const std::size_t height) {
-	m_name = name;
-	Reset(width, height);
-}
-
-/***********************************************************************************/
-void GLFramebuffer::Delete() {
-	if (m_fbo) {
-		glDeleteFramebuffers(1, &m_fbo);
-	}
-}
-
-/***********************************************************************************/
-void GLFramebuffer::Reset(const std::size_t width, const std::size_t height) {
-	Delete();
-	glGenFramebuffers(1, &m_fbo);
-	m_width = width;
-	m_height = height;
-
-	checkErrors();
-}
-
-/***********************************************************************************/
 void GLFramebuffer::Bind() const {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
 }
 
 /***********************************************************************************/
 void GLFramebuffer::Unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-/***********************************************************************************/
-void GLFramebuffer::Blit(const BufferBitMasks bufferBit, const GLint targetID) const {
-	Bind();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetID);
-	glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, static_cast<int>(bufferBit), GL_NEAREST);
 }
 
 /***********************************************************************************/
@@ -69,12 +61,6 @@ void GLFramebuffer::DrawBuffer(const GLBuffer buffer) const {
 void GLFramebuffer::ReadBuffer(const GLBuffer buffer) const {
 	glReadBuffer(static_cast<int>(buffer));
 	checkErrors();
-}
-
-/***********************************************************************************/
-void GLFramebuffer::Resize(const std::size_t width, const std::size_t height) {
-	m_width = width;
-	m_height = height;
 }
 
 /***********************************************************************************/

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 
 /***********************************************************************************/
 // Forward Declarations
@@ -16,9 +17,9 @@ class WindowSystem {
 public:
 	WindowSystem() noexcept = default;
 
-	WindowSystem(WindowSystem&&) = delete;
+	WindowSystem(WindowSystem&&) = default;
 	WindowSystem(const WindowSystem&) = delete;
-	WindowSystem& operator=(WindowSystem&&) = delete;
+	WindowSystem& operator=(WindowSystem&&) = default;
 	WindowSystem& operator=(const WindowSystem&) = delete;
 
 	~WindowSystem() = default;
@@ -37,12 +38,13 @@ public:
 
 	auto ShouldClose() const noexcept { return m_shouldWindowClose; }
 	auto IsCursorVisible() const noexcept { return m_showCursor; }
-	auto IsFocused() const noexcept { return m_focused; }
+
+	// Returns the window's framebuffer dimensions in pixels {width, height}.
+	std::pair<int, int> GetFramebufferDims() const;
 
 private:
-	GLFWwindow* m_window = nullptr;
+	GLFWwindow* m_window{ nullptr };
 
-	bool m_shouldWindowClose;
-	bool m_focused = true;
-	bool m_showCursor = false;
+	bool m_shouldWindowClose{ false };
+	bool m_showCursor{ false };
 };

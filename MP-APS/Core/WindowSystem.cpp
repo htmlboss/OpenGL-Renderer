@@ -92,6 +92,14 @@ void WindowSystem::SetVsync(const bool vsync) const {
 }
 
 /***********************************************************************************/
+std::pair<int, int> WindowSystem::GetFramebufferDims() const {
+	int width, height;
+	glfwGetFramebufferSize(m_window, &width, &height);
+
+	return { width, height };
+}
+
+/***********************************************************************************/
 void WindowSystem::Update() {
 	glfwPollEvents();
 

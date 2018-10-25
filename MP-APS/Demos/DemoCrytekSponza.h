@@ -5,8 +5,10 @@
 class DemoCrytekSponza : public SceneBase {
 
 public:
-	DemoCrytekSponza(const std::size_t width, const std::size_t height);
+	DemoCrytekSponza();
 	~DemoCrytekSponza() = default;
+
+	MAKE_MOVE_ONLY(DemoCrytekSponza)
 	
 	void Init(const std::string_view sceneName) override;
 };

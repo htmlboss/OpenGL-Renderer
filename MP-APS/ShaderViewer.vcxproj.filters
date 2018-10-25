@@ -15,12 +15,6 @@
     <Filter Include="Core">
       <UniqueIdentifier>{8e0fde98-7c6e-438e-ac6f-57fb8323391c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Terrain">
-      <UniqueIdentifier>{2c038983-4100-4c4e-b124-0887306ab2ce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="AI">
-      <UniqueIdentifier>{0d636b6d-aaa3-4bc1-9375-8b5a52311ed6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Demos">
       <UniqueIdentifier>{eefd2842-47fc-4817-9cac-65f6078fc562}</UniqueIdentifier>
     </Filter>
@@ -86,16 +80,7 @@
     <ClCompile Include="Core\GUISystem.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="AI\AISystem.cpp">
-      <Filter>AI</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain\Terrain.cpp">
-      <Filter>Terrain</Filter>
-    </ClCompile>
     <ClCompile Include="Demos\DemoCrytekSponza.cpp">
-      <Filter>Demos</Filter>
-    </ClCompile>
-    <ClCompile Include="Demos\DemoPathfinding.cpp">
       <Filter>Demos</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,23 +154,14 @@
     <ClInclude Include="PBRMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain\TerrainNode.h">
-      <Filter>Terrain</Filter>
-    </ClInclude>
     <ClInclude Include="Core\GUISystem.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="AI\AISystem.h">
-      <Filter>AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain\Terrain.h">
-      <Filter>Terrain</Filter>
     </ClInclude>
     <ClInclude Include="Demos\DemoCrytekSponza.h">
       <Filter>Demos</Filter>
     </ClInclude>
-    <ClInclude Include="Demos\DemoPathfinding.h">
-      <Filter>Demos</Filter>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

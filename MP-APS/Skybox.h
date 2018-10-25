@@ -5,9 +5,8 @@
 #include "Graphics/GLVertexArray.h"
 
 class Skybox {
-public:
-	Skybox() = default;
 
+public:
 	void Init(const std::string_view hdrPath, const std::size_t resolution = 512);
 	void Draw();
 

@@ -5,15 +5,16 @@
 class Camera {
 
 public:
-	Camera(const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, const glm::vec3& up = { 0.0f, 1.0f, 0.0f }, const float yaw = -90.0f, const float pitch = 0.0f, const float FOV = 70.0f) noexcept;
+	Camera() noexcept;
 
 	void SetNear(const float near);
 	void SetFar(const float far);
-	void SetSpeed(const double speed);
+	void SetSpeed(const float speed);
 
 	void Update(const double deltaTime);
 
 	auto GetViewMatrix() const { return lookAt(m_position, m_position + m_front, m_up); }
+	// TODO: optimize projection matrix calculation
 	auto GetProjMatrix(const float width, const float height) const { return glm::perspective(m_FOV, width / height, m_near, m_far); }
 	auto GetPosition() const noexcept { return m_position; }
 
@@ -37,24 +38,26 @@ private:
 	void updateVectors();
 
 	// Camera Attributes
-	glm::vec3 m_position;
-	glm::vec3 m_front;
-	glm::vec3 m_up;
+	glm::vec3 m_position{ 0.0f, 0.0f, 0.0f };
+	glm::vec3 m_front{ 0.0f, 0.0f, -1.0f };
+	glm::vec3 m_up{ 0.0f, 1.0f, 0.0f };
 	glm::vec3 m_right;
-	const glm::vec3 m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	const glm::vec3 m_worldUp{ 0.0f, 1.0f, 0.0f };
 
 	float m_near = 1.0f, m_far = 100.0f;
 
 	// Eular Angles
-	double m_yaw, m_pitch;
+	float m_yaw{ -90.0f };
+	float m_pitch{ 0.0f };
 
-	double m_speed = 5.0;
-	const double m_sensitivity = 0.3;
-	const float m_FOV;
+	float m_speed{ 5.0f };
+	const float m_sensitivity{ 0.3f };
+	const float m_FOV{ 70.0f };
 
 	// Mouse positions
-	bool m_firstMouse;
-	double m_prevX, m_prevY;
+	bool m_firstMouse{ true };
+	double m_prevX{ 0.0 }, m_prevY{0.0};
 
-	bool m_shouldUpdate = true;
+	// Should we update the camera attributes?
+	bool m_dirty{ true };
 };

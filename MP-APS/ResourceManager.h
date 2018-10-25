@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include <optional>
+#include <filesystem>
 
 class ResourceManager {
 	ResourceManager() = default;
@@ -21,7 +22,7 @@ public:
 	void ReleaseAllResources();
 
 	// Load a text file and return as a string.
-	std::string LoadTextFile(const std::string_view path) const;
+	std::string LoadTextFile(const std::filesystem::path& path) const;
 	// Loads an HDR image and generates an OpenGL floating-point texture.
 	unsigned int LoadHDRI(const std::string_view path) const;
 	// Loads an image (if not cached) and generates an OpenGL texture.

@@ -1,19 +1,17 @@
 #include "RenderSystem.h"
 
 #include "../Graphics/GLShader.h"
+#include "../Camera.h"
 
 #include "../Input.h"
 #include "../SceneBase.h"
 
 #include <pugixml.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-
-/***********************************************************************************/
-RenderSystem::RenderSystem() :	m_width{0},
-								m_height{0} {}
 
 /***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
@@ -37,7 +35,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	m_height = height;
 	m_shadowMapResolution = rendererNode.attribute("shadowResolution").as_uint();
 
-	m_hdrFBO.Init("HDR FBO", width, height);
+	m_hdrFBO.Init("HDR FBO");
 	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
 
 	// Compile all shader programs in config.xml
@@ -90,6 +88,24 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 }
 
 /***********************************************************************************/
+void RenderSystem::Update(const Camera& camera) {
+
+	// Window size changed.
+	if (Input::GetInstance().ShouldResize()) {
+		m_width = Input::GetInstance().GetWidth();
+		m_height = Input::GetInstance().GetHeight();
+
+		UpdateView(camera);
+		glViewport(0, 0, m_width, m_height);
+	}
+
+	// Update view matrix inside UBO
+	const auto view = camera.GetViewMatrix();
+	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+}
+
+/***********************************************************************************/
 void RenderSystem::Shutdown() const {
 	for (const auto& shader : m_shaderCache) {
 		shader.second.DeleteProgram();
@@ -97,7 +113,8 @@ void RenderSystem::Shutdown() const {
 }
 
 /***********************************************************************************/
-void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
+void RenderSystem::Render(const Camera& camera, RenderListIterator renderListBegin, RenderListIterator renderListEnd, const SceneBase& scene, const bool globalWireframe) {
+	
 	setDefaultState();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
@@ -109,7 +126,7 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	static auto& skyboxShader = m_shaderCache.at("SkyboxShader");
 	
 	// Shadow mapping
-	renderShadowMap(scene);
+	renderShadowMap(scene, renderListBegin, renderListEnd);
 
 	// Regular rendering
 	m_hdrFBO.Bind();
@@ -126,10 +143,10 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
 
 	pbrShader.Bind();
-	pbrShader.SetUniform("camPos", scene.GetCamera().GetPosition()).SetUniformi("wireframe", wireframe).SetUniform("lightSpaceMatrix", m_lightSpaceMatrix);
+	pbrShader.SetUniform("camPos", camera.GetPosition()).SetUniformi("wireframe", globalWireframe).SetUniform("lightSpaceMatrix", m_lightSpaceMatrix);
 	pbrShader.SetUniform("directionalLight", scene.m_staticDirectionalLights[0].Direction).SetUniform("lightColor", scene.m_staticDirectionalLights[0].Color);
 
-	renderModelsWithTextures(pbrShader, scene.m_renderList);
+	renderModelsWithTextures(pbrShader, renderListBegin, renderListEnd);
 
 	// Draw skybox
 	skyboxShader.Bind();
@@ -170,29 +187,10 @@ void RenderSystem::Render(const SceneBase& scene, const bool wireframe) {
 
 /***********************************************************************************/
 // TODO: This needs to be gutted and put elsewhere
-void RenderSystem::InitView(const Camera& camera) {
+void RenderSystem::UpdateView(const Camera& camera) {
 	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), value_ptr(m_projMatrix));
-}
-
-/***********************************************************************************/
-void RenderSystem::Update(const Camera& camera, const double delta) {
-
-	// Window size changed.
-	if (Input::GetInstance().ShouldResize()) {
-		m_width = Input::GetInstance().GetWidth();
-		m_height = Input::GetInstance().GetHeight();
-
-		InitView(camera);
-		glViewport(0, 0, m_width, m_height);
-		m_shadowDepthFBO.Resize(m_width, m_height);
-	}
-
-	// Update view matrix inside UBO
-	const auto view = camera.GetViewMatrix();
-	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(m_projMatrix));
 }
 
 /***********************************************************************************/
@@ -208,17 +206,19 @@ void RenderSystem::setDefaultState() {
 }
 
 /***********************************************************************************/
-void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const {
+void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, RenderListIterator renderListBegin, RenderListIterator renderListEnd) const {
 	glBindSampler(m_samplerPBRTextures, 3);
 	glBindSampler(m_samplerPBRTextures, 4);
 	glBindSampler(m_samplerPBRTextures, 5);
 	glBindSampler(m_samplerPBRTextures, 6);
 	// glBindSampler(m_samplerPBRTextures, 7);
 
-	for (const auto& model : renderList) {
-		shader.SetUniform("modelMatrix", model->GetModelMatrix());
+	auto begin{ renderListBegin };
+
+	while (begin != renderListEnd) {
+		shader.SetUniform("modelMatrix", (*begin)->GetModelMatrix());
 		
-		const auto meshes = model->GetMeshes();
+		const auto& meshes{ (*begin)->GetMeshes() };
 		for (const auto& mesh : meshes) {
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, mesh.Material->GetParameterTexture(PBRMaterial::ALBEDO));
@@ -236,23 +236,28 @@ void RenderSystem::renderModelsWithTextures(GLShaderProgram& shader, const std::
 			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+
+		++begin;
 	}
 
 	glBindSampler(m_samplerPBRTextures, 0);
 }
 
 /***********************************************************************************/
-void RenderSystem::renderModelsNoTextures(GLShaderProgram& shader, const std::vector<ModelPtr>& renderList) const {
-	
-	for (const auto& model : renderList) {
-		shader.SetUniform("modelMatrix", model->GetModelMatrix());
+void RenderSystem::renderModelsNoTextures(GLShaderProgram& shader, RenderListIterator renderListBegin, RenderListIterator renderListEnd) const {
+	auto begin{ renderListBegin };
 
-		const auto meshes = model->GetMeshes();
+	while(begin != renderListEnd) {
+		shader.SetUniform("modelMatrix", (*begin)->GetModelMatrix());
+
+		const auto& meshes{ (*begin)->GetMeshes() };
 		for (const auto& mesh : meshes) {
 			mesh.VAO.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, nullptr);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+
+		++begin;
 	}
 }
 
@@ -263,13 +268,13 @@ void RenderSystem::renderQuad() const {
 }
 
 /***********************************************************************************/
-void RenderSystem::renderShadowMap(const SceneBase& scene) {
+void RenderSystem::renderShadowMap(const SceneBase& scene, RenderListIterator renderListBegin, RenderListIterator renderListEnd) {
 	static auto& shadowDepthShader = m_shaderCache.at("ShadowDepthShader");
 	shadowDepthShader.Bind();
 	static constexpr float near_plane = 0.0f, far_plane = 100.0f;
 	static const glm::mat4 lightProjection = glm::ortho(-50.0f, 50.0f, 50.0f, -50.0f, near_plane, far_plane);
 
-	static const glm::mat4 lightView = glm::lookAt(scene.m_staticDirectionalLights[0].Direction, 
+	static const auto& lightView = glm::lookAt(scene.m_staticDirectionalLights[0].Direction, 
 								  glm::vec3(0.0f), 
 								  glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -282,7 +287,7 @@ void RenderSystem::renderShadowMap(const SceneBase& scene) {
 	m_shadowDepthFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	renderModelsNoTextures(shadowDepthShader, scene.m_renderList);
+	renderModelsNoTextures(shadowDepthShader, renderListBegin, renderListEnd);
 
 	m_shadowDepthFBO.Unbind();
 	glViewport(0, 0, m_width, m_height);
@@ -328,7 +333,7 @@ void RenderSystem::setupTextureSamplers() {
 
 /***********************************************************************************/
 void RenderSystem::setupShadowMap() {
-	m_shadowDepthFBO.Init("Shadow Depth FBO", m_shadowMapResolution, m_shadowMapResolution);
+	m_shadowDepthFBO.Init("Shadow Depth FBO");
 	m_shadowDepthFBO.Bind();
 
 	if (m_shadowDepthTexture) {
@@ -355,7 +360,7 @@ void RenderSystem::setupShadowMap() {
 void RenderSystem::setupPostProcessing() {
 	
 	// HDR
-	m_hdrFBO.Reset(m_width, m_height);
+	m_hdrFBO.Reset();
 	m_hdrFBO.Bind();
 
 	// Regular old HDR
@@ -393,7 +398,7 @@ void RenderSystem::setupPostProcessing() {
 	// Bloom
 	glGenTextures(2, m_pingPongColorBuffers.data());
 	for (auto i = 0; i < 2; i++) {
-		m_pingPongFBOs[i].Reset(m_width, m_height);
+		m_pingPongFBOs[i].Reset();
 		m_pingPongFBOs[i].Bind();
 
 		glBindTexture(GL_TEXTURE_2D, m_pingPongColorBuffers[i]);

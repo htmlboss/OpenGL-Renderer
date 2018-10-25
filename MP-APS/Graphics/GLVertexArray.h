@@ -3,9 +3,8 @@
 #include <glad/glad.h>
 
 class GLVertexArray {
-public:
-	GLVertexArray() = default;
 
+public:
 	enum BufferType : int {
 		ARRAY = GL_ARRAY_BUFFER,
 		ELEMENT = GL_ELEMENT_ARRAY_BUFFER
@@ -24,5 +23,5 @@ public:
 	void Delete();
 
 private:
-	GLuint m_vao;
+	GLuint m_vao{ 0 };
 };

@@ -6,10 +6,10 @@
 
 // Helper class to encapsulate common FBO stuff and clean up repeated code.
 class GLFramebuffer {
-public:
-	GLFramebuffer() = default;
 
-	enum class AttachmentType {
+public:
+
+	enum class AttachmentType : decltype(GL_COLOR_ATTACHMENT0) {
 		COLOR0 = GL_COLOR_ATTACHMENT0,
 		COLOR1 = GL_COLOR_ATTACHMENT1,
 		COLOR2 = GL_COLOR_ATTACHMENT2,
@@ -20,13 +20,13 @@ public:
 		STENCIL = GL_STENCIL_ATTACHMENT
 	};
 
-	enum class BufferBitMasks {
+	enum class BufferBitMasks : decltype(GL_COLOR_BUFFER_BIT) {
 		COLOR = GL_COLOR_BUFFER_BIT,
 		DEPTH = GL_DEPTH_BUFFER_BIT,
 		STENCIL = GL_STENCIL_BUFFER_BIT
 	};
 
-	enum class GLBuffer {
+	enum class GLBuffer : decltype(GL_NONE) {
 		NONE = GL_NONE,
 		FRONT = GL_FRONT,
 		BACK = GL_BACK,
@@ -36,16 +36,17 @@ public:
 		BACK_LEFT = GL_BACK_LEFT
 	};
 
-	void Init(const std::string_view name, const std::size_t width, const std::size_t height);
+	// Initialize framebuffer with OpenGL
+	void Init(const std::string_view name);
+	// Tell OpenGL to delete this framebuffer and underlying attachmants
 	void Delete();
-	void Reset(const std::size_t width, const std::size_t height);
-	void Resize(const std::size_t width, const std::size_t height);
+	// Deletes and re-initializes this framebuffer. Useful when needing to resize.
+	void Reset();
 
 	void AttachTexture(const GLuint& texID, const AttachmentType colorAttach) const;
 	void AttachRenderBuffer(const GLuint& rboID, const AttachmentType type) const;
 	void Bind() const;
 	void Unbind() const;
-	void Blit(const BufferBitMasks bufferBit, const GLint targetID) const;
 	void DrawBuffers(const unsigned int attachments[]) const;
 	void DrawBuffer(const GLBuffer buffer) const;
 	void ReadBuffer(const GLBuffer buffer) const;
@@ -53,8 +54,7 @@ public:
 private:
 	void checkErrors() const;
 
-	GLuint m_fbo;
+	GLuint m_fboID{ 0 };
 
 	std::string_view m_name;
-	std::size_t m_width, m_height;
 };

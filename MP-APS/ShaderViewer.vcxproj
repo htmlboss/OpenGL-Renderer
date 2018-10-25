@@ -30,7 +30,7 @@
     <ProjectGuid>{79953202-FB57-485E-89E1-3E6E37692583}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShaderViewer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <ProjectName>MP-APS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -150,19 +150,20 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions) /EHsc</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions) /EHsc /Zc:twoPhase-</AdditionalOptions>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <EnableModules>true</EnableModules>
+      <EnableModules>false</EnableModules>
+      <StringPooling>true</StringPooling>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -207,24 +208,24 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLM_FORCE_AVX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++latest /arch:AVX2 %(AdditionalOptions) /EHsc</AdditionalOptions>
+      <AdditionalOptions>/std:c++latest /arch:AVX2 %(AdditionalOptions) /EHsc /Zc:twoPhase-</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <StringPooling>true</StringPooling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <EnableModules>true</EnableModules>
+      <EnableModules>false</EnableModules>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -237,24 +238,24 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Editor_Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLM_FORCE_AVX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++latest /arch:AVX2 %(AdditionalOptions) /EHsc</AdditionalOptions>
+      <AdditionalOptions>/std:c++latest /arch:AVX2 %(AdditionalOptions) /EHsc /Zc:twoPhase-</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <StringPooling>true</StringPooling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <EnableModules>true</EnableModules>
+      <EnableModules>false</EnableModules>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -267,13 +268,11 @@
   <ItemGroup>
     <ClCompile Include="3rdParty\glad\src\glad.c" />
     <ClCompile Include="AABB.cpp" />
-    <ClCompile Include="AI\AISystem.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Core\GUISystem.cpp" />
     <ClCompile Include="Core\RenderSystem.cpp" />
     <ClCompile Include="Core\WindowSystem.cpp" />
     <ClCompile Include="Demos\DemoCrytekSponza.cpp" />
-    <ClCompile Include="Demos\DemoPathfinding.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Graphics\GLFramebuffer.cpp" />
     <ClCompile Include="Graphics\GLShader.cpp" />
@@ -286,21 +285,18 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Terrain\Terrain.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\stb\stb_image.h" />
     <ClInclude Include="AABB.hpp" />
-    <ClInclude Include="AI\AISystem.h" />
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Core\GUISystem.h" />
     <ClInclude Include="Core\RenderSystem.h" />
     <ClInclude Include="Core\WindowSystem.h" />
     <ClInclude Include="Demos\DemoCrytekSponza.h" />
-    <ClInclude Include="Demos\DemoPathfinding.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Graphics\StaticDirectionalLight.h" />
     <ClInclude Include="Graphics\GLFramebuffer.h" />
@@ -316,9 +312,8 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Terrain\Terrain.h" />
-    <ClInclude Include="Terrain\TerrainNode.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="ViewFrustum.h" />
   </ItemGroup>
   <ItemGroup>

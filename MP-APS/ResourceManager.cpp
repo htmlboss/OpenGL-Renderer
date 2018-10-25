@@ -24,16 +24,12 @@ void ResourceManager::ReleaseAllResources() {
 }
 
 /***********************************************************************************/
-std::string ResourceManager::LoadTextFile(const std::string_view path) const {
-#ifdef _DEBUG
-	std::cout << "Resource Manager: Loading text file: " << path << '\n';
-#endif
-
-	std::ifstream in(path.data(), std::ios::in);
+std::string ResourceManager::LoadTextFile(const std::filesystem::path& path) const {
+	std::ifstream in(path, std::ios::in);
 	in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 	if (!in) {
-		std::cerr << "Resource Manager: File loading error: " + *path.data() << " " << errno << std::endl;
+		std::cerr << "Resource Manager: File loading error: " + path.string() << " " << errno << std::endl;
 		std::abort();
 	}
 
@@ -47,7 +43,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 	// Dont flip HDR otherwise the probe will be upside down. We flip the y-coord in the
 	// shader to correctly render the texture.
 	int width, height, nrComp;
-	auto* data = stbi_loadf(path.data(), &width, &height, &nrComp, 0);
+	auto* data{ stbi_loadf(path.data(), &width, &height, &nrComp, 0) };
 	
 	//stbi_set_flip_vertically_on_load(false);
 
@@ -56,7 +52,7 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 		std::abort();
 	}
 
-	unsigned int hdrTexture;
+	unsigned int hdrTexture{ 0 };
 	glGenTextures(1, &hdrTexture);
 	glBindTexture(GL_TEXTURE_2D, hdrTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);

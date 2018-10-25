@@ -4,17 +4,7 @@
 #include <GLFW/glfw3.h>
 
 /***********************************************************************************/
-Camera::Camera(const glm::vec3& position, const glm::vec3& up, const float yaw, const float pitch, const float FOV) noexcept :
-	m_position(position),
-	m_front(glm::vec3(0.0f, 0.0f, -1.0f)),
-	m_up(up),
-	m_yaw(yaw),
-	m_pitch(pitch),
-	m_FOV(FOV),
-	m_firstMouse(true),
-	m_prevX(0.0),
-	m_prevY(0.0) 
-{
+Camera::Camera() noexcept {
 	updateVectors();
 }
 
@@ -29,7 +19,7 @@ void Camera::SetFar(const float far) {
 }
 
 /***********************************************************************************/
-void Camera::SetSpeed(const double speed) {
+void Camera::SetSpeed(const float speed) {
 	m_speed = speed;
 }
 
@@ -37,10 +27,10 @@ void Camera::SetSpeed(const double speed) {
 void Camera::Update(const double deltaTime) {
 
 	if (Input::GetInstance().IsKeyPressed(GLFW_KEY_TAB)) {
-		m_shouldUpdate = !m_shouldUpdate;
+		m_dirty = !m_dirty;
 	}
 
-	if (m_shouldUpdate) {
+	if (m_dirty) {
 		// Update view from mouse movement
 		updateView();
 
