@@ -21,14 +21,14 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 		std::abort();
 	}
 
+	queryHardwareCaps();
+
 #ifdef _DEBUG
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
 	std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
 	std::cout << "OpenGL Driver Vendor: " << glGetString(GL_VENDOR) << '\n';
 	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << '\n';
 #endif
-
-	getHardwareFeatures();
 
 	const auto width = rendererNode.attribute("width").as_uint();
 	const auto height = rendererNode.attribute("height").as_uint();
@@ -145,7 +145,7 @@ void RenderSystem::Render(const Camera& camera, RenderListIterator renderListBeg
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_skybox.GetBRDFLUT());
 	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
+	glBindTexture(GL_TEXTURE_2D, m_shadowColorTexture);
 
 	pbrShader.Bind();
 	pbrShader.SetUniform("camPos", camera.GetPosition()).SetUniformi("wireframe", globalWireframe).SetUniform("lightSpaceMatrix", m_lightSpaceMatrix);
@@ -196,6 +196,12 @@ void RenderSystem::UpdateView(const Camera& camera) {
 	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(m_projMatrix));
+}
+
+/***********************************************************************************/
+void RenderSystem::queryHardwareCaps() {
+	// Anisotropic filtering
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &m_caps.MaxAnisotropy);
 }
 
 /***********************************************************************************/
@@ -289,12 +295,12 @@ void RenderSystem::renderShadowMap(const SceneBase& scene, RenderListIterator re
 	
 	glCullFace(GL_FRONT); // Solve peter-panning
 	glViewport(0, 0, m_shadowMapResolution, m_shadowMapResolution);
-	m_shadowDepthFBO.Bind();
+	m_shadowFBO.Bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	renderModelsNoTextures(shadowDepthShader, renderListBegin, renderListEnd);
 
-	m_shadowDepthFBO.Unbind();
+	m_shadowFBO.Unbind();
 	glViewport(0, 0, m_width, m_height);
 	glCullFace(GL_BACK);
 }
@@ -327,33 +333,49 @@ void RenderSystem::setupTextureSamplers() {
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glSamplerParameteri(m_samplerPBRTextures, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glSamplerParameterf(m_samplerPBRTextures, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_features.MaxAnisotropy);
+	glSamplerParameterf(m_samplerPBRTextures, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_caps.MaxAnisotropy);
 
 }
 
 /***********************************************************************************/
 void RenderSystem::setupShadowMap() {
-	m_shadowDepthFBO.Init("Shadow Depth FBO");
-	m_shadowDepthFBO.Bind();
+	const static float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+	m_shadowFBO.Init("Shadow Depth FBO");
+	m_shadowFBO.Bind();
+
+	// Depth texture
 	if (m_shadowDepthTexture) {
 		glDeleteTextures(1, &m_shadowDepthTexture);
 	}
 	glGenTextures(1, &m_shadowDepthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_shadowDepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_shadowMapResolution, m_shadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, m_shadowMapResolution, m_shadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); // Clamp to border to fix over-sampling
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	const float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor); 
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	m_shadowDepthFBO.AttachTexture(m_shadowDepthTexture, GLFramebuffer::AttachmentType::DEPTH);
-	m_shadowDepthFBO.DrawBuffer(GLFramebuffer::GLBuffer::NONE);
-	m_shadowDepthFBO.ReadBuffer(GLFramebuffer::GLBuffer::NONE);
+	// Colour texture for Variance Shadow Mapping (VSM)
+	if (m_shadowColorTexture) {
+		glDeleteTextures(1, &m_shadowColorTexture);
+	}
+	glGenTextures(1, &m_shadowColorTexture);
+	glBindTexture(GL_TEXTURE_2D, m_shadowColorTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, m_shadowMapResolution, m_shadowMapResolution, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Hardware linear filtering gives us soft shadows for free!
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); // Clamp to border to fix over-sampling
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_caps.MaxAnisotropy); // Anisotropic filtering for sharper angles
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	m_shadowFBO.AttachTexture(m_shadowDepthTexture, GLFramebuffer::AttachmentType::DEPTH);
+	m_shadowFBO.AttachTexture(m_shadowColorTexture, GLFramebuffer::AttachmentType::COLOR0);
 	
-	m_shadowDepthFBO.Unbind();
+	m_shadowFBO.Unbind();
 }
 
 /***********************************************************************************/

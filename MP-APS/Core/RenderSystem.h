@@ -43,7 +43,7 @@ public:
 				);
 
 private:
-	struct Features {
+	struct HardwareCaps {
 		float MaxAnisotropy;
 		int MaxArrayTextureLayers;
 		int MaxTextureSamples;
@@ -53,11 +53,12 @@ private:
 		int MaxFragmentUniformBlocks;
 		int MaxComputeWorkGroupSize;
 		int MaxComputeWorkGroupCount;
-	} m_features;
+	} m_caps;
 
 	// Helper functions
 
-	
+	//
+	void queryHardwareCaps();
 	// Sets the default state required for rendering
 	void setDefaultState();
 	// Render models contained in the renderlist
@@ -92,8 +93,8 @@ private:
 	GLuint m_samplerPBRTextures{ 0 };
 
 	// Shadow mapping
-	GLuint m_shadowMapResolution{ 1024 }, m_shadowDepthTexture{ 0 };
-	GLFramebuffer m_shadowDepthFBO;
+	GLuint m_shadowMapResolution{ 1024 }, m_shadowDepthTexture{ 0 }, m_shadowColorTexture{ 0 };
+	GLFramebuffer m_shadowFBO;
 
 	// Environment map
 	Skybox m_skybox;

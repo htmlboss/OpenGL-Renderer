@@ -39,28 +39,27 @@ layout (location = 1) out vec4 BrightColor;
 const float PI = 3.14159265359;
 
 // ----------------------------------------------------------------------------
-float ComputeShadow(const vec4 fragPosLightSpace, const vec3 N, const vec3 L) {
+// Piecewise linear interpolation
+float linstep(const float low, const float high, const float value) {
+    return clamp((value - low) / (high - low), 0.0, 1.0);
+}
+
+// ----------------------------------------------------------------------------
+// Variance shadow mapping
+float ComputeShadow(const vec4 fragPosLightSpace) {
     // Perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5; // [0, 1]
+    vec2 screenCoords = fragPosLightSpace.xy / fragPosLightSpace.w;
+    screenCoords = screenCoords * 0.5 + 0.5; // [0, 1]
 
-    const float closestDepth = texture(shadowMap, projCoords.xy).r;   
-    const float currentDepth = projCoords.z;
-    const float bias = max(0.05 * (1.0 - dot(N, L)), 0.005); // Bias to solve shadow acne
-    
-    // PCF
-    float shadow = 0.0;
-    const vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for(int x = -2; x <= 2; ++x) {
-        for(int y = -2; y <= 2; ++y) {
-            const float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
-        }    
-    }
-    
-    shadow /= 25.0;
+    const float distance = fragPosLightSpace.z; // Use raw distance instead of linear junk
+    const vec2 moments = texture2D(shadowMap, screenCoords.xy).rg;
 
-    return shadow;
+    const float p = step(distance, moments.x);
+    const float variance = max(moments.y - (moments.x * moments.x), 0.00002);
+    const float d = distance - moments.x;
+    const float pMax = linstep(0.2, 1.0, variance / (variance + d*d)); // Solve light bleeding
+
+   return min(max(p, pMax), 1.0);
 }
 
 // ----------------------------------------------------------------------------
@@ -155,9 +154,9 @@ void main() {
     // scale light by NdotL
     float NdotL = max(dot(N, L), 0.0);        
 
-    const float shadow = ComputeShadow(fragData.FragPosLightSpace, N, L);
+    const float shadow = ComputeShadow(fragData.FragPosLightSpace);
     // add to outgoing radiance Lo
-    Lo = (kD * albedo / PI + specular) * radiance * NdotL * (1.0 - shadow);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    Lo = (kD * albedo / PI + specular) * radiance * NdotL * shadow;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
     
     // ambient lighting (we now use IBL as the ambient term)
