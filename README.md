@@ -20,6 +20,9 @@ Physically Based Rendering:
 ![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/03.png "Physically Based Rendering")
 ![PBR](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/04.png "Physically Based Rendering")
 
+Image Based Lighting (IBL):
+![IBL](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/06.png "Image Based Lighting (IBL)")
+
 Bloom:
 ![Bloom](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/05.png "Bloom")
 
@@ -36,7 +39,7 @@ Bloom:
 * Physically-based rendering.
 
 ## WIP
-* Shadow mapping.
+* Variance shadow mapping (soft shadows).
 * Depth-buffer optimization ([https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html](https://outerra.blogspot.ca/2012/11/maximizing-depth-buffer-range-and.html)).
 
 ## Roadmap
@@ -71,4 +74,5 @@ Bloom:
 * _Forward+: Bringing Deferred Lighting to the Next Level_ ([https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf](https://takahiroharada.files.wordpress.com/2015/04/forward_plus.pdf)). Harada, McKee, Yang (2012).
 * _Solid Wireframe_ ([http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf](http://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf)). Nvidia (2007).
 * _Physically Based Rendering_ ([https://learnopengl.com/#!PBR/IBL/Specular-IBL](https://learnopengl.com/#!PBR/IBL/Specular-IBL))
+* _Variance Shadow Mapping_ ([http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/VarianceShadowMapping/Doc/VarianceShadowMapping.pdf](http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/VarianceShadowMapping/Doc/VarianceShadowMapping.pdf))
 * _Tessellated Terrain Rendering with Dynamic LOD_ ([http://victorbush.com/2015/01/tessellated-terrain/](http://victorbush.com/2015/01/tessellated-terrain/))
