@@ -11,6 +11,16 @@ A modern OpenGL 3D rendering engine. The idea behind it is to be very simple to 
 [![forthebadge](http://forthebadge.com/images/badges/powered-by-water.svg)](http://forthebadge.com)
 
 
+## Compiling
+### Ubuntu (and similar)
+
+```sh
+bash install-deps-ubuntu.sh
+make
+cd build/
+./MP-APS
+```
+
 ## Screenshots
 
 Anti-aliased wireframe rendering:
