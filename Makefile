@@ -9,7 +9,7 @@ stb_dir := ./MP-APS/3rdParty/stb/
 pugixml_dir := ./MP-APS/3rdParty/pugixml/include/
 nuklear_dir := ./MP-APS/3rdParty/nuklear/include/
 
-libs := -lstdc++fs -lGL -lglfw -lpthread -lassimp
+libs := -lstdc++fs -lGL -lglfw -lpthread -lassimp -ltbb
 
 all:
 	make clean
