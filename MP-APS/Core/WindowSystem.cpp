@@ -7,7 +7,7 @@
 #include <iostream>
 
 /***********************************************************************************/
-void WindowSystem::Init(const pugi::xml_node& windowNode) {
+GLFWwindow* WindowSystem::Init(const pugi::xml_node& windowNode) {
 
 	// Gross lambda to connect the Input singleton to GLFW callbacks
 #define genericInputCallback(functionName)\
@@ -53,9 +53,9 @@ void WindowSystem::Init(const pugi::xml_node& windowNode) {
 
 	glfwMakeContextCurrent(m_window);
 	glfwFocusWindow(m_window);
-	glfwSetWindowSizeCallback(m_window, genericInputCallback(Input::GetInstance().windowResized));
-	glfwSetKeyCallback(m_window, genericInputCallback(Input::GetInstance().keyPressed));
-	glfwSetCursorPosCallback(m_window, genericInputCallback(Input::GetInstance().mouseMoved));
+	//glfwSetWindowSizeCallback(m_window, genericInputCallback(Input::GetInstance().windowResized));
+	//glfwSetKeyCallback(m_window, genericInputCallback(Input::GetInstance().keyPressed));
+	//glfwSetCursorPosCallback(m_window, genericInputCallback(Input::GetInstance().mouseMoved));
 
 	glfwSwapInterval(windowNode.attribute("vsync").as_bool());
 
@@ -64,6 +64,8 @@ void WindowSystem::Init(const pugi::xml_node& windowNode) {
 	glfwSetWindowPos(m_window, (mode->width / 2) - width / 2, (mode->height / 2) - height / 2);
 
 	DisableCursor();
+
+	return m_window;
 }
 
 /***********************************************************************************/

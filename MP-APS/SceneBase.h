@@ -7,6 +7,8 @@
 #include "Graphics/StaticPointLight.h"
 #include "Graphics/StaticSpotLight.h"
 
+#include <string>
+
 /***********************************************************************************/
 // Forward Declarations
 class Engine;

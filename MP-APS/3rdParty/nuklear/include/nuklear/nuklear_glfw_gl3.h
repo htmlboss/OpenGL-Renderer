@@ -14,6 +14,7 @@
 #define NK_GLFW_GL3_H_
 
 #include <GLFW/glfw3.h>
+#include <cstring>
 
 enum nk_glfw_init_state{
     NK_GLFW3_DEFAULT=0,

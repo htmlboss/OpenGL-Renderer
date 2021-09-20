@@ -7,11 +7,29 @@
 
 #include <GLFW/glfw3.h>
 #include <pugixml.hpp>
-#include <concrtrm.h>
 
 #include <iostream>
 #include <algorithm>
 #include <execution>
+#include <thread>
+
+/***********************************************************************************/
+void connectWindowInstanceToInput(GLFWwindow* window) {
+	const auto resizeCallback = [](GLFWwindow* w, auto width, auto height) {
+		Input::GetInstance().windowResized(width, height);
+	};
+	glfwSetWindowSizeCallback(window, resizeCallback);
+	
+	const auto keyCallback = [](GLFWwindow* w, auto key, auto scancode, auto action, auto mode) {
+		Input::GetInstance().keyPressed(key, scancode, action, mode);
+	};
+	glfwSetKeyCallback(window, keyCallback);
+
+	const auto cursorPosCallback = [](GLFWwindow* w, auto xPos, auto yPos) {
+		Input::GetInstance().mouseMoved(xPos, yPos);
+	};
+	glfwSetCursorPosCallback(window, cursorPosCallback);
+}
 
 /***********************************************************************************/
 Engine::Engine(const std::filesystem::path& configPath) {
@@ -22,7 +40,7 @@ Engine::Engine(const std::filesystem::path& configPath) {
 	std::cout << "DEBUG MODE!!\n";
 #endif
 	std::cout << "**************************************************\n";
-	std::cout << "Available processor cores: " << Concurrency::GetProcessorCount() << '\n';
+	std::cout << "Available processor cores: " << std::thread::hardware_concurrency() << '\n';
 	std::cout << "**************************************************\n";
 	std::cout << "Loading Engine config file...\n";
 	
@@ -34,7 +52,8 @@ Engine::Engine(const std::filesystem::path& configPath) {
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing Window...\n";
-	m_window.Init(engineNode.child("Window"));
+	auto* window{ m_window.Init(engineNode.child("Window")) };
+	connectWindowInstanceToInput(window);
 
 	std::cout << "**************************************************\n";
 	std::cout << "Initializing OpenGL Renderer...\n";
@@ -115,7 +134,7 @@ std::vector<ModelPtr> Engine::cullViewFrustum() const {
 	const auto& dims{ m_window.GetFramebufferDims() };
 	const ViewFrustum viewFrustum(m_camera.GetViewMatrix(), m_camera.GetProjMatrix(dims.first, dims.second));
 
-	std::for_each(std::execution::parallel_unsequenced_policy(), m_activeScene->m_sceneModels.cbegin(), m_activeScene->m_sceneModels.cend(), 
+	std::for_each(std::execution::par_unseq, m_activeScene->m_sceneModels.cbegin(), m_activeScene->m_sceneModels.cend(), 
 		[&](const auto& model) {
 		const auto result{ viewFrustum.TestIntersection(model->GetBoundingBox()) };
 

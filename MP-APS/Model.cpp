@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
-#include <ppl.h>
+
 #include "ResourceManager.h"
 
 /***********************************************************************************/
@@ -127,11 +127,10 @@ bool Model::loadModel(const std::string_view Path, const bool flipWindingOrder, 
 void Model::processNode(aiNode* node, const aiScene* scene, const bool loadMaterial) {
 
 	// Process all node meshes
-	concurrency::parallel_for(static_cast<unsigned int>(0), node->mNumMeshes, [&](const auto idx)
-	{
-		auto* mesh = scene->mMeshes[node->mMeshes[idx]];
+	for (auto i = 0; i < node->mNumMeshes; ++i) {
+		auto* mesh = scene->mMeshes[node->mMeshes[i]];
 		m_meshes.push_back(processMesh(mesh, scene, loadMaterial));
-	});
+	}
 
 	// Process their children via recursive tree traversal
 	for (auto i = 0; i < node->mNumChildren; ++i) {
