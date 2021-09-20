@@ -3,6 +3,7 @@ A modern OpenGL 3D rendering engine. The idea behind it is to be very simple to 
 
 ![MPAPS](https://github.com/htmlboss/OpenGL-Renderer/blob/master/MP-APS/img/MP-APS.png "MPAPS")
 
+[![C/C++ CI](https://github.com/htmlboss/OpenGL-Renderer/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/htmlboss/OpenGL-Renderer/actions/workflows/c-cpp.yml)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fd7023ebf2e941eeb7d4f67cf9c6ea1f)](https://www.codacy.com/app/htmlboss/OpenGL-Renderer?utm_source=github.com&utm_medium=referral&utm_content=htmlboss/OpenGL-Renderer&utm_campaign=badger)
