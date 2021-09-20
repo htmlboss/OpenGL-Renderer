@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <array>
+#include <string_view>
 
 // Material for a PBR pipeline
 class PBRMaterial {

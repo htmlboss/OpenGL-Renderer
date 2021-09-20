@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/MP-APS/3rdParty/glm/",
+                "${workspaceFolder}/MP-APS/3rdParty/glad/include/",
+                "${workspaceFolder}/MP-APS/3rdParty/pugixml/include/"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++-10",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

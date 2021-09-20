@@ -24,7 +24,7 @@ public:
 
 	~WindowSystem() = default;
 
-	void Init(const pugi::xml_node& windowNode);
+	GLFWwindow* Init(const pugi::xml_node& windowNode);
 	void Update();
 	void Shutdown() const;
 

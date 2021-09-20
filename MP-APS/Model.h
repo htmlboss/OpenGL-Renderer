@@ -6,6 +6,8 @@
 #include "AABB.hpp"
 
 #include <memory>
+#include <string>
+#include <string_view>
 
 struct aiScene;
 struct aiNode;
