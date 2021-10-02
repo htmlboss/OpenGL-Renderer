@@ -1,5 +1,4 @@
 #pragma once
-#include "Timer.h"
 #include "Camera.h"
 
 #include "Core/WindowSystem.h"
@@ -27,7 +26,6 @@ private:
 	// Returns meshes visible by the camera.
 	std::vector<ModelPtr> cullViewFrustum() const;
 
-	Timer m_timer;
 	Camera m_camera;
 
 	// Core Systems
