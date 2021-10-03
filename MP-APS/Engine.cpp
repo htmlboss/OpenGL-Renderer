@@ -1,5 +1,6 @@
 #include "Engine.h"
 
+#include "Timer.h"
 #include "Input.h"
 #include "ViewFrustum.h"
 #include "ResourceManager.h"
@@ -29,6 +30,16 @@ void connectWindowInstanceToInput(GLFWwindow* window) {
 		Input::GetInstance().mouseMoved(xPos, yPos);
 	};
 	glfwSetCursorPosCallback(window, cursorPosCallback);
+}
+
+/***********************************************************************************/
+double frameTimeMilliseconds(const unsigned int numFramesRendered) {
+	return 1000.0 / static_cast<double>(numFramesRendered);
+}
+
+/***********************************************************************************/
+double framesPerSecond(const double frameTimeMilliseconds) {
+	return 1.0 / (frameTimeMilliseconds / 1000.0);
 }
 
 /***********************************************************************************/
@@ -92,11 +103,28 @@ void Engine::Execute() {
 	std::cout << "Engine initialization complete!\n";
 	std::cout << "**************************************************\n";
 
-	// Main loop
-	while (!m_window.ShouldClose()) {
+	bool hasOneSecondPassed{ false };
+	Timer timer(1.0, [&]() {
+		hasOneSecondPassed = true;
+	});
 
-		m_timer.Update(glfwGetTime());
-		const auto dt{ m_timer.GetDelta() };
+	// Main loop
+	unsigned int numFramesRendered{ 0 };
+	while (!m_window.ShouldClose()) {
+		timer.Update(glfwGetTime());		
+		
+		if (hasOneSecondPassed) {
+			const auto frameTime{ frameTimeMilliseconds(numFramesRendered) };
+			std::cout << 
+				"Frame time: " <<
+				frameTime << " ms - " <<
+				framesPerSecond(frameTime) << " fps\n";
+			
+			numFramesRendered = 0;
+			hasOneSecondPassed = false;
+		}
+
+		const auto dt{ timer.GetDelta() };
 
 		Input::GetInstance().Update();
 
@@ -114,6 +142,8 @@ void Engine::Execute() {
 		m_guiSystem.Render();
 
 		m_window.SwapBuffers();
+
+		++numFramesRendered;
 	}
 
 	shutdown();
