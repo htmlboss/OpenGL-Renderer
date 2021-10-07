@@ -5,6 +5,7 @@
 #include "ViewFrustum.h"
 #include "ResourceManager.h"
 #include "SceneBase.h"
+#include "FrameStats.h"
 
 #include <GLFW/glfw3.h>
 #include <pugixml.hpp>
@@ -110,16 +111,16 @@ void Engine::Execute() {
 
 	// Main loop
 	unsigned int numFramesRendered{ 0 };
+	FrameStats frameStats;
+	bool showFrameStats{ true };
 	while (!m_window.ShouldClose()) {
 		timer.Update(glfwGetTime());		
 		
 		if (hasOneSecondPassed) {
-			const auto frameTime{ frameTimeMilliseconds(numFramesRendered) };
-			std::cout << 
-				"Frame time: " <<
-				frameTime << " ms - " <<
-				framesPerSecond(frameTime) << " fps\n";
-			
+			const auto frameTime{ frameTimeMilliseconds(numFramesRendered) };		
+			frameStats.frameTimeMilliseconds = frameTime;
+			frameStats.videoMemoryUsageKB = m_renderer.GetVideoMemUsageKB();
+
 			numFramesRendered = 0;
 			hasOneSecondPassed = false;
 		}
@@ -129,6 +130,8 @@ void Engine::Execute() {
 		Input::GetInstance().Update();
 
 		m_window.Update();
+		
+		const auto& [width, height] = m_window.GetFramebufferDims();
 
 		m_camera.Update(dt);
 
@@ -139,7 +142,7 @@ void Engine::Execute() {
 		const auto& renderList{ cullViewFrustum() };
 		m_renderer.Render(m_camera, renderList.cbegin(), renderList.cend(), *m_activeScene, false);
 
-		m_guiSystem.Render();
+		m_guiSystem.Render(width, height, frameStats);
 
 		m_window.SwapBuffers();
 

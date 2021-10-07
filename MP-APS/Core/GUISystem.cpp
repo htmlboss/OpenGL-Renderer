@@ -1,28 +1,34 @@
 #include "GUISystem.h"
 
+#include "../FrameStats.h"
+
+#include <fmt/core.h>
 #include <cstddef>
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
 #define NK_INCLUDE_DEFAULT_ALLOCATOR
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 #define NK_INCLUDE_FONT_BAKING
 #define NK_INCLUDE_DEFAULT_FONT
 #define NK_IMPLEMENTATION
-#define NK_GLFW_GL3_IMPLEMENTATION
+#define NK_GLFW_GL4_IMPLEMENTATION
+#define NK_KEYSTATE_BASED_INPUT
 #include <nuklear/nuklear.h>
-#include <nuklear/nuklear_glfw_gl3.h>
+#include <nuklear/nuklear_glfw_gl4.h>
 
-//https://github.com/vurtun/nuklear/blob/master/demo/glfw_opengl3/main.c
+// https://github.com/Immediate-Mode-UI/Nuklear/blob/master/demo/glfw_opengl4/main.c
 
 const constexpr std::size_t MaxVertexBuffer{ 512 * 1024 };
 const constexpr std::size_t MaxElementBuffer{ 128 * 1024 };
 
 /***********************************************************************************/
 void GUISystem::Init(GLFWwindow* windowPtr) {
-	m_nuklearContext = nk_glfw3_init(windowPtr, NK_GLFW3_INSTALL_CALLBACKS);
+	m_nuklearContext = nk_glfw3_init(windowPtr, NK_GLFW3_INSTALL_CALLBACKS, MaxVertexBuffer, MaxElementBuffer);
 
 	/* Load Fonts: if none of these are loaded a default font will be used  */
 	/* Load Cursor: if you uncomment cursor loading please hide the cursor */
@@ -34,55 +40,36 @@ void GUISystem::Init(GLFWwindow* windowPtr) {
 }
 
 /***********************************************************************************/
-void GUISystem::Update() {
-}
-
-/***********************************************************************************/
-void GUISystem::Render() {
+void GUISystem::Render(const int framebufferWidth, 
+	const int framebufferHeight, const FrameStats& frameStats) {
 	
 	struct nk_colorf bg;
 	bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 
 	nk_glfw3_new_frame();
 
-	if (nk_begin(m_nuklearContext, "Demo", nk_rect(50, 50, 230, 250),
-			NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-			NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
+	const auto frameStatFlags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_NO_INPUT;
+	if (nk_begin(m_nuklearContext, "Frame Stats", nk_rect(0, framebufferHeight - 40, 500, 40), frameStatFlags)) {
+		nk_layout_row_begin(m_nuklearContext, NK_STATIC, 0, 1);
 		{
-			enum {EASY, HARD};
-			static int op = EASY;
-			static int property = 20;
-			nk_layout_row_static(m_nuklearContext, 30, 80, 1);
-			if (nk_button_label(m_nuklearContext, "button")) {
-				fprintf(stdout, "button pressed\n");
-			}
-
-			nk_layout_row_dynamic(m_nuklearContext, 30, 2);
-			if (nk_option_label(m_nuklearContext, "easy", op == EASY)) op = EASY;
-			if (nk_option_label(m_nuklearContext, "hard", op == HARD)) op = HARD;
-
-			nk_layout_row_dynamic(m_nuklearContext, 25, 1);
-			nk_property_int(m_nuklearContext, "Compression:", 0, &property, 100, 10, 1);
-
-			nk_layout_row_dynamic(m_nuklearContext, 20, 1);
-			nk_label(m_nuklearContext, "background:", NK_TEXT_LEFT);
-			nk_layout_row_dynamic(m_nuklearContext, 25, 1);
-			if (nk_combo_begin_color(m_nuklearContext, nk_rgb_cf(bg), nk_vec2(nk_widget_width(m_nuklearContext),400))) {
-				nk_layout_row_dynamic(m_nuklearContext, 120, 1);
-				bg = nk_color_picker(m_nuklearContext, bg, NK_RGBA);
-				nk_layout_row_dynamic(m_nuklearContext, 25, 1);
-				bg.r = nk_propertyf(m_nuklearContext, "#R:", 0, bg.r, 1.0f, 0.01f,0.005f);
-				bg.g = nk_propertyf(m_nuklearContext, "#G:", 0, bg.g, 1.0f, 0.01f,0.005f);
-				bg.b = nk_propertyf(m_nuklearContext, "#B:", 0, bg.b, 1.0f, 0.01f,0.005f);
-				bg.a = nk_propertyf(m_nuklearContext, "#A:", 0, bg.a, 1.0f, 0.01f,0.005f);
-				nk_combo_end(m_nuklearContext);
-			}
+			nk_layout_row_push(m_nuklearContext, 500);
+            nk_label(
+				m_nuklearContext,
+				fmt::format("Frame Time: {:.2f} ms ({:.0f} fps) | GPU VRAM Usage: {} MB",
+						frameStats.frameTimeMilliseconds,
+						1.0 / (frameStats.frameTimeMilliseconds / 1000.0),
+						frameStats.videoMemoryUsageKB / 1000
+					).c_str(),
+				NK_TEXT_LEFT
+			);
 		}
+		nk_layout_row_end(m_nuklearContext);
+	}
 
 	nk_end(m_nuklearContext);
 
 
-	nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+	nk_glfw3_render(NK_ANTI_ALIASING_ON);
 }
 
 /***********************************************************************************/

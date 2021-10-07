@@ -5,6 +5,7 @@
 #include "../Graphics/GLFramebuffer.h"
 #include "../Graphics/GLVertexArray.h"
 #include "../Graphics/GLShaderProgram.h"
+#include "../Graphics/HardwareCaps.h"
 
 #include <unordered_map>
 #include <vector>
@@ -41,20 +42,10 @@ public:
 				const SceneBase& scene,
 				const bool globalWireframe = false
 				);
+	
+	int GetVideoMemUsageKB() const;
 
 private:
-	struct HardwareCaps {
-		float MaxAnisotropy;
-		int MaxArrayTextureLayers;
-		int MaxTextureSamples;
-		int MaxTextureSamplers;
-		int MaxVertexUniformBlocks;
-		int MaxGeometryUniformBlocks;
-		int MaxFragmentUniformBlocks;
-		int MaxComputeWorkGroupSize;
-		int MaxComputeWorkGroupCount;
-	} m_caps;
-
 	// Helper functions
 
 	//
@@ -79,6 +70,8 @@ private:
 	void setupPostProcessing();
 	// Sets projection matrix variable and updates UBO
 	void setProjectionMatrix(const Camera& camera);
+
+	Graphics::HardwareCaps m_caps;
 
 	// Screen dimensions
 	std::size_t m_width{ 0 }, m_height{ 0 };
