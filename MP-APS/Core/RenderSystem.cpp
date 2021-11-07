@@ -13,6 +13,10 @@
 
 #include <iostream>
 
+// https://developer.download.nvidia.com/opengl/specs/GL_NVX_gpu_memory_info.txt
+#define GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX 0x9048
+#define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
+
 /***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	
@@ -22,6 +26,8 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	}
 
 	queryHardwareCaps();
+
+	std::cout << m_caps << '\n';
 
 #ifdef _DEBUG
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
@@ -191,6 +197,15 @@ void RenderSystem::Render(const Camera& camera, RenderListIterator renderListBeg
 }
 
 /***********************************************************************************/
+int RenderSystem::GetVideoMemUsageKB() const {
+	GLint currentAvailable{ 0 };
+
+	glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &currentAvailable);
+
+	return m_caps.TotalVideoMemoryKB - currentAvailable;
+}
+
+/***********************************************************************************/
 // TODO: This needs to be gutted and put elsewhere
 void RenderSystem::UpdateView(const Camera& camera) {
 	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
@@ -202,6 +217,9 @@ void RenderSystem::UpdateView(const Camera& camera) {
 void RenderSystem::queryHardwareCaps() {
 	// Anisotropic filtering
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &m_caps.MaxAnisotropy);
+
+	// Video memory
+	glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &m_caps.TotalVideoMemoryKB);
 }
 
 /***********************************************************************************/
