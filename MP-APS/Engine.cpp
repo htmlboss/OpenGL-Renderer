@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "SceneBase.h"
 #include "FrameStats.h"
+#include "Platform/Platform.h"
 
 #include <GLFW/glfw3.h>
 #include <pugixml.hpp>
@@ -120,6 +121,7 @@ void Engine::Execute() {
 			const auto frameTime{ frameTimeMilliseconds(numFramesRendered) };		
 			frameStats.frameTimeMilliseconds = frameTime;
 			frameStats.videoMemoryUsageKB = m_renderer.GetVideoMemUsageKB();
+			frameStats.ramUsageKB = Platform::maxRSSKb();
 
 			numFramesRendered = 0;
 			hasOneSecondPassed = false;
