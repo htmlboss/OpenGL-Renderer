@@ -49,16 +49,17 @@ void GUISystem::Render(const int framebufferWidth,
 	nk_glfw3_new_frame();
 
 	const auto frameStatFlags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_NO_INPUT;
-	if (nk_begin(m_nuklearContext, "Frame Stats", nk_rect(0, framebufferHeight - 40, 500, 40), frameStatFlags)) {
+	if (nk_begin(m_nuklearContext, "Frame Stats", nk_rect(0, framebufferHeight - 40, 720, 40), frameStatFlags)) {
 		nk_layout_row_begin(m_nuklearContext, NK_STATIC, 0, 1);
 		{
-			nk_layout_row_push(m_nuklearContext, 500);
+			nk_layout_row_push(m_nuklearContext, 720);
             nk_label(
 				m_nuklearContext,
-				fmt::format("Frame Time: {:.2f} ms ({:.0f} fps) | GPU VRAM Usage: {} MB",
+				fmt::format("Frame Time: {:.2f} ms ({:.0f} fps) | GPU VRAM Usage: {} MB | RAM Usage: {} MB",
 						frameStats.frameTimeMilliseconds,
 						1.0 / (frameStats.frameTimeMilliseconds / 1000.0),
-						frameStats.videoMemoryUsageKB / 1000
+						frameStats.videoMemoryUsageKB / 1000,
+						frameStats.ramUsageKB / 1000
 					).c_str(),
 				NK_TEXT_LEFT
 			);
