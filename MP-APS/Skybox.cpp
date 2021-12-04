@@ -1,7 +1,7 @@
 #include "Skybox.h"
 
 #include "ResourceManager.h"
-#include "Graphics/GLShader.h"
+#include "Graphics/GLShaderProgramFactory.h"
 #include "Graphics/GLShaderProgram.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -121,8 +121,11 @@ void Skybox::Init(const std::string_view hdrPath, const std::size_t resolution) 
 	};
 
 	// Convert HDR equirectangular environment map to cubemap
-	GLShaderProgram convertToCubemapShader{ "Equirectangular to cubemap shader", {	GLShader("Data/Shaders/cubemapvs.glsl", GL_VERTEX_SHADER),
-																					GLShader("Data/Shaders/cubemapconverterps.glsl", GL_FRAGMENT_SHADER) } };
+	auto convertToCubemapShader{ Graphics::GLShaderProgramFactory::createShaderProgram("Equirectangular to cubemap shader", {
+		{"Data/Shaders/cubemapvs.glsl", "vertex"},
+		{"Data/Shaders/cubemapconverterps.glsl", "fragment"}
+	}).value() };
+	
 	convertToCubemapShader.Bind();
 	convertToCubemapShader.SetUniformi("equirectangularMap", 0).SetUniform("projection", captureProjection);
 
@@ -166,8 +169,11 @@ void Skybox::Init(const std::string_view hdrPath, const std::size_t resolution) 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution / 16, resolution / 16);
 
 	// Solve diffuse integral by convolution to create an irradiance cubemap
-	GLShaderProgram irradianceShader{ "Irradiance Shader", {	GLShader("Data/Shaders/cubemapvs.glsl", GL_VERTEX_SHADER),
-																GLShader("Data/Shaders/irradianceConvolutionps.glsl", GL_FRAGMENT_SHADER) } };
+	auto irradianceShader{ Graphics::GLShaderProgramFactory::createShaderProgram("Irradiance Shader", {
+		{"Data/Shaders/cubemapvs.glsl", "vertex"},
+		{"Data/Shaders/irradianceConvolutionps.glsl", "fragment"}
+	}).value() };
+	
 	irradianceShader.Bind();
 	irradianceShader.SetUniformi("environmentMap", 0).SetUniform("projection", captureProjection);
 	
@@ -202,8 +208,11 @@ void Skybox::Init(const std::string_view hdrPath, const std::size_t resolution) 
 
 	// Run quasi monte-carlo simulation on the environment lighting to create a prefilter cubemap (since we can't integrate over infinite directions).
 	// Pre-filter the environment map with different roughness values over multiple mipmap levels
-	GLShaderProgram prefilterShader{ "Pre-filter Shader", {	GLShader("Data/Shaders/cubemapvs.glsl", GL_VERTEX_SHADER),
-															GLShader("Data/Shaders/prefilterps.glsl", GL_FRAGMENT_SHADER)} };
+	auto prefilterShader{ Graphics::GLShaderProgramFactory::createShaderProgram("Pre-filter Shader", {
+		{"Data/Shaders/cubemapvs.glsl", "vertex"},
+		{"Data/Shaders/prefilterps.glsl", "fragment"}
+	}).value() };
+	
 	prefilterShader.Bind();
 	prefilterShader.SetUniformi("environmentMap", 0).SetUniform("projection", captureProjection);// .SetUniformf("resolution", resolution);
 	glActiveTexture(GL_TEXTURE0);
@@ -249,8 +258,11 @@ void Skybox::Init(const std::string_view hdrPath, const std::size_t resolution) 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUT, 0);
 
-	GLShaderProgram brdfShader{ "BRDF Shader", {	GLShader("Data/Shaders/brdfvs.glsl", GL_VERTEX_SHADER),
-													GLShader("Data/Shaders/brdfps.glsl", GL_FRAGMENT_SHADER)} };
+	auto brdfShader{ Graphics::GLShaderProgramFactory::createShaderProgram("BRDF Shader", {
+		{"Data/Shaders/brdfvs.glsl", "vertex"},
+		{"Data/Shaders/brdfps.glsl", "fragment"}
+	}).value() };
+	
 	brdfShader.Bind();
 	glViewport(0, 0, resolution, resolution);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

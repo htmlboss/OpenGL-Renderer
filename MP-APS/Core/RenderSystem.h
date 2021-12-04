@@ -7,6 +7,8 @@
 #include "../Graphics/GLShaderProgram.h"
 #include "../Graphics/HardwareCaps.h"
 
+#include <pugixml.hpp>
+
 #include <unordered_map>
 #include <vector>
 
@@ -18,9 +20,6 @@
 class Camera;
 class SceneBase;
 class GLShaderProgram;
-namespace pugi {
-	class xml_node;
-}
 
 /***********************************************************************************/
 class RenderSystem {
@@ -49,6 +48,8 @@ private:
 	// Helper functions
 
 	//
+	void compileShaders();
+	//
 	void queryHardwareCaps();
 	// Sets the default state required for rendering
 	void setDefaultState();
@@ -70,6 +71,8 @@ private:
 	void setupPostProcessing();
 	// Sets projection matrix variable and updates UBO
 	void setProjectionMatrix(const Camera& camera);
+
+	pugi::xml_node m_rendererNode;
 
 	Graphics::HardwareCaps m_caps;
 

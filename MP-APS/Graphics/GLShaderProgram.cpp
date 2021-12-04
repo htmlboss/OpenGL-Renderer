@@ -1,28 +1,13 @@
 ﻿#include "GLShaderProgram.h"
 
-#include "GLShader.h"
-
+#include <cassert>
 #include <iostream>
-#include <string_view>
-#include <string>
 
 /***********************************************************************************/
-GLShaderProgram::GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders) : m_programName(programName) {
-	m_programID = glCreateProgram();
-
-	for (const auto& shader : shaders) {
-		shader.AttachShader(m_programID);
-	}
-
-	if (linkAndValidate()) {
-		getUniforms();
-	}
-
-	// Cleanup
-	for (const auto& shader : shaders) {
-		shader.DetachShader(m_programID);
-		shader.DeleteShader();
-	}
+GLShaderProgram::GLShaderProgram(const std::string& programName, const GLuint programID) :
+	m_programName(programName), m_programID(programID)
+{
+	getUniforms();
 }
 
 /***********************************************************************************/
@@ -32,12 +17,15 @@ GLShaderProgram::~GLShaderProgram() {
 
 /***********************************************************************************/
 void GLShaderProgram::Bind() const {
+	assert(m_programID != 0);
+
 	glUseProgram(m_programID);
 }
 
 /***********************************************************************************/
 void GLShaderProgram::DeleteProgram() const {
 	if (m_programID != 0) {
+		std::cout << "Deleting program: " << m_programName << '\n';
 		glDeleteProgram(m_programID);
 	}
 }
@@ -96,28 +84,6 @@ GLShaderProgram& GLShaderProgram::SetUniform(const std::string& uniformName, con
 	glUniformMatrix4fv(m_uniforms.at(uniformName), 1, GL_FALSE, value_ptr(value));
 
 	return *this;
-}
-
-/***********************************************************************************/
-bool GLShaderProgram::linkAndValidate() {
-
-	glLinkProgram(m_programID);
-	glGetProgramiv(m_programID, GL_LINK_STATUS, &m_success);
-	if (!m_success) {
-		glGetProgramInfoLog(m_programID, m_infoLog.size(), nullptr, m_infoLog.data());
-		std::cerr << "Shader Program Linking Error: " << m_infoLog.data() << std::endl;
-		return false;
-	}
-
-	glValidateProgram(m_programID);
-	glGetProgramiv(m_programID, GL_VALIDATE_STATUS, &m_success);
-	if (!m_success) {
-		glGetProgramInfoLog(m_programID, m_infoLog.size(), nullptr, m_infoLog.data());
-		std::cerr << "Shader Program Validation Error: " << m_infoLog.data() << std::endl;
-		return false;
-	}
-
-	return true;
 }
 
 /***********************************************************************************/
