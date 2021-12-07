@@ -61,6 +61,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
+       sudo apt update
        bash ./install-deps-ubuntu.sh
        make all
 
