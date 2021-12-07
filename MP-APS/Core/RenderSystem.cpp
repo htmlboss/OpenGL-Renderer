@@ -1,6 +1,6 @@
 #include "RenderSystem.h"
 
-#include "../Graphics/GLShader.h"
+#include "../Graphics/GLShaderProgramFactory.h"
 #include "../Camera.h"
 
 #include "../Input.h"
@@ -18,7 +18,24 @@
 #define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
 
 /***********************************************************************************/
+void GLAPIENTRY
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+  std::fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
+/***********************************************************************************/
 void RenderSystem::Init(const pugi::xml_node& rendererNode) {
+
+	m_rendererNode = rendererNode;
 	
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
 		std::cerr << "Failed to start GLAD.";
@@ -29,7 +46,7 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 
 	std::cout << m_caps << '\n';
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
 	std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
 	std::cout << "OpenGL Driver Vendor: " << glGetString(GL_VENDOR) << '\n';
@@ -46,32 +63,16 @@ void RenderSystem::Init(const pugi::xml_node& rendererNode) {
 	m_hdrFBO.Init("HDR FBO");
 	m_skybox.Init("Data/hdri/barcelona.hdr", 2048);
 
-	// Compile all shader programs in config.xml
-	for (auto program = rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
-
-		// Get all shader files that make up the program
-		std::vector<GLShader> shaders;
-		for (auto shader = program.child("Shader"); shader; shader = shader.next_sibling("Shader")) {
-			shaders.emplace_back(shader.attribute("path").as_string(), shader.attribute("type").as_string());
-		}
-
-		//GLShaderProgram prgrm;
-		//prgrm.Init(program.attribute("name").as_string(), shaders);
-
-		// Compile and cache shader program
-		//m_shaderCache.try_emplace(program.attribute("name").as_string(), prgrm);
-		m_shaderCache.try_emplace(program.attribute("name").as_string(), program.attribute("name").as_string(), shaders);
-	}
+	compileShaders();
 	
 	setupScreenquad();
 	setupTextureSamplers();
 	setupShadowMap();
 	setupPostProcessing();
 
-#ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-#endif
+	//glDebugMessageCallback(MessageCallback, nullptr);
 	setDefaultState();
 	glEnable(GL_MULTISAMPLE);
 	
@@ -211,6 +212,27 @@ void RenderSystem::UpdateView(const Camera& camera) {
 	m_projMatrix = camera.GetProjMatrix(m_width, m_height);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(m_projMatrix));
+}
+
+/***********************************************************************************/
+void RenderSystem::compileShaders() {
+	m_shaderCache.clear();
+	for (auto program = m_rendererNode.child("Program"); program; program = program.next_sibling("Program")) {
+
+		// Get all shader files that make up the program
+		std::vector<Graphics::ShaderStage> stages;
+		for (auto shader = program.child("Shader"); shader; shader = shader.next_sibling("Shader")) {
+			stages.emplace_back(shader.attribute("path").as_string(), shader.attribute("type").as_string());
+		}
+
+		std::string name{ program.attribute("name").as_string() };
+
+		auto shaderProgram{ Graphics::GLShaderProgramFactory::createShaderProgram(name, stages) };
+
+		if (shaderProgram) {
+			m_shaderCache.try_emplace(name, std::move(shaderProgram.value())); // value_or for default and remove if-check?
+		}
+	}
 }
 
 /***********************************************************************************/

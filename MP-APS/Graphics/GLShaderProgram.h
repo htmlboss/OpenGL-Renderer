@@ -3,17 +3,41 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <unordered_map>
-#include <array>
-#include <string>
-#include <vector>
+#include <glad/glad.h>
 
-class GLShader;
+#include <unordered_map>
+#include <string>
 
 class GLShaderProgram {
+
 public:
-	GLShaderProgram(const std::string_view programName, const std::vector<GLShader>& shaders);
+	GLShaderProgram(const std::string& programName, const GLuint programID);
 	~GLShaderProgram();
+
+	GLShaderProgram(GLShaderProgram&& other) {
+		m_uniforms = other.m_uniforms;
+		m_programID = other.m_programID;
+		m_programName = other.m_programName;
+
+		other.m_uniforms.clear();
+		other.m_programID = 0;
+		other.m_programName.clear();
+	}
+
+	GLShaderProgram& operator=(GLShaderProgram other) noexcept(true) {
+		std::swap(m_uniforms, other.m_uniforms);
+		std::swap(m_programID, other.m_programID);
+		std::swap(m_programName, other.m_programName);
+		return *this;
+	}
+
+	// Disable copying to avoid accidentally calling the destructor
+	// on the original instance which causes the program to be
+	// deleted on the GPU, but all of the original instance's data
+	// is dumbly copied over to the new instance (including non-zero
+	// programID) but in fact the program ID is now a dangling reference
+	GLShaderProgram(const GLShaderProgram&) = delete;
+	GLShaderProgram& operator=(const GLShaderProgram&) = delete;
 
 	void Bind() const;
 	void DeleteProgram() const;
@@ -30,15 +54,10 @@ public:
 	auto GetProgramName() const noexcept { return m_programName; }
 
 private:
-	bool linkAndValidate();
 	void getUniforms();
 
 	std::unordered_map<std::string, int> m_uniforms;
 
-	unsigned int m_programID;
-	const std::string m_programName;
-
-	//  To check for compile-time errors
-	int m_success;
-	std::array<char, 1024> m_infoLog;
+	GLuint m_programID{ 0 };
+	std::string m_programName;
 };
