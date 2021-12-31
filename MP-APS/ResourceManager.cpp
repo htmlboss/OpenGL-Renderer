@@ -99,20 +99,24 @@ unsigned int ResourceManager::LoadTexture(const std::string_view path, const boo
 	}
 
 	GLenum format = 0;
+	GLenum internalFormat = 0;
 	switch (nrComponents) {
 	case 1:
 		format = GL_RED;
+		internalFormat = GL_COMPRESSED_RED;
 		break;
 	case 3:
 		format = GL_RGB;
+		internalFormat = GL_COMPRESSED_RGB;
 		break;
 	case 4:
 		format = GL_RGBA;
+		internalFormat = GL_COMPRESSED_RGBA;
 		break;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 	if (useMipMaps) {
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
