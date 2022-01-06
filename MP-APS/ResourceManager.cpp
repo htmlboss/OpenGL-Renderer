@@ -10,6 +10,18 @@
 #define STBI_FAILURE_USERMSG
 #include <stb_image.h>
 
+const static std::filesystem::path COMPRESSED_TEX_DIR{ std::filesystem::current_path() / "Data/cache/textures" };
+
+using ImageBuffer = std::unique_ptr<unsigned char []>;
+
+struct CompressedImageDesc {
+	GLint width{ -1 };
+	GLint height{ -1 };
+	GLint size{ -1 };
+	GLint format{ -1 };
+	ImageBuffer data;
+};
+
 /***********************************************************************************/
 void ResourceManager::ReleaseAllResources() {
 	// Delete cached meshes
@@ -72,62 +84,155 @@ unsigned int ResourceManager::LoadHDRI(const std::string_view path) const {
 }
 
 /***********************************************************************************/
-unsigned int ResourceManager::LoadTexture(const std::string_view path, const bool useMipMaps, const bool useUnalignedUnpack) {
+auto buildTextureCachePath(const std::filesystem::path& filenameNoExt) {
+	const std::filesystem::path filename{ filenameNoExt.string() + ".bin" };
+	return std::filesystem::path( COMPRESSED_TEX_DIR / filename);
+}
 
-	// Check if texture is already loaded somewhere
-	const auto val = m_textureCache.find(path.data());
+/***********************************************************************************/
+void saveCompressedImageToDisk(const std::filesystem::path& target, const CompressedImageDesc& desc) {
+	if (!std::filesystem::exists(COMPRESSED_TEX_DIR)) {
+		if (!std::filesystem::create_directories(COMPRESSED_TEX_DIR)) {
+			std::cerr << "Failed to create texture cache directory: " << COMPRESSED_TEX_DIR << '\n';
+			return;
+		}
+	}
+
+	std::ofstream out(target, std::ios::binary);
+	if (out) {
+		out.write((char*)(&desc.size), sizeof(CompressedImageDesc::size));
+		out.write((char*)(&desc.width), sizeof(CompressedImageDesc::width));
+		out.write((char*)(&desc.height), sizeof(CompressedImageDesc::height));
+		out.write((char*)(&desc.format), sizeof(CompressedImageDesc::format));
+		out.write((char*)(desc.data.get()), desc.size);
+	}
+}
+
+/***********************************************************************************/
+std::optional<CompressedImageDesc> loadCompressedImageFromDisk(const std::filesystem::path& target) {
+	CompressedImageDesc desc;
+
+	std::ifstream in(target, std::ios::binary);
+	if (!in) {
+		return std::nullopt;
+	}
+
+	in.read(reinterpret_cast<char*>(&desc.size), sizeof(CompressedImageDesc::size));
+	in.read(reinterpret_cast<char*>(&desc.width), sizeof(CompressedImageDesc::width));
+	in.read(reinterpret_cast<char*>(&desc.height), sizeof(CompressedImageDesc::height));
+	in.read(reinterpret_cast<char*>(&desc.format), sizeof(CompressedImageDesc::format));
+
+	desc.data = std::make_unique<unsigned char[]>(desc.size);
+	in.read(reinterpret_cast<char*>(desc.data.get()), desc.size);
+
+	return std::make_optional(std::move(desc));
+}
+
+/***********************************************************************************/
+unsigned int ResourceManager::LoadTexture(const std::filesystem::path& path, const bool useMipMaps, const bool useUnalignedUnpack) {
+
+	if (path.filename().empty()) {
+		return 0;
+	}
 	
-	if (val != m_textureCache.end()) {
+	const auto compressedFilePath{ buildTextureCachePath(path.stem()) };
+	const auto compressedImageExists{ std::filesystem::exists(compressedFilePath) };
+
+	const std::filesystem::path pathToLoad = compressedImageExists ? compressedFilePath : path;
+
+	// Check if texture is already loaded in memory
+	if (const auto val = m_textureCache.find(pathToLoad); val != m_textureCache.end()) {
 		// Found it
 		return val->second;
 	}
-
+	
 	if (useUnalignedUnpack) {
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	}
 
-	// Create and cache a new texture
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path.data(), &width, &height, &nrComponents, 0);
-	if (!data) {
-		std::cerr << "Failed to load texture: " << path << std::endl;
+	if (compressedImageExists) {
+		
+		const auto desc{ loadCompressedImageFromDisk(compressedFilePath) };
+		if (!desc) {
+			return 0;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glCompressedTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			desc.value().format,
+			desc.value().width,
+			desc.value().height,
+			0,
+			desc.value().size,
+			desc.value().data.get()
+		);
+		
+	} else {
+		int width = 0, height = 0, nrComponents = 0;
+		unsigned char* data = stbi_load(pathToLoad.c_str(), &width, &height, &nrComponents, 0);
+		if (!data) {
+			std::cerr << "Failed to load texture: " << path << std::endl;
+			glDeleteTextures(1, &textureID);
+			stbi_image_free(data);
+			return 0;
+		}
+
+		GLenum format = 0;
+		GLenum internalFormat = 0;
+		switch (nrComponents) {
+		case 1:
+			format = GL_RED;
+			internalFormat = GL_COMPRESSED_RED;
+			break;
+		case 3:
+			format = GL_RGB;
+			internalFormat = GL_COMPRESSED_RGB;
+			break;
+		case 4:
+			format = GL_RGBA;
+			internalFormat = GL_COMPRESSED_RGBA;
+			break;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		
+		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_DONT_CARE);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
 		stbi_image_free(data);
-		return 0;
-	}
 
-	GLenum format = 0;
-	switch (nrComponents) {
-	case 1:
-		format = GL_RED;
-		break;
-	case 3:
-		format = GL_RGB;
-		break;
-	case 4:
-		format = GL_RGBA;
-		break;
-	}
+		GLint compressed = GL_FALSE;
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
+		if (compressed == GL_TRUE) {
+			CompressedImageDesc desc{
+				.width = width,
+				.height = height
+			};
 
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &desc.size);
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &desc.format);
+
+			desc.data = std::make_unique<unsigned char[]>(desc.size);
+			glGetCompressedTexImage(GL_TEXTURE_2D, 0, (GLvoid*)desc.data.get());
+
+			saveCompressedImageToDisk(compressedFilePath, desc);
+		}
+	}
+	
 	if (useMipMaps) {
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-
-	stbi_image_free(data);
-
-#ifdef _DEBUG
-	std::cout << "Resource Manager: loaded texture: " << path << std::endl;
-#endif
 
 	if (useUnalignedUnpack) {
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
 	}
 
-	return m_textureCache.try_emplace(path.data(), textureID).first->second;
+	return m_textureCache.try_emplace(path, textureID).first->second;
 }
 
 /***********************************************************************************/
