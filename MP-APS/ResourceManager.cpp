@@ -12,12 +12,14 @@
 
 const static std::filesystem::path COMPRESSED_TEX_DIR{ std::filesystem::current_path() / "Data/cache/textures" };
 
+using ImageBuffer = std::unique_ptr<unsigned char []>;
+
 struct CompressedImageDesc {
 	GLint width{ -1 };
 	GLint height{ -1 };
 	GLint size{ -1 };
 	GLint format{ -1 };
-	unsigned char* data{ nullptr };
+	ImageBuffer data;
 };
 
 /***********************************************************************************/
@@ -98,12 +100,32 @@ void saveCompressedImageToDisk(const std::filesystem::path& target, const Compre
 
 	std::ofstream out(target, std::ios::binary);
 	if (out) {
-		out.write((char*)(&desc.size), sizeof(GLint));
-		out.write((char*)(&desc.width), sizeof(GLint));
-		out.write((char*)(&desc.height), sizeof(GLint));
-		out.write((char*)(&desc.format), sizeof(GLint));
-		out.write((char*)(desc.data), desc.size);
+		out.write((char*)(&desc.size), sizeof(CompressedImageDesc::size));
+		out.write((char*)(&desc.width), sizeof(CompressedImageDesc::width));
+		out.write((char*)(&desc.height), sizeof(CompressedImageDesc::height));
+		out.write((char*)(&desc.format), sizeof(CompressedImageDesc::format));
+		out.write((char*)(desc.data.get()), desc.size);
 	}
+}
+
+/***********************************************************************************/
+std::optional<CompressedImageDesc> loadCompressedImageFromDisk(const std::filesystem::path& target) {
+	CompressedImageDesc desc;
+
+	std::ifstream in(target, std::ios::binary);
+	if (!in) {
+		return std::nullopt;
+	}
+
+	in.read(reinterpret_cast<char*>(&desc.size), sizeof(CompressedImageDesc::size));
+	in.read(reinterpret_cast<char*>(&desc.width), sizeof(CompressedImageDesc::width));
+	in.read(reinterpret_cast<char*>(&desc.height), sizeof(CompressedImageDesc::height));
+	in.read(reinterpret_cast<char*>(&desc.format), sizeof(CompressedImageDesc::format));
+
+	desc.data = std::make_unique<unsigned char[]>(desc.size);
+	in.read(reinterpret_cast<char*>(desc.data.get()), desc.size);
+
+	return std::make_optional(std::move(desc));
 }
 
 /***********************************************************************************/
@@ -132,31 +154,23 @@ unsigned int ResourceManager::LoadTexture(const std::filesystem::path& path, con
 	glGenTextures(1, &textureID);
 
 	if (compressedImageExists) {
-		std::ifstream in(compressedFilePath, std::ios::binary);
-		in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-		if (!in) {
+		
+		const auto desc{ loadCompressedImageFromDisk(compressedFilePath) };
+		if (!desc) {
 			return 0;
 		}
-
-		GLint size{ -1 };
-		GLint width{ -1 };
-		GLint height{ -1 };
-		GLint format{ -1 };
-
-		in.read((char*)&size, sizeof(GLint));
-		if (in.fail() || size == -1) {
-			return 0;
-		}
-
-		in.read((char*)&width, sizeof(GLint));
-		in.read((char*)&height, sizeof(GLint));
-		in.read((char*)&format, sizeof(GLint));
-
-		auto compressedData = std::make_unique<unsigned char[]>(size);
-		in.read((char*)compressedData.get(), size);
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, size, compressedData.get());
+		glCompressedTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			desc.value().format,
+			desc.value().width,
+			desc.value().height,
+			0,
+			desc.value().size,
+			desc.value().data.get()
+		);
 		
 	} else {
 		int width = 0, height = 0, nrComponents = 0;
@@ -195,22 +209,16 @@ unsigned int ResourceManager::LoadTexture(const std::filesystem::path& path, con
 		GLint compressed = GL_FALSE;
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
 		if (compressed == GL_TRUE) {
-			GLint compressedSize = -1;
-			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &compressedSize);
-
-			GLint internalFormat = -1;
-			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
-
-			auto compressedData = std::make_unique<unsigned char[]>(compressedSize);
-			glGetCompressedTexImage(GL_TEXTURE_2D, 0, (GLvoid*)compressedData.get());
-
-			const CompressedImageDesc desc {
+			CompressedImageDesc desc{
 				.width = width,
-				.height = height,
-				.size = compressedSize,
-				.format = internalFormat,
-				.data = compressedData.get()
+				.height = height
 			};
+
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &desc.size);
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &desc.format);
+
+			desc.data = std::make_unique<unsigned char[]>(desc.size);
+			glGetCompressedTexImage(GL_TEXTURE_2D, 0, (GLvoid*)desc.data.get());
 
 			saveCompressedImageToDisk(compressedFilePath, desc);
 		}
