@@ -17,16 +17,17 @@ GLShaderProgram::~GLShaderProgram() {
 
 /***********************************************************************************/
 void GLShaderProgram::Bind() const {
-	assert(m_programID != 0);
+	assert(m_programID != GLShaderProgram::noId);
 
 	glUseProgram(m_programID);
 }
 
 /***********************************************************************************/
-void GLShaderProgram::DeleteProgram() const {
-	if (m_programID != 0) {
+void GLShaderProgram::DeleteProgram() {
+    if (m_programID != GLShaderProgram::noId) {
 		std::cout << "Deleting program: " << m_programName << '\n';
 		glDeleteProgram(m_programID);
+                m_programID = GLShaderProgram::noId;
 	}
 }
 
