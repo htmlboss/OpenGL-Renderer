@@ -155,7 +155,7 @@ void Engine::Execute() {
 }
 
 /***********************************************************************************/
-void Engine::shutdown() const {
+void Engine::shutdown() {
 	m_guiSystem.Shutdown();
 	m_renderer.Shutdown();
 	ResourceManager::GetInstance().ReleaseAllResources();

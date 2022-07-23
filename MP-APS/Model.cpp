@@ -141,7 +141,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, const bool loadMater
 /***********************************************************************************/
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const bool loadMaterial) {
 	std::vector<Vertex> vertices;
-	glm::vec3 min, max;
+	glm::vec3 min(std::numeric_limits<float>::max()), max(std::numeric_limits<float>::lowest());
 
 	for (auto i = 0; i < mesh->mNumVertices; ++i) {
 		Vertex vertex;

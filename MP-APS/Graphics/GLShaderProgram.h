@@ -15,13 +15,9 @@ public:
 	~GLShaderProgram();
 
 	GLShaderProgram(GLShaderProgram&& other) {
-		m_uniforms = other.m_uniforms;
-		m_programID = other.m_programID;
-		m_programName = other.m_programName;
-
-		other.m_uniforms.clear();
-		other.m_programID = 0;
-		other.m_programName.clear();
+		std::swap(m_uniforms, other.m_uniforms);
+		std::swap(m_programID, other.m_programID);
+		std::swap(m_programName, other.m_programName);
 	}
 
 	GLShaderProgram& operator=(GLShaderProgram other) noexcept(true) {
@@ -40,7 +36,7 @@ public:
 	GLShaderProgram& operator=(const GLShaderProgram&) = delete;
 
 	void Bind() const;
-	void DeleteProgram() const;
+	void DeleteProgram();
 
 	GLShaderProgram& SetUniformi(const std::string& uniformName, const int value);
 	GLShaderProgram& SetUniformf(const std::string& uniformName, const float value);
@@ -58,6 +54,7 @@ private:
 
 	std::unordered_map<std::string, int> m_uniforms;
 
-	GLuint m_programID{ 0 };
+    static const GLuint noId = 0;
+	GLuint m_programID{ noId };
 	std::string m_programName;
 };

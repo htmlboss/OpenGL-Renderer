@@ -25,16 +25,17 @@ class GLShaderProgram;
 class RenderSystem {
 	using RenderListIterator = std::vector<ModelPtr>::const_iterator;
 public:
+    ~RenderSystem() = default;
 
 	void Init(const pugi::xml_node& rendererNode);
 	void Update(const Camera& camera);
-	// Release OpenGL resources
-	void Shutdown() const;
+	//! Release OpenGL resources
+	void Shutdown();
 
 	//
 	void UpdateView(const Camera& camera);
 
-	// Where the magic happens
+	//! Where the magic happens
 	void Render(const Camera& camera,
 				RenderListIterator renderListBegin,
 				RenderListIterator renderListEnd,

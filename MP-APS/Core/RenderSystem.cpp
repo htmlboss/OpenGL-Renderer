@@ -118,10 +118,8 @@ void RenderSystem::Update(const Camera& camera) {
 }
 
 /***********************************************************************************/
-void RenderSystem::Shutdown() const {
-	for (const auto& shader : m_shaderCache) {
-		shader.second.DeleteProgram();
-	}
+void RenderSystem::Shutdown() {
+    m_shaderCache.clear();
 }
 
 /***********************************************************************************/

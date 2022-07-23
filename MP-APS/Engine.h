@@ -20,7 +20,7 @@ public:
 	void Execute();
 
 private:
-	void shutdown() const;
+	void shutdown();
 
 	// Performs view-frustum culling.
 	// Returns meshes visible by the camera.
